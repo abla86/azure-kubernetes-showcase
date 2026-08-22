@@ -1,3 +1,6 @@
+﻿using OpenTelemetry.Metrics;
+using OpenTelemetry.Trace;
+using OpenTelemetry.Resources;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -87,3 +90,4 @@ app.MapGet("/api/events", () =>
 app.Run();
 
 public partial class Program;
+
