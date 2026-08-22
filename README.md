@@ -1,21 +1,19 @@
 # Azure Kubernetes Showcase
 
-A focused cloud-engineering portfolio project demonstrating a small full-stack application packaged for containers and prepared for Kubernetes/Azure deployment.
+A focused cloud-engineering portfolio project demonstrating a small full-stack application built with **ASP.NET Core/.NET 10, React/TypeScript, Docker and Kubernetes**, with Azure Infrastructure as Code and DevSecOps practices.
 
-## What this project demonstrates
+## What this demonstrates
 
-- ASP.NET Core / .NET 10 REST API
-- React + TypeScript frontend
-- Docker multi-stage builds
-- Kubernetes Deployment, Service and HPA manifests
-- Kubernetes restricted pod security settings
-- Bicep and Terraform infrastructure examples
-- GitHub Actions CI
-- CodeQL analysis
-- Dependabot configuration
-- OpenTelemetry tracing/metrics integration
-- Serilog structured application logging
-- Health endpoint suitable for container/Kubernetes probes
+- **Backend:** ASP.NET Core / .NET 10 REST API
+- **Frontend:** React + TypeScript + Vite
+- **Containers:** Multi-stage Docker builds; non-root web container
+- **Kubernetes:** Deployment, Service, HPA, NetworkPolicy and Pod Security enforcement
+- **Azure IaC:** Bicep and Terraform examples for Azure resources
+- **CI:** GitHub Actions for .NET build/test, frontend lint/build, Docker builds and Kubernetes validation
+- **Security:** CodeQL, Dependabot, restricted Kubernetes security context
+- **Observability:** Serilog request logging, OpenTelemetry instrumentation and health checks
+
+> **Verification status:** The repository contains deployment-ready examples, but this README does **not** claim that Azure/AKS has been deployed or that production infrastructure has been verified. CI status is the source of truth for automated verification.
 
 ## Architecture
 
@@ -23,7 +21,10 @@ A focused cloud-engineering portfolio project demonstrating a small full-stack a
 React + TypeScript
         |
         v
-ASP.NET Core / .NET 10
+Nginx container
+        |
+        v
+ASP.NET Core / .NET 10 API
         |
         +--> REST endpoints
         +--> Health checks
@@ -36,23 +37,35 @@ Docker
         v
 Kubernetes
         |
+        +--> Deployment + Service
+        +--> HPA
+        +--> NetworkPolicy
+        |
         v
-Azure (deployment-ready manifests/IaC)
+Azure IaC examples
+(Bicep / Terraform)
 ```
 
 ## API endpoints
 
 | Endpoint | Purpose |
 |---|---|
-| `/health` | Health check for container/Kubernetes probes |
+| `/health` | Kubernetes/container health check |
 | `/api/health` | Application health information |
 | `/api/info` | Runtime and application information |
-| `/api/metrics` | Simple application metrics/status information |
+| `/api/metrics` | Example application status metrics |
 | `/api/events` | Example system events |
 
 ## Local development
 
-### API
+### Prerequisites
+
+- .NET 10 SDK
+- Node.js 22+
+- Docker Desktop
+- kubectl (for Kubernetes validation/testing)
+
+### Run the API
 
 ```powershell
 dotnet restore
@@ -60,7 +73,7 @@ dotnet build --configuration Release
 dotnet test --configuration Release
 ```
 
-### Frontend
+### Run the frontend
 
 ```powershell
 cd src/Web
@@ -69,49 +82,83 @@ npm run lint
 npm run build
 ```
 
-### Docker Compose
+### Run the complete application with Docker Compose
 
 ```powershell
 docker compose up --build
 ```
 
-The API is exposed on `http://localhost:5080` and the frontend on `http://localhost:5173` when using the supplied Compose configuration.
+Then open:
+
+- Frontend: `http://localhost:5173`
+- API: `http://localhost:5080`
+- API health: `http://localhost:5080/health`
+
+The production-style frontend container listens on port `8080` and proxies `/api/*` to the Compose API service.
 
 ## Kubernetes
 
 The `k8s/` directory contains:
 
-- API Deployment and Service
-- Frontend Deployment and Service
+- API Deployment and ClusterIP Service
+- Frontend Deployment and LoadBalancer Service
 - Horizontal Pod Autoscaler
 - NetworkPolicy
+- Restricted Pod Security enforcement
+- Readiness and liveness probes
 
-The manifests are intended to be validated before deployment to a cluster. Container images must exist in a registry accessible by the target cluster before an actual remote deployment.
+Validate the manifests locally with:
+
+```powershell
+kubectl apply --dry-run=client -f k8s/
+```
+
+Container images must be available to the target cluster before a real deployment.
 
 ## Infrastructure as Code
 
-The repository contains examples for both:
+Two Azure IaC examples are included:
 
 - `infra/bicep/main.bicep`
 - `infra/terraform/main.tf`
 
-The current IaC files deliberately remain small and auditable. They demonstrate Azure resource provisioning without claiming that the resources have been deployed when they have not.
+They intentionally remain small and auditable. They demonstrate Azure resource provisioning without falsely implying that the resources have already been deployed.
 
-## CI/CD and security
+## CI and DevSecOps
 
-GitHub Actions performs:
+GitHub Actions currently verifies:
 
-1. .NET restore, build and test
-2. Frontend dependency installation, lint and build
-3. API and frontend Docker image builds
-4. CodeQL analysis for C#
+1. .NET restore and Release build
+2. .NET test suite with coverage collection
+3. Frontend dependency installation, lint and production build
+4. Kubernetes manifest validation
+5. API and frontend Docker image builds
+6. CodeQL analysis for C# and JavaScript/TypeScript
 
-Dependabot is configured for npm, Docker and GitHub Actions dependencies.
+Dependabot monitors NuGet, npm, Docker and GitHub Actions dependencies.
 
-## Verification status
+## Testing
 
-This repository distinguishes between configuration present in source control and infrastructure that has actually been deployed. Azure/Kubernetes deployment is not described as production deployment unless a real deployment and verification have succeeded.
+The repository includes ASP.NET Core integration-style endpoint tests using `WebApplicationFactory` for the health, info and metrics endpoints.
 
-## Project scope
+The project does **not** claim frontend E2E coverage or a production deployment until those have actually been implemented and verified.
 
-This is a portfolio showcase rather than a production healthcare system. It contains no production data, credentials or real patient information.
+## Security
+
+Implemented controls include:
+
+- Non-root frontend container
+- Kubernetes `runAsNonRoot`
+- `seccompProfile: RuntimeDefault`
+- `allowPrivilegeEscalation: false`
+- Linux capabilities dropped with `drop: ALL`
+- Kubernetes restricted Pod Security enforcement
+- NetworkPolicy for API ingress/DNS egress
+- CodeQL security analysis
+- Dependabot dependency monitoring
+
+No credentials, production data or patient information are included.
+
+## Scope
+
+This is a **portfolio showcase**, not a production healthcare system. The purpose is to demonstrate practical full-stack, container, Kubernetes, Azure IaC and DevSecOps engineering skills in a small, auditable project.
