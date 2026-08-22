@@ -1,0 +1,6 @@
+@Showcase.Api_HostAddress = http://localhost:5145
+
+GET {{Showcase.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
