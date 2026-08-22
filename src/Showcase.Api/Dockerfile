@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+﻿FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 
 WORKDIR /src
 
@@ -23,6 +23,6 @@ ENV ASPNETCORE_URLS=http://+:8080
 
 EXPOSE 8080
 
-USER app
-
+USER 1654
 ENTRYPOINT ["dotnet", "Showcase.Api.dll"]
+
