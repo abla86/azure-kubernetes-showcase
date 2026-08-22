@@ -1,6 +1,3 @@
-using OpenTelemetry.Metrics;
-using OpenTelemetry.Resources;
-using OpenTelemetry.Trace;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,8 +9,7 @@ builder.Host.UseSerilog((context, configuration) =>
         .WriteTo.Console();
 });
 
-builder.Services
-    .AddOpenTelemetry()
+builder.Services.AddOpenTelemetry()
     .ConfigureResource(resource =>
         resource.AddService("azure-kubernetes-showcase"))
     .WithTracing(tracing =>
@@ -24,9 +20,7 @@ builder.Services
     })
     .WithMetrics(metrics =>
     {
-        metrics
-            .AddAspNetCoreInstrumentation()
-            .AddRuntimeInstrumentation();
+        metrics.AddAspNetCoreInstrumentation();
     });
 
 builder.Services.AddHealthChecks();
@@ -63,9 +57,7 @@ app.MapGet("/api/info", () =>
         application = "Azure Kubernetes Showcase",
         version = "1.0.0",
         runtime = ".NET 10",
-        environment =
-            Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")
-            ?? "Production"
+        environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"
     }));
 
 app.MapGet("/api/metrics", () =>
