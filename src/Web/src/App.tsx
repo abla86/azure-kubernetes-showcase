@@ -20,8 +20,6 @@ type EventItem = {
   timestamp: string;
 };
 
-const API = import.meta.env.VITE_API_URL ?? "http://localhost:5080";
-
 function App() {
   const [health, setHealth] = useState<Health | null>(null);
   const [info, setInfo] = useState<Info | null>(null);
@@ -31,12 +29,11 @@ function App() {
   useEffect(() => {
     const load = async () => {
       try {
-        const [healthResponse, infoResponse, eventsResponse] =
-          await Promise.all([
-            fetch(`${API}/api/health`),
-            fetch(`${API}/api/info`),
-            fetch(`${API}/api/events`)
-          ]);
+        const [healthResponse, infoResponse, eventsResponse] = await Promise.all([
+          fetch("/api/health"),
+          fetch("/api/info"),
+          fetch("/api/events")
+        ]);
 
         if (!healthResponse.ok || !infoResponse.ok || !eventsResponse.ok) {
           throw new Error("API request failed");
@@ -48,7 +45,7 @@ function App() {
         setError("");
       } catch {
         setError(
-          "API er ikke tilgjengelig. Start ASP.NET Core API-et for lokal kjøring."
+          "API er ikke tilgjengelig. Start ASP.NET Core API-et for lokal kjÃ¸ring."
         );
       }
     };
@@ -63,8 +60,8 @@ function App() {
           <p className="eyebrow">CLOUD ENGINEERING PORTFOLIO</p>
           <h1>Azure Kubernetes Showcase</h1>
           <p className="subtitle">
-            .NET · React · Docker · Kubernetes · Azure · IaC · CI/CD ·
-            DevSecOps · Observability
+            .NET Â· React Â· Docker Â· Kubernetes Â· Azure Â· IaC Â· CI/CD Â·
+            DevSecOps Â· Observability
           </p>
         </div>
 
@@ -79,20 +76,20 @@ function App() {
       <section className="grid">
         <article className="card">
           <span className="label">SERVICE HEALTH</span>
-          <strong>{health?.status ?? "—"}</strong>
+          <strong>{health?.status ?? "â€”"}</strong>
           <small>{health?.service ?? "Waiting for API"}</small>
         </article>
 
         <article className="card">
           <span className="label">RUNTIME</span>
-          <strong>{info?.runtime ?? "—"}</strong>
-          <small>{info?.environment ?? "—"}</small>
+          <strong>{info?.runtime ?? "â€”"}</strong>
+          <small>{info?.environment ?? "â€”"}</small>
         </article>
 
         <article className="card">
           <span className="label">VERSION</span>
-          <strong>{info?.version ?? "—"}</strong>
-          <small>{info?.application ?? "—"}</small>
+          <strong>{info?.version ?? "â€”"}</strong>
+          <small>{info?.application ?? "â€”"}</small>
         </article>
 
         <article className="card">
@@ -104,16 +101,8 @@ function App() {
 
       <section className="architecture">
         <h2>Engineering pipeline</h2>
-
         <div className="pipeline">
-          {[
-            "React / TypeScript",
-            "ASP.NET Core",
-            "Docker",
-            "Kubernetes",
-            "Azure",
-            "Observability"
-          ].map((item) => (
+          {["React / TypeScript", "ASP.NET Core", "Docker", "Kubernetes", "Azure", "Observability"].map((item) => (
             <div className="pipelineItem" key={item}>
               {item}
             </div>
@@ -123,7 +112,6 @@ function App() {
 
       <section className="events">
         <h2>System events</h2>
-
         {events.length === 0 ? (
           <p className="muted">No events available.</p>
         ) : (
