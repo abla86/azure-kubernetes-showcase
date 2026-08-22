@@ -33,7 +33,7 @@ builder.Services.AddHealthChecks();
 
 builder.Services.AddCors(options =>
 {
-    options.AddDefaultPolicy(policy =>
+    options.AddPolicy("frontend", policy =>
     {
         policy
             .AllowAnyOrigin()
@@ -45,7 +45,7 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 app.UseSerilogRequestLogging();
-app.UseCors();
+app.UseCors("frontend");
 
 app.MapHealthChecks("/health");
 
@@ -53,6 +53,7 @@ app.MapGet("/api/health", () =>
     Results.Ok(new
     {
         status = "healthy",
+        service = "azure-kubernetes-showcase",
         timestamp = DateTimeOffset.UtcNow
     }));
 
@@ -62,15 +63,16 @@ app.MapGet("/api/info", () =>
         application = "Azure Kubernetes Showcase",
         version = "1.0.0",
         runtime = ".NET 10",
-        environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")
-                       ?? "Production"
+        environment =
+            Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")
+            ?? "Production"
     }));
 
 app.MapGet("/api/metrics", () =>
     Results.Ok(new
     {
         status = "operational",
-        uptime = Environment.TickCount64
+        uptimeMilliseconds = Environment.TickCount64
     }));
 
 app.MapGet("/api/events", () =>
@@ -80,6 +82,12 @@ app.MapGet("/api/events", () =>
         {
             type = "deployment",
             message = "Application running",
+            timestamp = DateTimeOffset.UtcNow
+        },
+        new
+        {
+            type = "observability",
+            message = "Health and telemetry endpoints enabled",
             timestamp = DateTimeOffset.UtcNow
         }
     }));

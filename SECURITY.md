@@ -1,39 +1,16 @@
 # Security
 
-## Security principles
-
 This project demonstrates:
 
 - non-root containers
-- dropped Linux capabilities
 - Kubernetes security contexts
 - NetworkPolicy
 - CodeQL
 - Dependabot
-- Trivy
-- GitHub Actions least privilege
+- least-privilege GitHub Actions
 - environment-based configuration
-- no committed credentials
+- container security
 
-## Secrets
+No real credentials are committed.
 
-No real credentials belong in this repository.
-
-Azure credentials must use GitHub Actions OIDC or GitHub Secrets.
-
-## Limitations
-
-This is a portfolio project.
-
-It is not a production security certification.
-
-A production deployment would additionally require:
-
-- enterprise identity
-- MFA
-- formal threat modelling
-- penetration testing
-- managed secret storage
-- network segmentation
-- backup/recovery controls
-- privacy assessment
+Azure and Kubernetes are only considered deployed when an actual deployment succeeds.

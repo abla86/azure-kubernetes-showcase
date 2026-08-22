@@ -1,122 +1,145 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useEffect, useState } from "react";
+import "./App.css";
+
+type Health = {
+  status: string;
+  service: string;
+  timestamp: string;
+};
+
+type Info = {
+  application: string;
+  version: string;
+  runtime: string;
+  environment: string;
+};
+
+type EventItem = {
+  type: string;
+  message: string;
+  timestamp: string;
+};
+
+const API = import.meta.env.VITE_API_URL ?? "http://localhost:5080";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [health, setHealth] = useState<Health | null>(null);
+  const [info, setInfo] = useState<Info | null>(null);
+  const [events, setEvents] = useState<EventItem[]>([]);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const [healthResponse, infoResponse, eventsResponse] =
+          await Promise.all([
+            fetch(`${API}/api/health`),
+            fetch(`${API}/api/info`),
+            fetch(`${API}/api/events`)
+          ]);
+
+        if (!healthResponse.ok || !infoResponse.ok || !eventsResponse.ok) {
+          throw new Error("API request failed");
+        }
+
+        setHealth(await healthResponse.json());
+        setInfo(await infoResponse.json());
+        setEvents(await eventsResponse.json());
+        setError("");
+      } catch {
+        setError(
+          "API er ikke tilgjengelig. Start ASP.NET Core API-et for lokal kjøring."
+        );
+      }
+    };
+
+    load();
+  }, []);
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
+    <main className="dashboard">
+      <header className="hero">
         <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
+          <p className="eyebrow">CLOUD ENGINEERING PORTFOLIO</p>
+          <h1>Azure Kubernetes Showcase</h1>
+          <p className="subtitle">
+            .NET · React · Docker · Kubernetes · Azure · IaC · CI/CD ·
+            DevSecOps · Observability
           </p>
         </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
+
+        <div className={`status ${health ? "online" : "offline"}`}>
+          <span />
+          {health ? "API ONLINE" : "API OFFLINE"}
+        </div>
+      </header>
+
+      {error && <section className="alert">{error}</section>}
+
+      <section className="grid">
+        <article className="card">
+          <span className="label">SERVICE HEALTH</span>
+          <strong>{health?.status ?? "—"}</strong>
+          <small>{health?.service ?? "Waiting for API"}</small>
+        </article>
+
+        <article className="card">
+          <span className="label">RUNTIME</span>
+          <strong>{info?.runtime ?? "—"}</strong>
+          <small>{info?.environment ?? "—"}</small>
+        </article>
+
+        <article className="card">
+          <span className="label">VERSION</span>
+          <strong>{info?.version ?? "—"}</strong>
+          <small>{info?.application ?? "—"}</small>
+        </article>
+
+        <article className="card">
+          <span className="label">PLATFORM</span>
+          <strong>Cloud Ready</strong>
+          <small>Container + Kubernetes</small>
+        </article>
       </section>
 
-      <div className="ticks"></div>
+      <section className="architecture">
+        <h2>Engineering pipeline</h2>
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
+        <div className="pipeline">
+          {[
+            "React / TypeScript",
+            "ASP.NET Core",
+            "Docker",
+            "Kubernetes",
+            "Azure",
+            "Observability"
+          ].map((item) => (
+            <div className="pipelineItem" key={item}>
+              {item}
+            </div>
+          ))}
         </div>
       </section>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+      <section className="events">
+        <h2>System events</h2>
+
+        {events.length === 0 ? (
+          <p className="muted">No events available.</p>
+        ) : (
+          events.map((event) => (
+            <div className="event" key={`${event.type}-${event.timestamp}`}>
+              <div>
+                <strong>{event.type}</strong>
+                <span>{event.message}</span>
+              </div>
+              <time>{new Date(event.timestamp).toLocaleString()}</time>
+            </div>
+          ))
+        )}
+      </section>
+    </main>
+  );
 }
 
-export default App
+export default App;

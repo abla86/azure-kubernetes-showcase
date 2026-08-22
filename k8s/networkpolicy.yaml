@@ -1,0 +1,16 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: showcase-api
+  namespace: showcase
+spec:
+  podSelector:
+    matchLabels:
+      app: showcase-api
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - {}
+  egress:
+    - {}

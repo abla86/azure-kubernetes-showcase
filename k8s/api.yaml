@@ -1,0 +1,84 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: showcase
+  labels:
+    pod-security.kubernetes.io/enforce: restricted
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: showcase-api
+  namespace: showcase
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: showcase-api
+  template:
+    metadata:
+      labels:
+        app: showcase-api
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: api
+          image: azure-kubernetes-showcase-api:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: showcase-api
+  namespace: showcase
+spec:
+  selector:
+    app: showcase-api
+  ports:
+    - port: 80
+      targetPort: 8080
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: showcase-api
+  namespace: showcase
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: showcase-api
+  minReplicas: 2
+  maxReplicas: 5
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
