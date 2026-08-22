@@ -11,6 +11,20 @@ spec:
     - Ingress
     - Egress
   ingress:
-    - {}
+    - from:
+        - podSelector:
+            matchLabels:
+              app: showcase-web
+      ports:
+        - protocol: TCP
+          port: 8080
   egress:
-    - {}
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
