@@ -1,19 +1,38 @@
 # Azure Kubernetes Showcase
 
+[![CI/CD](https://github.com/abla86/azure-kubernetes-showcase/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/abla86/azure-kubernetes-showcase/actions/workflows/ci-cd.yml)
+[![Security](https://img.shields.io/badge/security-CodeQL%20%2B%20Dependabot-blue)](https://github.com/abla86/azure-kubernetes-showcase/security)
+[![.NET](https://img.shields.io/badge/.NET-10-512BD4)](https://dotnet.microsoft.com/)
+[![React](https://img.shields.io/badge/React-TypeScript-61DAFB)](https://react.dev/)
+[![Docker](https://img.shields.io/badge/Docker-Containers-2496ED)](https://www.docker.com/)
+[![Kubernetes](https://img.shields.io/badge/Kubernetes-Deployment-326CE5)](https://kubernetes.io/)
+
 A focused cloud-engineering portfolio project demonstrating a small full-stack application built with **ASP.NET Core/.NET 10, React/TypeScript, Docker and Kubernetes**, with Azure Infrastructure as Code and DevSecOps practices.
 
-## What this demonstrates
+## Portfolio snapshot
+
+This repository is designed as an employer-facing engineering showcase. It demonstrates:
 
 - **Backend:** ASP.NET Core / .NET 10 REST API
 - **Frontend:** React + TypeScript + Vite
-- **Containers:** Multi-stage Docker builds; non-root web container
-- **Kubernetes:** Deployment, Service, HPA, NetworkPolicy and Pod Security enforcement
-- **Azure IaC:** Bicep and Terraform examples for Azure resources
-- **CI:** GitHub Actions for .NET build/test, frontend lint/build, Docker builds and Kubernetes validation
-- **Security:** CodeQL, Dependabot, restricted Kubernetes security context
-- **Observability:** Serilog request logging, OpenTelemetry instrumentation and health checks
+- **Containers:** Multi-stage Docker builds with non-root runtime users
+- **Kubernetes:** Deployments, Services, HPA, NetworkPolicy, probes and restricted Pod Security
+- **Azure IaC:** Bicep and Terraform examples
+- **CI/CD:** GitHub Actions for build, test, lint, Docker and Kubernetes validation
+- **Security:** CodeQL, Dependabot and least-privilege Kubernetes security controls
+- **Observability:** Serilog request logging, OpenTelemetry instrumentation and health endpoints
 
-> **Verification status:** The repository contains deployment-ready examples, but this README does **not** claim that Azure/AKS has been deployed or that production infrastructure has been verified. CI status is the source of truth for automated verification.
+## Current verification
+
+The application has been run locally on Docker Desktop Kubernetes and verified with:
+
+- API deployment: **2/2 Ready**
+- Frontend deployment: **2/2 Ready**
+- API health endpoint: **healthy**
+- Kubernetes services: **available**
+- API and frontend containers: **Running**
+
+This is a local Kubernetes verification, not a claim that production Azure/AKS infrastructure has been deployed.
 
 ## Architecture
 
@@ -40,6 +59,7 @@ Kubernetes
         +--> Deployment + Service
         +--> HPA
         +--> NetworkPolicy
+        +--> Restricted Pod Security
         |
         v
 Azure IaC examples
@@ -88,13 +108,7 @@ npm run build
 docker compose up --build
 ```
 
-Then open:
-
-- Frontend: `http://localhost:5173`
-- API: `http://localhost:5080`
-- API health: `http://localhost:5080/health`
-
-The production-style frontend container listens on port `8080` and proxies `/api/*` to the Compose API service.
+The production-style frontend container listens on port `8080` and proxies `/api/*` to the API service.
 
 ## Kubernetes
 
@@ -107,13 +121,18 @@ The `k8s/` directory contains:
 - Restricted Pod Security enforcement
 - Readiness and liveness probes
 
-Validate the manifests locally with:
+Example local validation:
 
 ```powershell
 kubectl apply --dry-run=client -f k8s/
 ```
 
-Container images must be available to the target cluster before a real deployment.
+For the Docker Desktop cluster used during local verification:
+
+```powershell
+kubectl apply -f k8s/
+kubectl get deployments,pods,services -n showcase
+```
 
 ## Infrastructure as Code
 
@@ -122,18 +141,17 @@ Two Azure IaC examples are included:
 - `infra/bicep/main.bicep`
 - `infra/terraform/main.tf`
 
-They intentionally remain small and auditable. They demonstrate Azure resource provisioning without falsely implying that the resources have already been deployed.
+They intentionally remain small and auditable. They demonstrate Azure resource provisioning without falsely implying that Azure resources have already been deployed.
 
 ## CI and DevSecOps
 
-GitHub Actions currently verifies:
+GitHub Actions is configured for:
 
-1. .NET restore and Release build
-2. .NET test suite with coverage collection
-3. Frontend dependency installation, lint and production build
-4. Kubernetes manifest validation
-5. API and frontend Docker image builds
-6. CodeQL analysis for C# and JavaScript/TypeScript
+1. .NET restore, Release build and tests
+2. Frontend dependency installation, lint and production build
+3. Kubernetes manifest validation
+4. API and frontend Docker image builds
+5. CodeQL analysis for C# and JavaScript/TypeScript
 
 Dependabot monitors NuGet, npm, Docker and GitHub Actions dependencies.
 
@@ -141,14 +159,15 @@ Dependabot monitors NuGet, npm, Docker and GitHub Actions dependencies.
 
 The repository includes ASP.NET Core integration-style endpoint tests using `WebApplicationFactory` for the health, info and metrics endpoints.
 
-The project does **not** claim frontend E2E coverage or a production deployment until those have actually been implemented and verified.
+The project does **not** claim frontend E2E coverage or a production Azure deployment unless those have actually been implemented and verified.
 
 ## Security
 
 Implemented controls include:
 
-- Non-root frontend container
+- Non-root API and frontend containers
 - Kubernetes `runAsNonRoot`
+- Explicit non-root API UID
 - `seccompProfile: RuntimeDefault`
 - `allowPrivilegeEscalation: false`
 - Linux capabilities dropped with `drop: ALL`
@@ -162,3 +181,9 @@ No credentials, production data or patient information are included.
 ## Scope
 
 This is a **portfolio showcase**, not a production healthcare system. The purpose is to demonstrate practical full-stack, container, Kubernetes, Azure IaC and DevSecOps engineering skills in a small, auditable project.
+
+## Repository
+
+**GitHub:** https://github.com/abla86/azure-kubernetes-showcase
+
+The repository's `main` branch is the published version.
