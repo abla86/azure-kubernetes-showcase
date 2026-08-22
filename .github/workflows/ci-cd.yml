@@ -12,11 +12,9 @@ permissions:
   actions: read
 
 jobs:
-
   backend:
     name: Backend build and test
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
 
@@ -26,16 +24,14 @@ jobs:
 
       - run: dotnet restore
       - run: dotnet build --configuration Release --no-restore
-      - run: dotnet test --configuration Release --no-build
+      - run: dotnet test --configuration Release --verbosity normal --collect:"XPlat Code Coverage"
 
   frontend:
     name: Frontend lint and build
     runs-on: ubuntu-latest
-
     defaults:
       run:
         working-directory: src/Web
-
     steps:
       - uses: actions/checkout@v4
 
@@ -49,35 +45,43 @@ jobs:
       - run: npm run lint
       - run: npm run build
 
+  kubernetes:
+    name: Kubernetes manifest validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/setup-kubectl@v4
+        with:
+          version: latest
+      - run: kubectl apply --dry-run=client -f k8s/
+
   docker:
     name: Container build
     runs-on: ubuntu-latest
-
+    needs: [backend, frontend]
     steps:
       - uses: actions/checkout@v4
 
       - name: Build API
-        run: docker build -t azure-kubernetes-showcase-api ./src/Showcase.Api
+        run: docker build -t azure-kubernetes-showcase-api:${{ github.sha }} ./src/Showcase.Api
 
       - name: Build frontend
-        run: docker build -t azure-kubernetes-showcase-web ./src/Web
+        run: docker build -t azure-kubernetes-showcase-web:${{ github.sha }} ./src/Web
 
   security:
-    name: CodeQL
+    name: CodeQL security analysis
     runs-on: ubuntu-latest
-
     permissions:
       security-events: write
-      packages: read
       actions: read
       contents: read
-
     steps:
       - uses: actions/checkout@v4
 
       - uses: github/codeql-action/init@v3
         with:
-          languages: csharp
+          languages: csharp,javascript-typescript
+          queries: security-extended
 
       - uses: actions/setup-dotnet@v4
         with:
