@@ -1,10 +1,10 @@
 services:
-
   api:
     build:
       context: ./src/Showcase.Api
     environment:
       ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
       OTEL_SERVICE_NAME: azure-kubernetes-showcase
     ports:
       - "5080:8080"
@@ -14,6 +14,6 @@ services:
     build:
       context: ./src/Web
     ports:
-      - "5173:80"
+      - "5173:8080"
     depends_on:
       - api
