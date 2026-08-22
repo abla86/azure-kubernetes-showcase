@@ -46,22 +46,31 @@ spec:
             httpGet:
               path: /health
               port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
           livenessProbe:
             httpGet:
               path: /health
               port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: Production
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: showcase-api
+  name: api
   namespace: showcase
 spec:
   selector:
     app: showcase-api
   ports:
-    - port: 80
+    - protocol: TCP
+      port: 8080
       targetPort: 8080
+  type: ClusterIP
 ---
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
