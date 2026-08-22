@@ -1,18 +1,32 @@
 version: 2
 
 updates:
+  - package-ecosystem: nuget
+    directory: "/src/Showcase.Api"
+    schedule:
+      interval: weekly
+
+  - package-ecosystem: nuget
+    directory: "/tests/Showcase.Api.Tests"
+    schedule:
+      interval: weekly
 
   - package-ecosystem: npm
     directory: "/src/Web"
     schedule:
       interval: weekly
 
-  - package-ecosystem: github-actions
-    directory: "/"
+  - package-ecosystem: docker
+    directory: "/src/Showcase.Api"
     schedule:
       interval: weekly
 
   - package-ecosystem: docker
-    directory: "/src/Showcase.Api"
+    directory: "/src/Web"
+    schedule:
+      interval: weekly
+
+  - package-ecosystem: github-actions
+    directory: "/"
     schedule:
       interval: weekly
