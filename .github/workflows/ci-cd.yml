@@ -55,6 +55,34 @@ jobs:
           version: latest
       - run: kubectl apply --dry-run=client -f k8s/
 
+  azure-iac:
+    name: Azure IaC validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate Bicep
+        uses: azure/cli@v2
+        with:
+          inlineScript: az bicep build --file infra/bicep/main.bicep
+
+      - name: Validate Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.6
+
+      - name: Terraform format check
+        working-directory: infra/terraform
+        run: terraform fmt -check -recursive
+
+      - name: Terraform init
+        working-directory: infra/terraform
+        run: terraform init -backend=false
+
+      - name: Terraform validate
+        working-directory: infra/terraform
+        run: terraform validate
+
   docker:
     name: Container build
     runs-on: ubuntu-latest
