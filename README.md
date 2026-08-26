@@ -1,6 +1,7 @@
 # Azure Kubernetes Showcase
 
 [![CI/CD](https://github.com/abla86/azure-kubernetes-showcase/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/abla86/azure-kubernetes-showcase/actions/workflows/ci-cd.yml)
+[![Azure IaC](https://img.shields.io/badge/Azure%20IaC-Bicep%20%2B%20Terraform-0078D4)](https://azure.microsoft.com/)
 [![Security](https://img.shields.io/badge/security-CodeQL%20%2B%20Dependabot-blue)](https://github.com/abla86/azure-kubernetes-showcase/security)
 [![.NET](https://img.shields.io/badge/.NET-10-512BD4)](https://dotnet.microsoft.com/)
 [![React](https://img.shields.io/badge/React-TypeScript-61DAFB)](https://react.dev/)
@@ -32,7 +33,12 @@ The application has been run locally on Docker Desktop Kubernetes and verified w
 - Kubernetes services: **available**
 - API and frontend containers: **Running**
 
-This is a local Kubernetes verification, not a claim that production Azure/AKS infrastructure has been deployed.
+The CI pipeline also validates the repository's Azure Infrastructure as Code:
+
+- Bicep compilation is checked automatically
+- Terraform formatting and validation are checked automatically
+
+This is a local Kubernetes verification plus automated IaC validation, not a claim that production Azure/AKS infrastructure has been deployed.
 
 ## Architecture
 
@@ -84,6 +90,8 @@ Azure IaC examples
 - Node.js 22+
 - Docker Desktop
 - kubectl (for Kubernetes validation/testing)
+- Azure CLI (for optional local Bicep validation)
+- Terraform 1.6+ (for optional local IaC validation)
 
 ### Run the API
 
@@ -134,14 +142,29 @@ kubectl apply -f k8s/
 kubectl get deployments,pods,services -n showcase
 ```
 
-## Infrastructure as Code
+## Azure Infrastructure as Code
 
-Two Azure IaC examples are included:
+Two small, auditable Azure IaC examples are included:
 
 - `infra/bicep/main.bicep`
 - `infra/terraform/main.tf`
 
-They intentionally remain small and auditable. They demonstrate Azure resource provisioning without falsely implying that Azure resources have already been deployed.
+GitHub Actions validates both representations on pushes and pull requests. The project deliberately demonstrates **Azure provisioning skills without claiming that Azure resources have already been deployed**.
+
+For a local Bicep compilation check:
+
+```powershell
+az bicep build --file infra/bicep/main.bicep
+```
+
+For local Terraform validation:
+
+```powershell
+cd infra/terraform
+terraform fmt -check -recursive
+terraform init -backend=false
+terraform validate
+```
 
 ## CI and DevSecOps
 
@@ -150,8 +173,10 @@ GitHub Actions is configured for:
 1. .NET restore, Release build and tests
 2. Frontend dependency installation, lint and production build
 3. Kubernetes manifest validation
-4. API and frontend Docker image builds
-5. CodeQL analysis for C# and JavaScript/TypeScript
+4. Azure Bicep compilation
+5. Azure Terraform formatting and validation
+6. API and frontend Docker image builds
+7. CodeQL analysis for C# and JavaScript/TypeScript
 
 Dependabot monitors NuGet, npm, Docker and GitHub Actions dependencies.
 
