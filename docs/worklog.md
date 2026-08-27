@@ -2,3 +2,7 @@
 - Commit: ci: add automated maintenance log
 - Branch: main
 
+### 2026-08-27T05:49:15Z — 61039e4
+- Commit: ci: stabilize workflow and canonical smoke test
+- Branch: main
+
