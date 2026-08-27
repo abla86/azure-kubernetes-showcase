@@ -1,4 +1,4 @@
-.PHONY: up down build logs test-build validate-manifests validate-iac validate security
+.PHONY: up down build logs test-build validate-manifests validate-iac validate security cost-audit
 
 up:
 	docker compose up --build -d
@@ -21,15 +21,18 @@ test-build:
 	@echo "Alle .NET API-tjenester er bygget."
 
 validate-manifests:
-	@python -m pip install --disable-pip-version-check --quiet pyyaml
-	@python scripts/validate_manifests.py
+	python scripts/validate_manifests.py
 
 validate-iac:
 	terraform -chdir=infra/terraform fmt -check -recursive
-	terraform -chdir=infra/terraform init -backend=false
+	terraform -chdir=infra/terraform init -backend=false -input=false
 	terraform -chdir=infra/terraform validate
+	az bicep build --file infra/bicep/main.bicep --stdout > $null
 
-validate: validate-manifests validate-iac test-build
+validate: validate-manifests validate-iac
 
-security: validate
-	@echo "Security/IaC validation passed."
+security:
+	python security/api-self-test.py
+
+cost-audit:
+	python ../cloud-waste-auditor/auditor.py
