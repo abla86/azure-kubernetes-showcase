@@ -23,5 +23,5 @@ if (-not $ClientId) {
 
 $content = Get-Content $source -Raw
 $content = $content.Replace('${AZURE_WORKLOAD_IDENTITY_CLIENT_ID}', $ClientId)
-Set-Content -Path $output -Value $content -Encoding utf8NoBOM
+[System.IO.File]::WriteAllText($output, $content, [System.Text.UTF8Encoding]::new($false))
 Write-Host "Generert: $output" -ForegroundColor Green
