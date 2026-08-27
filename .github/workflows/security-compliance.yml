@@ -9,6 +9,7 @@ on:
       - "infra/terraform/**"
       - "infra/bicep/**"
       - "k8s/**"
+      - "scripts/validate_manifests.py"
       - "docs/iac-parity-matrix.md"
       - ".github/workflows/security-compliance.yml"
 
@@ -47,9 +48,23 @@ jobs:
       - name: Bicep build
         shell: bash
         run: |
+          set -euo pipefail
           find infra/bicep -name '*.bicep' -print0 | while IFS= read -r -d '' file; do
             az bicep build --file "$file" --stdout >/dev/null
-done
+          done
+
+  manifest-policy:
+    name: Kubernetes workload security policy
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install YAML parser
+        run: python -m pip install --disable-pip-version-check pyyaml
+      - name: Validate Kubernetes manifests
+        run: python scripts/validate_manifests.py
 
   checkov:
     name: Check Terraform and Kubernetes security
@@ -85,7 +100,7 @@ done
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
-      - name: Verify required parity anchors
+      - name: Verify parity document and anchors
         shell: bash
         run: |
           set -euo pipefail
