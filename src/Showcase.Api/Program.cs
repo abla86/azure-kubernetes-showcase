@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Azure.Identity;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
@@ -54,7 +55,13 @@ app.Use(async (context, next) =>
 app.UseSerilogRequestLogging();
 app.UseCors("frontend");
 
-app.MapHealthChecks("/health");
+// Controlled API self-test surface. It is deliberately scoped to the local app.
+app.MapGet("/.well-known/security.txt", () => Results.Text(
+    "Contact: mailto:REPLACE-WITH-REAL-SECURITY-CONTACT@example.invalid\n" +
+    "Expires: 2027-08-27T00:00:00Z\n" +
+    "Preferred-Languages: no, en\n" +
+    "Policy: https://github.com/abla86/azure-kubernetes-showcase/blob/main/SECURITY.md\n",
+    "text/plain"));
 
 app.MapGet("/api/health", () =>
     Results.Ok(new
