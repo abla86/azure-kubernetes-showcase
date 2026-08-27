@@ -26,6 +26,8 @@ permissions:
 jobs:
   self-test:
     runs-on: ubuntu-24.04
+    env:
+      OTEL_ENABLED: "false"
 
     steps:
       - uses: actions/checkout@v4
@@ -44,6 +46,7 @@ jobs:
       - name: Wait for services
         shell: bash
         run: |
+          set -euo pipefail
           for i in {1..30}; do
             if curl -fsS http://127.0.0.1:5080/health >/dev/null 2>&1 && \
                curl -fsS http://127.0.0.1:5001/health >/dev/null 2>&1 && \
@@ -56,16 +59,38 @@ jobs:
           docker compose logs
           exit 1
 
+      - name: Verify Security Radar status
+        run: |
+          curl -fsS http://127.0.0.1:5080/api/status | tee /tmp/radar-status.json
+          python - <<'PY'
+          import json
+          with open('/tmp/radar-status.json', encoding='utf-8') as f:
+              data = json.load(f)
+          assert data["status"] == "operational"
+          assert data["rateLimiting"] is True
+          assert data["structuredSecurityEvents"] is True
+          assert data["ghostRoute"] is True
+          assert data["telemetryEnabled"] is False
+          PY
+
       - name: Run controlled API security self-test
         run: python security/api-self-test.py
 
       - name: Verify Security Radar deception route
         shell: bash
         run: |
+          set -euo pipefail
           status=$(curl -sS -o /tmp/radar.json -w "%{http_code}" http://127.0.0.1:5080/ghost/admin)
           test "$status" = "404"
           grep -q '"detected":true' /tmp/radar.json
           grep -q '"deception":true' /tmp/radar.json
+
+      - name: Verify deception event feed
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsS http://127.0.0.1:5080/api/events | tee /tmp/radar-events.json
+          grep -q 'ghost-route-rejected' /tmp/radar-events.json
 
       - name: Collect service logs on failure
         if: failure()
