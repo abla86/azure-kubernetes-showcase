@@ -21,7 +21,7 @@ pre{height:280px;overflow:auto;background:#05070b;padding:16px;border-radius:8px
 <p>Restricted workloads: <span class="ok">NON-ROOT</span></p>
 <p>Identity: <span class="ok">OIDC / KEYLESS</span></p>
 <p>Observability: <span class="ok">ENABLED</span></p>
-<button id="simulate">Run controlled simulation</button></section>
+<button id="simulate">Run controlled simulation</button><button id="ghost">Trigger ghost route</button></section>
 <section class="card"><h2>Event feed</h2><pre id="feed">[system] Radar initialized.
 [system] Awaiting controlled simulation...
 </pre></section>
@@ -29,5 +29,6 @@ pre{height:280px;overflow:auto;background:#05070b;padding:16px;border-radius:8px
 <script>
 const feed=document.querySelector('#feed');
 function log(s,c=''){const t=new Date().toLocaleTimeString();feed.textContent+=`[${t}] ${s}\n`;feed.scrollTop=feed.scrollHeight}
-document.querySelector('#simulate').onclick=async()=>{log('SIMULATION: controlled request started');const t=performance.now();try{const r=await fetch('/api/simulate-attack',{method:'POST'});const d=await r.json();log(`ALERT: request rejected; controlled delay ${Math.round(performance.now()-t)} ms`)}catch(e){log('ERROR: simulation endpoint unavailable')}}
+document.querySelector('#ghost').onclick=async()=>{log('DECEPTION: probing controlled ghost route');try{const r=await fetch('/ghost/admin', {method:'GET'});const d=await r.json();log(`DECEPTION: decoy rejected; delay ${d.delayMs} ms`)}catch(e){log('ERROR: ghost route unavailable')}};
+document.querySelector('#simulate').onclick=async()=>{log('SIMULATION: controlled request started');const t=performance.now();try{const r=await fetch('/api/simulate-attack',{method:'POST'});const d=await r.json();log(`ALERT: simulation rejected; delay ${d.delayMs} ms`)}catch(e){log('ERROR: simulation endpoint unavailable')}}
 </script></body></html>
