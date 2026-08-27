@@ -44,6 +44,13 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+app.Use(async (context, next) =>
+{
+    context.Response.Headers["X-Clacks-Overhead"] = "GNU Terry Pratchett";
+    context.Response.Headers["X-Defense-Depth"] = "Zero-Trust-Active";
+    await next();
+});
+
 app.UseSerilogRequestLogging();
 app.UseCors("frontend");
 
