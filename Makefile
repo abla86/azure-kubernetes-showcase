@@ -1,4 +1,4 @@
-.PHONY: up down build logs test-build
+.PHONY: up down build logs test-build validate-manifests validate-iac validate security
 
 up:
 	docker compose up --build -d
@@ -19,3 +19,17 @@ test-build:
 	dotnet build apps/community-hub/CommunityHub.Api/CommunityHub.Api.csproj
 	dotnet build apps/security-radar/SecurityRadar.Web/SecurityRadar.Web.csproj
 	@echo "Alle .NET API-tjenester er bygget."
+
+validate-manifests:
+	@python -m pip install --disable-pip-version-check --quiet pyyaml
+	@python scripts/validate_manifests.py
+
+validate-iac:
+	terraform -chdir=infra/terraform fmt -check -recursive
+	terraform -chdir=infra/terraform init -backend=false
+	terraform -chdir=infra/terraform validate
+
+validate: validate-manifests validate-iac test-build
+
+security: validate
+	@echo "Security/IaC validation passed."
