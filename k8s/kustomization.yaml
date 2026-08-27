@@ -26,3 +26,5 @@ images:
     newName: acrshowcasedev.azurecr.io/care-portal-api
   - name: acrshowcase.azurecr.io/community-hub-api
     newName: acrshowcasedev.azurecr.io/community-hub-api
+  - name: acrshowcasedev.azurecr.io/security-radar
+    newName: acrshowcasedev.azurecr.io/security-radar
