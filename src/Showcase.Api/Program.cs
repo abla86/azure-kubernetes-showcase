@@ -1,6 +1,7 @@
-﻿using OpenTelemetry.Metrics;
-using OpenTelemetry.Trace;
+using Azure.Identity;
+using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,19 +13,21 @@ builder.Host.UseSerilog((context, configuration) =>
         .WriteTo.Console();
 });
 
-builder.Services.AddOpenTelemetry()
-    .ConfigureResource(resource =>
-        resource.AddService("azure-kubernetes-showcase"))
-    .WithTracing(tracing =>
+var credential = new DefaultAzureCredential();
+
+builder.Services
+    .AddOpenTelemetry()
+    .ConfigureResource(resource => resource.AddService("azure-kubernetes-showcase"))
+    .UseAzureMonitorExporter(options =>
     {
-        tracing
-            .AddAspNetCoreInstrumentation()
-            .AddHttpClientInstrumentation();
+        options.Credential = credential;
     })
-    .WithMetrics(metrics =>
-    {
-        metrics.AddAspNetCoreInstrumentation();
-    });
+    .WithTracing(tracing => tracing
+        .AddAspNetCoreInstrumentation()
+        .AddHttpClientInstrumentation())
+    .WithMetrics(metrics => metrics
+        .AddAspNetCoreInstrumentation()
+        .AddRuntimeInstrumentation());
 
 builder.Services.AddHealthChecks();
 
@@ -90,5 +93,3 @@ app.MapGet("/api/events", () =>
 app.Run();
 
 public partial class Program;
-
-
