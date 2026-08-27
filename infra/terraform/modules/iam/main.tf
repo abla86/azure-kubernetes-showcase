@@ -1,52 +1,46 @@
-variable "acr_id" {
-  type = string
-}
-
-variable "principal_id" {
-  type = string
-}
-
-variable "resource_group_name" {
-  type = string
-}
-
-variable "location" {
-  type = string
-}
-
-variable "oidc_issuer_url" {
-  type = string
-}
+variable "acr_id" { type = string }
+variable "principal_id" { type = string }
+variable "resource_group_name" { type = string }
+variable "location" { type = string }
+variable "environment" { type = string }
+variable "oidc_issuer_url" { type = string }
+variable "application_insights_id" { type = string }
+variable "github_actions_client_id" { type = string, nullable = true, default = null }
 
 resource "azurerm_role_assignment" "acr_pull" {
-  scope                = var.acr_id
+  scope = var.acr_id
   role_definition_name = "AcrPull"
-  principal_id         = var.principal_id
+  principal_id = var.principal_id
 }
 
-variable "workload_identity_principal_id" {
-  description = "Optional principal ID of a dedicated workload managed identity."
-  type        = string
-  default     = null
-  nullable    = true
+resource "azurerm_user_assigned_identity" "workload" {
+  name = "id-showcase-workload-\${var.environment}"
+  location = var.location
+  resource_group_name = var.resource_group_name
 }
 
-variable "workload_identity_scope" {
-  description = "Optional Azure resource scope for the workload identity role assignment."
-  type        = string
-  default     = null
-  nullable    = true
+resource "azurerm_federated_identity_credential" "workload" {
+  name = "showcase-api-service-account"
+  resource_group_name = var.resource_group_name
+  parent_id = azurerm_user_assigned_identity.workload.id
+  issuer = var.oidc_issuer_url
+  subject = "system:serviceaccount:showcase:api-workload-identity-sa"
+  audiences = ["api://AzureADTokenExchange"]
 }
 
-variable "workload_identity_role_definition_name" {
-  description = "Azure RBAC role for the workload identity when a scope is supplied."
-  type        = string
-  default     = "Reader"
+resource "azurerm_role_assignment" "appinsights_publish" {
+  scope = var.application_insights_id
+  role_definition_name = "Monitoring Metrics Publisher"
+  principal_id = azurerm_user_assigned_identity.workload.principal_id
 }
 
-resource "azurerm_role_assignment" "workload_identity" {
-  count                = var.workload_identity_principal_id != null && var.workload_identity_scope != null ? 1 : 0
-  scope                = var.workload_identity_scope
-  role_definition_name = var.workload_identity_role_definition_name
-  principal_id         = var.workload_identity_principal_id
+resource "azurerm_role_assignment" "acr_push" {
+  count = var.github_actions_client_id != null ? 1 : 0
+  scope = var.acr_id
+  role_definition_name = "AcrPush"
+  principal_id = var.github_actions_client_id
+}
+
+output "workload_identity_client_id" {
+  value = azurerm_user_assigned_identity.workload.client_id
 }
