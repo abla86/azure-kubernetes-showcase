@@ -18,6 +18,7 @@ resources:
   - networking/routes.yaml
   - networking/security-radar-route.yaml
   - networking/cert-manager.yaml
+  - networking/pod-security-baseline.yaml
 
 images:
   - name: azure-kubernetes-showcase-api
