@@ -1,0 +1,45 @@
+name: Security Compliance
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+    paths:
+      - "infra/terraform/**"
+      - "k8s/**"
+      - ".github/workflows/security-compliance.yml"
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  checkov:
+    name: Check Terraform and Kubernetes security
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkov
+        uses: bridgecrewio/checkov-action@v12
+        with:
+          directory: .
+          framework: terraform,kubernetes
+          quiet: false
+          soft_fail: false
+          output_format: cli,sarif
+          output_file_path: console,checkov.sarif
+      - name: Upload Checkov SARIF
+        if: always()
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: checkov.sarif
+
+  kubeconform:
+    name: Validate Kubernetes schemas
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker://ghcr.io/yannh/kubeconform:latest
+        with:
+          args: -strict -summary k8s
