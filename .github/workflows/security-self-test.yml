@@ -1,0 +1,76 @@
+name: Security Self-Test
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/**"
+      - "src/**"
+      - "security/**"
+      - "docker-compose.yml"
+      - ".github/workflows/security-self-test.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "apps/**"
+      - "src/**"
+      - "security/**"
+      - "docker-compose.yml"
+      - ".github/workflows/security-self-test.yml"
+  schedule:
+    - cron: "13 4 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  self-test:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build application stack
+        run: docker compose build
+
+      - name: Start application stack
+        run: docker compose up -d
+
+      - name: Wait for services
+        shell: bash
+        run: |
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:5080/health >/dev/null 2>&1 && \
+               curl -fsS http://127.0.0.1:5001/health >/dev/null 2>&1 && \
+               curl -fsS http://127.0.0.1:5002/health >/dev/null 2>&1; then
+              exit 0
+            fi
+            sleep 2
+          done
+          docker compose ps
+          docker compose logs
+          exit 1
+
+      - name: Run controlled API security self-test
+        run: python security/api-self-test.py
+
+      - name: Verify Security Radar deception route
+        shell: bash
+        run: |
+          status=$(curl -sS -o /tmp/radar.json -w "%{http_code}" http://127.0.0.1:5080/ghost/admin)
+          test "$status" = "404"
+          grep -q '"detected":true' /tmp/radar.json
+          grep -q '"deception":true' /tmp/radar.json
+
+      - name: Collect service logs on failure
+        if: failure()
+        run: docker compose logs
+
+      - name: Stop stack
+        if: always()
+        run: docker compose down -v
