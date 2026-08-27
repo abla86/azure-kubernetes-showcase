@@ -4,6 +4,16 @@
 
 A cloud-engineering portfolio project demonstrating .NET 10, React/TypeScript, Docker, Kubernetes, Azure IaC and DevSecOps, with deliberately small application services and controlled resilience/security demonstrations.
 
+## Fast evaluation
+
+**Test the application layer locally:**
+
+```powershell
+docker compose up --build
+```
+
+Then open Security Radar at `http://localhost:5080`, Care Portal at `http://localhost:5001` and Community Hub at `http://localhost:5002`.
+
 ## What it demonstrates
 
 - ASP.NET Core / .NET 10 APIs
@@ -15,10 +25,50 @@ A cloud-engineering portfolio project demonstrating .NET 10, React/TypeScript, D
 - Azure Bicep and modular Terraform
 - AKS OIDC / Workload Identity
 - ACR pull permissions
-- GitHub Actions CI
-- CodeQL and Dependabot
-- Health endpoints, Serilog and OpenTelemetry in the core API
+- GitHub Actions CI/CD
+- CodeQL, Dependabot, Trivy and SBOM generation
+- OpenTelemetry and Azure Monitor integration
 - Security Radar for controlled security-event simulation
+- Automated local API security self-tests
+- Controlled Kubernetes resilience testing
+
+## Architecture
+
+```text
+Developer / PR
+      |
+      v
+GitHub Actions
+  |   |   |   |   |
+  |   |   |   |   +--> SBOM
+  |   |   |   +------> Trivy
+  |   |   +----------> CodeQL
+  |   +--------------> Checkov / Kubeconform
+  +------------------> Build / Test
+            |
+            v
+        ACR (OIDC)
+            |
+            v
+          ArgoCD
+            |
+            v
+           AKS
+            |
+    +-------+--------+
+    |       |        |
+    v       v        v
+  Core    Care    Community
+  API    Portal      Hub
+            |
+            +---- Security Radar
+            |
+            v
+  NetworkPolicy / Restricted Pods
+            |
+            v
+ OpenTelemetry -> Azure Monitor
+```
 
 ## Application modules
 
@@ -37,28 +87,10 @@ A small demonstration service for care-coordination concepts. It contains no pat
 
 A small demonstration service for shared resources. It contains no real personal data and uses in-memory example data only.
 
-## Architecture
+### Security Radar
+`apps/security-radar/`
 
-```text
-React/TypeScript frontend
-        |
-        v
-Kubernetes / Gateway API
-        |
-        +--> Core Showcase API
-        +--> Care Portal
-        +--> Community Hub
-        |
-        +--> NetworkPolicy + Restricted Pod Security
-        |
-        +--> OIDC / Workload Identity
-        |
-        v
-Azure Container Registry
-        |
-        v
-Terraform / Bicep
-```
+A controlled operations/security demonstration with a local event feed, bounded-delay simulation endpoint and application-level ghost route. It does not claim to be a production SIEM or intrusion-detection platform.
 
 ## Local development
 
@@ -71,39 +103,23 @@ dotnet test --configuration Release
 docker compose up --build
 ```
 
-The local Compose stack intentionally contains the three application services below. The core API/frontend remain available through their existing project-specific development workflows.
+The local Compose stack contains the three application services used for the defensive self-test plus Security Radar. The infrastructure layer remains separately deployable to Azure/AKS.
 
-Compose ports:
+## Automated security self-test
 
-| Service | Port |
-|---|---:|
-| Security Radar | 5080 |
-| Care Portal | 5001 |
-| Community Hub | 5002 |
+`security/api-self-test.py` checks only the project's declared local endpoints. It verifies health responses and ensures sensitive-looking paths such as `.env`, `config.json` and `/admin` are not unexpectedly exposed.
 
-Start the Compose stack with:
-
-```powershell
-docker compose up --build
-```
-
-The Security Radar's simulation is controlled application behavior; it is not presented as a real SIEM, IDS or attack generator.
+The GitHub workflow starts the local Compose stack automatically, waits for the services, executes the self-test and checks the controlled Security Radar ghost route. Failures collect container logs before teardown.
 
 ## Kubernetes
 
 The `k8s/` directory contains the namespace, application deployments, services, HPA, NetworkPolicies, probes, Gateway API routes and Workload Identity ServiceAccount configuration.
 
-CI uses client-side parsing without requiring a live cluster:
-
-```powershell
-kubectl apply --dry-run=client --validate=false -f k8s/
-```
-
-A successful manifest parse is not treated as proof of a production deployment.
+The NetworkPolicies use default-deny behavior for the protected workloads and explicitly permit required DNS egress. This reduces uncontrolled outbound communication while preserving cluster name resolution.
 
 ## Azure IaC
 
-Terraform is modularized into networking, ACR, AKS and IAM/Workload Identity. The AKS configuration enables OIDC and Workload Identity and explicitly uses Azure CNI Overlay with Azure Network Policy. Azure CNI Overlay keeps pod IPs in a separate pod CIDR rather than consuming VNet IPs for every pod; the trade-off is that the networking model must be validated against required VNet reachability and workload constraints. citeturn0search0turn0search5 The kubelet identity receives ACR pull access.
+Terraform is modularized into networking, ACR, AKS and IAM/Workload Identity. The AKS configuration enables OIDC and Workload Identity and explicitly uses Azure CNI Overlay with Azure Network Policy. The networking mode is documented as an environment-specific trade-off rather than a universal best practice.
 
 Bicep remains available as a second IaC representation.
 
@@ -111,138 +127,68 @@ The repository does not claim that Azure resources are deployed merely because t
 
 ## CI / DevSecOps
 
-GitHub Actions checks:
+GitHub Actions includes:
 
 1. .NET restore, build and tests
 2. Frontend install, lint and build
-3. Kubernetes manifest parsing
+3. Kubernetes manifest validation
 4. Bicep compilation
-5. Terraform format, initialization and validation
-6. Docker builds for all five application containers
-7. CodeQL analysis
+5. Terraform format and validation
+6. Docker builds for application containers
+7. Trivy vulnerability scanning
+8. CycloneDX SBOM generation
+9. CodeQL analysis
+10. Checkov infrastructure security checks
+11. Automated local API security self-testing
+12. Scheduled health/security checks on the dedicated tool repositories
 
 ## Security
 
 - Non-root runtime containers
-- Explicit UID 1654 for .NET containers
 - `runAsNonRoot`
 - `seccompProfile: RuntimeDefault`
 - `allowPrivilegeEscalation: false`
 - Capabilities dropped with `ALL`
 - Restricted Pod Security labels
 - NetworkPolicy isolation
-- OIDC / Workload Identity configuration
-- ACR pull through managed identity
+- OIDC / Workload Identity
+- Managed identity access to ACR
 - CodeQL and Dependabot
+- Trivy image scanning and SBOM generation
+- Controlled deception/self-test paths
 
 No credentials, production data or patient information are included.
 
-## Verification status
+## Day-2 operations
 
-Automated CI checks are the authoritative verification for committed source. A failed check is not described as successful functionality. A real Azure/AKS deployment requires a separate deployment and runtime verification.
+See [`docs/observability-runbook.md`](docs/observability-runbook.md) for a concrete diagnostic path from Gateway and routing through NetworkPolicy, pod health, application logs and OpenTelemetry.
+
+The repository also includes `k8s-pod-doctor` as a standalone operations tool for first-line diagnosis of common pod failures such as `CrashLoopBackOff` and `OOMKilled`.
+
+## Production considerations
+
+See [`docs/production-considerations.md`](docs/production-considerations.md) for cost, networking, observability and delivery trade-offs. The repository intentionally distinguishes architecture/configuration from runtime evidence.
+
+## Resilience
+
+`.github/workflows/chaos.yml` provides an explicitly triggered resilience test that authenticates to AKS using OIDC, deletes one selected pod and verifies that Kubernetes reconciliation restores the Deployment to its desired state. It does not claim an SLA or run destructive tests automatically.
+
+## Verification discipline
+
+Configuration in GitHub is not treated as proof of runtime behavior. Runtime claims require successful environment-specific verification, including deployment, HTTPS/TLS, telemetry ingestion, GitOps synchronization and recovery tests.
+
+## Portfolio tools
+
+The adjacent repositories extend the engineering lifecycle:
+
+- `git-secrets-sentinel` — local shift-left secret detection
+- `cloud-waste-auditor` — Terraform/FinOps cost-risk guardrail
+- `k8s-pod-doctor` — Kubernetes Day-2 first-line diagnosis
 
 ## Scope
 
-This is a portfolio showcase, not a production healthcare or community-management system. The modules are intentionally small demonstrations of service boundaries, containers, Kubernetes and Azure infrastructure.
+This is a portfolio showcase, not a production healthcare or community-management system. The application modules are intentionally small demonstrations of service boundaries, containers, Kubernetes and Azure platform engineering.
 
 ## Repository
 
 https://github.com/abla86/azure-kubernetes-showcase
-
-## Fast evaluation
-
-**Run the application layer locally:**
-
-```powershell
-docker compose up --build
-```
-
-Then open Security Radar at `http://localhost:5080`, Care Portal at `http://localhost:5001` and Community Hub at `http://localhost:5002`.
-
-This gives a reviewer a fast local path to inspect the services before evaluating the Azure/AKS delivery layer.
-
-## Production considerations
-
-See [`docs/production-considerations.md`](docs/production-considerations.md) for cost, networking, observability and delivery trade-offs. See [`docs/observability-runbook.md`](docs/observability-runbook.md) for a concrete Day-2 troubleshooting path from Gateway to application telemetry.
-
-## Enterprise delivery layer
-
-The repository also contains the production-oriented delivery patterns below.
-
-### Observability
-
-The .NET services use OpenTelemetry instrumentation for ASP.NET Core, HTTP client and runtime metrics. Azure Monitor's OpenTelemetry exporter is configured with `DefaultAzureCredential`, so AKS Workload Identity can authenticate telemetry without embedding an Application Insights connection string in the repository.
-
-Terraform provisions Application Insights on the existing Log Analytics workspace and grants the dedicated workload identity the **Monitoring Metrics Publisher** role. Microsoft documents this role as the required ingestion permission for Entra-authenticated Application Insights telemetry. 
-
-### GitOps and Kubernetes delivery
-
-`k8s/kustomization.yaml` is the deployment root for Kustomize. `k8s/gitops/application.yaml` defines an Argo CD Application that tracks the `main` branch and enables automated sync, pruning and self-healing.
-
-The repository uses Kubernetes Gateway API rather than adding a new dependency on the legacy NGINX ingress controller. The intended Azure ingress implementation is **Application Gateway for Containers / ALB Controller**, with HTTPS listeners and cert-manager-managed certificates.
-
-The Gateway manifests contain example domain values and therefore require a real DNS name and ACME email before public certificate issuance. They are not presented as a live public endpoint until those values are configured.
-
-### Supply-chain security
-
-`.github/workflows/build-scan-publish.yml` builds the application container images defined in its matrix, scans each image with Trivy for HIGH/CRITICAL vulnerabilities, uploads SARIF results and publishes a CycloneDX SBOM artifact.
-
-Only the exact locally loaded image that passes the build/scan step is pushed; the workflow does not rebuild a different image between scanning and publication. Publishing uses Azure Login with GitHub OIDC and ACR RBAC; no ACR admin credentials are used.
-
-### Terraform delivery
-
-`.github/workflows/terraform-deploy.yml` provides an OIDC-based plan/apply path with an Azure Storage remote state backend using Microsoft Entra authentication.
-
-The workflow expects the Azure identity and Terraform-state storage configuration to be supplied through GitHub Environment secrets/variables. It is intentionally not described as a successful Azure deployment until a real workflow run completes successfully.
-
-## Required external configuration
-
-Before a real cloud deployment, configure:
-
-- GitHub Environment `production`
-- `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID` secrets
-- `ACR_NAME` and `ACR_LOGIN_SERVER` repository/environment variables
-- `TFSTATE_RESOURCE_GROUP`, `TFSTATE_STORAGE_ACCOUNT` and `TFSTATE_CONTAINER` variables
-- Azure federated identity credentials for the GitHub repository/workflow
-- Azure Storage Blob Data Contributor permission for Terraform state
-- A real DNS name and ACME email for public TLS
-- Application Gateway for Containers / ALB Controller prerequisites
-
-These are deployment prerequisites, not fake values committed as secrets.
-
-## Verification discipline
-
-A workflow file existing in GitHub is not evidence that the corresponding Azure resource or Kubernetes workload is deployed. Deployment, runtime health, telemetry ingestion, TLS issuance and GitOps synchronization are only marked as operational after a successful environment-specific verification.
-
-
-## Resilience and security demonstrations
-
-### Controlled chaos test
-
-`.github/workflows/chaos.yml` provides an explicitly manual resilience test. After authenticating to AKS through GitHub OIDC, it deletes one selected application pod and verifies that the Deployment reaches its desired state again. This is a controlled recovery test, not evidence of a measured sub-two-second SLA.
-
-### Security Radar
-
-`apps/security-radar/` provides a small visual operations surface with a controlled simulation endpoint. The endpoint deliberately waits before rejecting the simulated request and reports the measured delay. It demonstrates application-level detection and response behavior without generating real malicious traffic.
-
-### Deception layer
-
-The Security Radar now contains a **controlled application-level deception layer**: a `/ghost/{path}` decoy route records a local event, applies a bounded delay, and rejects the request. It does not collect client IP addresses, contact external systems, or represent a production deception network. Real SIEM ingestion and live NetworkPolicy/IP-block visualization still require runtime telemetry integration.
-
-## Verification matrix
-
-| Capability | Source implementation | Runtime proof required |
-|---|---|---|
-| Container build | GitHub Actions | CI success |
-| Vulnerability scanning | Trivy | CI success with policy threshold |
-| SBOM | CycloneDX artifact | CI artifact |
-| IaC security | Checkov | CI success |
-| Kubernetes schema validation | Kubeconform | CI success |
-| Pod recovery | Chaos workflow | Successful AKS run |
-| OIDC authentication | GitHub/Azure configuration | Successful Azure login |
-| ACR publication | GitHub/Azure configuration | Successful push |
-| OpenTelemetry ingestion | App + Azure configuration | Runtime telemetry observed |
-| TLS | Gateway/cert-manager manifests | Issued certificate + HTTPS test |
-| GitOps synchronization | Argo CD manifest | Argo CD application healthy/synced |
-
-This matrix prevents configuration from being presented as runtime evidence.
