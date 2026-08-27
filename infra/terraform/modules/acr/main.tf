@@ -1,6 +1,14 @@
-variable "resource_group_name" { type = string }
-variable "location" { type = string }
-variable "environment" { type = string }
+variable "resource_group_name" {
+  type = string
+}
+
+variable "location" {
+  type = string
+}
+
+variable "environment" {
+  type = string
+}
 
 resource "azurerm_container_registry" "acr" {
   name                = "acrshowcase${var.environment}"
@@ -10,5 +18,10 @@ resource "azurerm_container_registry" "acr" {
   admin_enabled       = false
 }
 
-output "acr_id" { value = azurerm_container_registry.acr.id }
-output "acr_name" { value = azurerm_container_registry.acr.name }
+output "acr_id" {
+  value = azurerm_container_registry.acr.id
+}
+
+output "acr_name" {
+  value = azurerm_container_registry.acr.name
+}
