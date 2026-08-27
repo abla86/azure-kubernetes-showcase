@@ -1,11 +1,15 @@
-.PHONY: up down build logs test-build validate-manifests validate-iac validate security cost-audit
+.PHONY: up up-observability down build logs test-build validate-manifests validate-iac validate security cost-audit
 
 up:
 	docker compose up --build -d
 	@echo "Miljøet kjører. Security Radar: http://localhost:5080"
 
+up-observability:
+	OTEL_ENABLED=true docker compose --profile observability up --build -d
+	@echo "Miljøet kjører med OTEL Collector aktivert. Security Radar: http://localhost:5080"
+
 down:
-	docker compose down
+	docker compose down -v
 
 build:
 	docker compose build
@@ -35,4 +39,4 @@ security:
 	python security/api-self-test.py
 
 cost-audit:
-	python ../cloud-waste-auditor/auditor.py
+	python scripts/cloud_waste_audit.py
