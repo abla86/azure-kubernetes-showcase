@@ -3,18 +3,42 @@ name: CI-CD
 on:
   push:
     branches: [main]
+    paths:
+      - "src/**"
+      - "apps/**"
+      - "tests/**"
+      - "k8s/**"
+      - "security/**"
+      - "scripts/**"
+      - "docker-compose.yml"
+      - "Makefile"
+      - ".github/workflows/ci-cd.yml"
   pull_request:
     branches: [main]
+    paths:
+      - "src/**"
+      - "apps/**"
+      - "tests/**"
+      - "k8s/**"
+      - "security/**"
+      - "scripts/**"
+      - "docker-compose.yml"
+      - "Makefile"
+      - ".github/workflows/ci-cd.yml"
 
 permissions:
   contents: read
   security-events: write
   actions: read
 
+concurrency:
+  group: ci-cd-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   backend:
     name: Backend build and test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
@@ -26,7 +50,7 @@ jobs:
 
   frontend:
     name: Frontend lint and build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: src/Web
@@ -43,7 +67,7 @@ jobs:
 
   kubernetes:
     name: Kubernetes manifest validation
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: azure/setup-kubectl@v4
@@ -60,7 +84,7 @@ jobs:
 
   azure-iac:
     name: Azure IaC validation
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - name: Validate Bicep
@@ -127,6 +151,8 @@ jobs:
     needs: [docker]
     steps:
       - uses: actions/checkout@v4
+      - name: Set local telemetry mode
+        run: echo "OTEL_ENABLED=false" >> "$GITHUB_ENV"
       - name: Start local ecosystem
         run: docker compose up --build -d
       - name: Wait for services
