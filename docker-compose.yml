@@ -17,3 +17,23 @@ services:
       - "5173:8080"
     depends_on:
       - api
+
+  care-portal:
+    build:
+      context: ./apps/care-portal/CarePortal.Api
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+    ports:
+      - "5081:8080"
+    restart: unless-stopped
+
+  community-hub:
+    build:
+      context: ./apps/community-hub/CommunityHub.Api
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+    ports:
+      - "5082:8080"
+    restart: unless-stopped
