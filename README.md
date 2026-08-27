@@ -118,7 +118,7 @@ GitHub Actions checks:
 3. Kubernetes manifest parsing
 4. Bicep compilation
 5. Terraform format, initialization and validation
-6. Docker builds for all four application containers
+6. Docker builds for all five application containers
 7. CodeQL analysis
 
 ## Security
