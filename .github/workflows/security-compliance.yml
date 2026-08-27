@@ -7,7 +7,9 @@ on:
     branches: [main]
     paths:
       - "infra/terraform/**"
+      - "infra/bicep/**"
       - "k8s/**"
+      - "docs/iac-parity-matrix.md"
       - ".github/workflows/security-compliance.yml"
 
 permissions:
@@ -15,6 +17,40 @@ permissions:
   security-events: write
 
 jobs:
+  terraform:
+    name: Terraform fmt and validate
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.7.5
+      - name: Terraform fmt check
+        working-directory: infra/terraform
+        run: terraform fmt -check -recursive
+      - name: Terraform init
+        working-directory: infra/terraform
+        run: terraform init -backend=false -input=false
+      - name: Terraform validate
+        working-directory: infra/terraform
+        run: terraform validate
+
+  bicep:
+    name: Bicep build validation
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Azure CLI
+        uses: azure/cli@v2
+        with:
+          inlineScript: az bicep install
+      - name: Bicep build
+        shell: bash
+        run: |
+          find infra/bicep -name '*.bicep' -print0 | while IFS= read -r -d '' file; do
+            az bicep build --file "$file" --stdout >/dev/null
+done
+
   checkov:
     name: Check Terraform and Kubernetes security
     runs-on: ubuntu-24.04
@@ -43,3 +79,22 @@ jobs:
       - uses: docker://ghcr.io/yannh/kubeconform:latest
         with:
           args: -strict -ignore-missing-schemas -summary k8s
+
+  parity:
+    name: Check IaC parity contract
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify required parity anchors
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f docs/iac-parity-matrix.md
+          test -d infra/terraform
+          test -d infra/bicep
+          grep -R 'oidc_issuer_enabled\|workload_identity_enabled' infra/terraform >/dev/null
+          grep -R -i 'oidc\|workload identity' infra/bicep >/dev/null
+          grep -R 'network_policy.*azure' infra/terraform >/dev/null
+          grep -R -i 'network.*policy' infra/bicep >/dev/null
+          grep -R 'admin_enabled.*false' infra/terraform >/dev/null
+          echo 'IaC parity anchors present.'
