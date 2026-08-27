@@ -103,7 +103,7 @@ A successful manifest parse is not treated as proof of a production deployment.
 
 ## Azure IaC
 
-Terraform is modularized into networking, ACR, AKS and IAM/Workload Identity. The AKS configuration enables OIDC and Workload Identity, uses Azure networking/policy settings and grants the kubelet identity ACR pull access.
+Terraform is modularized into networking, ACR, AKS and IAM/Workload Identity. The AKS configuration enables OIDC and Workload Identity and explicitly uses Azure CNI Overlay with Azure Network Policy. Azure CNI Overlay keeps pod IPs in a separate pod CIDR rather than consuming VNet IPs for every pod; the trade-off is that the networking model must be validated against required VNet reachability and workload constraints. citeturn0search0turn0search5 The kubelet identity receives ACR pull access.
 
 Bicep remains available as a second IaC representation.
 
