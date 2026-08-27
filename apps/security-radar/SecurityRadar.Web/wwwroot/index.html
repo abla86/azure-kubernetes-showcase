@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="no">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Security & Traffic Radar</title>
+<style>
+:root{color-scheme:dark}body{margin:0;background:#090d14;color:#d7ffe9;font:15px ui-monospace,SFMono-Regular,Consolas,monospace}
+main{max-width:1100px;margin:auto;padding:32px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.card{border:1px solid #234;background:#0f1722;border-radius:12px;padding:20px}.ok{color:#4dff9a}.alert{color:#ff657a}
+pre{height:280px;overflow:auto;background:#05070b;padding:16px;border-radius:8px}button{padding:11px 16px;border:0;border-radius:7px;background:#4dff9a;color:#06110b;font-weight:700;cursor:pointer}
+@media(max-width:800px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body><main>
+<h1>Cluster Security & Traffic Radar</h1>
+<p>Controlled security telemetry demonstration. No real attack traffic is generated.</p>
+<div class="grid">
+<section class="card"><h2>Cluster controls</h2>
+<p>Network policy: <span class="ok">ENABLED</span></p>
+<p>Restricted workloads: <span class="ok">NON-ROOT</span></p>
+<p>Identity: <span class="ok">OIDC / KEYLESS</span></p>
+<p>Observability: <span class="ok">ENABLED</span></p>
+<button id="simulate">Run controlled simulation</button></section>
+<section class="card"><h2>Event feed</h2><pre id="feed">[system] Radar initialized.
+[system] Awaiting controlled simulation...
+</pre></section>
+</div></main>
+<script>
+const feed=document.querySelector('#feed');
+function log(s,c=''){const t=new Date().toLocaleTimeString();feed.textContent+=`[${t}] ${s}\n`;feed.scrollTop=feed.scrollHeight}
+document.querySelector('#simulate').onclick=async()=>{log('SIMULATION: controlled request started');const t=performance.now();try{const r=await fetch('/api/simulate-attack',{method:'POST'});const d=await r.json();log(`ALERT: request rejected; controlled delay ${Math.round(performance.now()-t)} ms`)}catch(e){log('ERROR: simulation endpoint unavailable')}}
+</script></body></html>
