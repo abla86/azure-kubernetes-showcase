@@ -5,26 +5,16 @@ metadata:
   namespace: showcase
 spec:
   podSelector:
-    matchLabels:
-      app: showcase-api
-  policyTypes:
-    - Ingress
-    - Egress
+    matchLabels: { app: showcase-api }
+  policyTypes: [Ingress, Egress]
   ingress:
     - from:
-        - podSelector:
-            matchLabels:
-              app: showcase-web
-      ports:
-        - protocol: TCP
-          port: 8080
+        - podSelector: { matchLabels: { app: showcase-web } }
+      ports: [{ protocol: TCP, port: 8080 }]
   egress:
     - to:
         - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: kube-system
+            matchLabels: { kubernetes.io/metadata.name: kube-system }
       ports:
-        - protocol: UDP
-          port: 53
-        - protocol: TCP
-          port: 53
+        - { protocol: UDP, port: 53 }
+        - { protocol: TCP, port: 53 }
