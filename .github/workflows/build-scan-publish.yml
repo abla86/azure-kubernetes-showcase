@@ -3,10 +3,10 @@ name: Build, Scan and Publish
 on:
   push:
     branches: [main]
-    paths: ["apps/**","src/**","docker-compose.yml",".github/workflows/build-scan-publish.yml"]
+    paths: ["apps/**", "src/**", "docker-compose.yml", ".github/workflows/build-scan-publish.yml"]
   pull_request:
     branches: [main]
-    paths: ["apps/**","src/**","docker-compose.yml",".github/workflows/build-scan-publish.yml"]
+    paths: ["apps/**", "src/**", "docker-compose.yml", ".github/workflows/build-scan-publish.yml"]
 
 permissions:
   contents: read
@@ -21,7 +21,7 @@ jobs:
   build-scan-publish:
     name: Build, scan and publish verified image
     runs-on: ubuntu-24.04
-    environment: production
+    environment: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && 'production' || '' }}
     strategy:
       fail-fast: true
       matrix:
@@ -99,6 +99,7 @@ jobs:
       - name: Push verified image
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
+          set -euo pipefail
           docker tag "${{ matrix.name }}:${{ github.sha }}" "$ACR_LOGIN_SERVER/${{ matrix.name }}:${{ github.sha }}"
           docker tag "${{ matrix.name }}:${{ github.sha }}" "$ACR_LOGIN_SERVER/${{ matrix.name }}:main"
           docker push "$ACR_LOGIN_SERVER/${{ matrix.name }}:${{ github.sha }}"
