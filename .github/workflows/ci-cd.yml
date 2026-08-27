@@ -112,7 +112,7 @@ jobs:
 
   docker:
     name: Container build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [backend, frontend]
     steps:
       - uses: actions/checkout@v4
@@ -129,7 +129,7 @@ jobs:
 
   security:
     name: CodeQL security analysis
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       security-events: write
       actions: read
@@ -148,13 +148,16 @@ jobs:
 
   resilience-self-test:
     name: Non-destructive local resilience and security self-test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [docker]
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
       - name: Set local telemetry mode
         run: echo "OTEL_ENABLED=false" >> "$GITHUB_ENV"
-      - name: Run deterministic local smoke test
+      - name: Run canonical local smoke test
         run: python scripts/local_smoke_test.py
       - name: Collect Docker diagnostics on failure
         if: failure()
