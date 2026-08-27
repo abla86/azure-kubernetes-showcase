@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: care-portal-api
+  namespace: showcase
+  labels:
+    app: care-portal-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: care-portal-api
+  template:
+    metadata:
+      labels:
+        app: care-portal-api
+    spec:
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: api
+          image: acrshowcase.azurecr.io/care-portal-api:latest
+          ports:
+            - name: http
+              containerPort: 8080
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 1654
+            capabilities:
+              drop:
+                - ALL
+          resources:
+            requests:
+              cpu: 100m
+              memory: 64Mi
+            limits:
+              cpu: 300m
+              memory: 256Mi
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: care-portal-service
+  namespace: showcase
+spec:
+  selector:
+    app: care-portal-api
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+  type: ClusterIP
