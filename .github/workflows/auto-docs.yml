@@ -1,0 +1,89 @@
+name: Automatic Documentation Sync
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "README.md"
+      - "CHANGELOG.md"
+      - "docs/**"
+      - "scripts/**"
+      - "k8s/**"
+      - "infra/**"
+      - ".github/workflows/auto-docs.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: auto-docs-main
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    name: Sync repository metadata
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Update generated repository snapshot
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p docs/generated
+
+          {
+            echo "# Repository Snapshot"
+            echo
+            echo "Generated automatically from \`main\`."
+            echo
+            echo "## Head"
+            echo
+            echo "- Commit: \`$(git rev-parse HEAD)\`"
+            echo "- Commit date: \`$(git log -1 --format=%cI)\`"
+            echo "- Subject: $(git log -1 --format=%s)"
+            echo
+            echo "## Engineering areas"
+            echo
+            for path in \
+              "apps" \
+              "src" \
+              "k8s" \
+              "infra" \
+              "security" \
+              "scripts" \
+              ".github/workflows"; do
+              if [ -d "$path" ]; then
+                echo "- \`$path/\` present"
+              fi
+            done
+          } > docs/generated/repository-snapshot.md
+
+      - name: Update generated status block
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f README.md
+          grep -q "Repository Snapshot" README.md || {
+            printf '\n## Automated repository metadata\n\nSee [generated repository snapshot](docs/generated/repository-snapshot.md) for the current repository head and tracked engineering areas.\n' >> README.md
+          }
+
+      - name: Commit documentation-only changes
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if git diff --quiet; then
+            echo "No documentation changes required."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add README.md docs/generated/repository-snapshot.md
+          git commit -m "docs: sync generated repository metadata"
+          git push
