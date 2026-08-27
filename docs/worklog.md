@@ -10,3 +10,7 @@
 - Commit: ci: add automatic documentation metadata sync
 - Branch: main
 
+### 2026-08-27T05:52:39Z — 3f5f9a4
+- Commit: docs: define strict missing-test failure policy
+- Branch: main
+
