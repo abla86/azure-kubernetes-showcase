@@ -1,53 +1,45 @@
+terraform {
+  required_version = ">= 1.6.0"
+  required_providers {
+    azurerm = { source = "hashicorp/azurerm", version = "~> 4.0" }
+  }
+}
+
+provider "azurerm" { features {} }
+
+resource "azurerm_resource_group" "rg" {
+  name = var.resource_group_name
+  location = var.location
+  tags = { project = "azure-kubernetes-showcase", environment = var.environment }
+}
+
 module "networking" {
   source = "./modules/networking"
+  resource_group_name = azurerm_resource_group.rg.name
   location = var.location
-  resource_group_name = azurerm_resource_group.main.name
-  name_prefix = var.name_prefix
-  vnet_address_space = var.vnet_address_space
-  aks_subnet_prefix = var.aks_subnet_prefix
-  workload_subnet_prefix = var.workload_subnet_prefix
+  environment = var.environment
 }
 
 module "acr" {
   source = "./modules/acr"
+  resource_group_name = azurerm_resource_group.rg.name
   location = var.location
-  resource_group_name = azurerm_resource_group.main.name
-  name_prefix = var.name_prefix
+  environment = var.environment
 }
 
 module "aks" {
   source = "./modules/aks"
+  resource_group_name = azurerm_resource_group.rg.name
   location = var.location
-  resource_group_name = azurerm_resource_group.main.name
-  name_prefix = var.name_prefix
-  subnet_id = module.networking.aks_subnet_id
+  environment = var.environment
+  subnet_id = module.networking.subnet_id
+  kubernetes_version = var.kubernetes_version
   node_count = var.node_count
   node_vm_size = var.node_vm_size
-  log_analytics_workspace_id = azurerm_log_analytics_workspace.main.id
 }
 
 module "iam" {
   source = "./modules/iam"
-  location = var.location
-  resource_group_name = azurerm_resource_group.main.name
-  aks_identity_principal_id = module.aks.aks_identity_principal_id
   acr_id = module.acr.acr_id
-  aks_oidc_issuer_url = module.aks.oidc_issuer_url
-  workload_identity_name = "${var.name_prefix}-workload"
-  workload_service_account = "showcase-api"
-  workload_namespace = "showcase"
-}
-
-resource "azurerm_resource_group" "main" {
-  name = var.resource_group_name
-  location = var.location
-  tags = { project = "azure-kubernetes-showcase" environment = "demo" }
-}
-
-resource "azurerm_log_analytics_workspace" "main" {
-  name = "${var.name_prefix}-logs"
-  location = var.location
-  resource_group_name = azurerm_resource_group.main.name
-  sku = "PerGB2018"
-  retention_in_days = 30
+  principal_id = module.aks.kubelet_identity_object_id
 }
