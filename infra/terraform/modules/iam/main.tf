@@ -1,4 +1,5 @@
 variable "resource_group_name" { type = string }
+variable "location" { type = string }
 variable "aks_identity_principal_id" { type = string }
 variable "acr_id" { type = string }
 variable "aks_oidc_issuer_url" { type = string }
@@ -14,7 +15,7 @@ resource "azurerm_role_assignment" "acr_pull" {
 
 resource "azurerm_user_assigned_identity" "workload" {
   name = var.workload_identity_name
-  location = "westeurope"
+  location = var.location
   resource_group_name = var.resource_group_name
 }
 
