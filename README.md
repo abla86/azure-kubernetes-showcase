@@ -211,7 +211,7 @@ A workflow file existing in GitHub is not evidence that the corresponding Azure 
 
 ### Deception layer
 
-The repository does **not** currently claim that it has a production deception network, real honey tokens, SIEM ingestion, or live NetworkPolicy/IP blocking visualization. Those capabilities would require actual telemetry sources and runtime integration. Keeping this distinction explicit is intentional.
+The Security Radar now contains a **controlled application-level deception layer**: a `/ghost/{path}` decoy route records a local event, applies a bounded delay, and rejects the request. It does not collect client IP addresses, contact external systems, or represent a production deception network. Real SIEM ingestion and live NetworkPolicy/IP-block visualization still require runtime telemetry integration.
 
 ## Verification matrix
 
