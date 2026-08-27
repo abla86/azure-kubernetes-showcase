@@ -14,7 +14,9 @@ spec:
     metadata:
       labels:
         app: care-portal-api
+        azure.workload.identity/use: "true"
     spec:
+      serviceAccountName: api-workload-identity-sa
       securityContext:
         seccompProfile:
           type: RuntimeDefault
