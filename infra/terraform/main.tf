@@ -8,7 +8,7 @@ terraform {
 provider "azurerm" { features {} }
 
 resource "azurerm_resource_group" "rg" {
-  name = var.resource_group_name
+  name     = var.resource_group_name
   location = var.location
   tags = { project = "azure-kubernetes-showcase", environment = var.environment }
 }
@@ -42,4 +42,7 @@ module "iam" {
   source = "./modules/iam"
   acr_id = module.acr.acr_id
   principal_id = module.aks.kubelet_identity_object_id
+  resource_group_name = azurerm_resource_group.rg.name
+  location = var.location
+  oidc_issuer_url = module.aks.oidc_issuer_url
 }
