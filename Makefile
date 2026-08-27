@@ -1,4 +1,4 @@
-.PHONY: up up-observability down build logs test-build validate-manifests validate-iac validate security cost-audit
+.PHONY: up up-observability down build logs test-build validate-manifests validate-iac validate security cost-audit smoke
 
 up:
 	docker compose up --build -d
@@ -40,3 +40,6 @@ security:
 
 cost-audit:
 	python scripts/cloud_waste_audit.py
+
+smoke:
+	python scripts/local_smoke_test.py
