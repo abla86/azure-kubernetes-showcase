@@ -1,5 +1,22 @@
-variable "acr_id" { type = string }
-variable "principal_id" { type = string }
+variable "acr_id" {
+  type = string
+}
+
+variable "principal_id" {
+  type = string
+}
+
+variable "resource_group_name" {
+  type = string
+}
+
+variable "location" {
+  type = string
+}
+
+variable "oidc_issuer_url" {
+  type = string
+}
 
 resource "azurerm_role_assignment" "acr_pull" {
   scope                = var.acr_id
@@ -7,11 +24,8 @@ resource "azurerm_role_assignment" "acr_pull" {
   principal_id         = var.principal_id
 }
 
-# Workload Identity is intentionally separate from the AKS kubelet identity.
-# The kubelet identity is used for node-level ACR image pulls; workload identity
-# should use a dedicated user-assigned managed identity with OIDC federation.
 variable "workload_identity_principal_id" {
-  description = "Principal ID of the dedicated user-assigned managed identity used by application workloads."
+  description = "Optional principal ID of a dedicated workload managed identity."
   type        = string
   default     = null
   nullable    = true
