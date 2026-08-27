@@ -53,3 +53,9 @@ variable "budget_alert_emails" {
   type        = list(string)
   default     = []
 }
+
+variable "budget_start_date" {
+  description = "First day of the month used as the Azure budget period start. Use RFC3339 UTC format."
+  type        = string
+  default     = "2026-08-01T00:00:00Z"
+}
