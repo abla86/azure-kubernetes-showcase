@@ -1,0 +1,24 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: showcase-gateway
+  namespace: showcase
+  annotations:
+    alb.networking.azure.io/alb-namespace: alb-showcase-system
+    alb.networking.azure.io/alb-name: alb-showcase
+spec:
+  gatewayClassName: azure-alb-external
+  listeners:
+    - name: https
+      protocol: HTTPS
+      port: 443
+      hostname: showcase.example.com
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            group: ""
+            name: showcase-tls
+      allowedRoutes:
+        namespaces:
+          from: Same
