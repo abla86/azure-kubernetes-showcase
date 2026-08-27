@@ -25,6 +25,7 @@ on:
       - "docker-compose.yml"
       - "Makefile"
       - ".github/workflows/ci-cd.yml"
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -155,3 +156,8 @@ jobs:
         run: echo "OTEL_ENABLED=false" >> "$GITHUB_ENV"
       - name: Run deterministic local smoke test
         run: python scripts/local_smoke_test.py
+      - name: Collect Docker diagnostics on failure
+        if: failure()
+        run: |
+          docker compose ps
+          docker compose logs --no-color
