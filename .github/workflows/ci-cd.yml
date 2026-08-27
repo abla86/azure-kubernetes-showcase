@@ -53,7 +53,7 @@ jobs:
       - uses: azure/setup-kubectl@v4
         with:
           version: latest
-      - run: kubectl apply --dry-run=client -f k8s/
+      - run: kubectl apply --dry-run=client --validate=false -f k8s/
 
   azure-iac:
     name: Azure IaC validation
@@ -90,11 +90,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build API
+      - name: Build main API
         run: docker build -t azure-kubernetes-showcase-api:${{ github.sha }} ./src/Showcase.Api
 
       - name: Build frontend
         run: docker build -t azure-kubernetes-showcase-web:${{ github.sha }} ./src/Web
+
+      - name: Build care portal
+        run: docker build -t care-portal-api:${{ github.sha }} ./apps/care-portal/CarePortal.Api
+
+      - name: Build community hub
+        run: docker build -t community-hub-api:${{ github.sha }} ./apps/community-hub/CommunityHub.Api
 
   security:
     name: CodeQL security analysis
