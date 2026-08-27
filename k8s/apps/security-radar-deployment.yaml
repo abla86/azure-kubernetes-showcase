@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: security-radar
+  namespace: showcase
+spec:
+  replicas: 2
+  selector:
+    matchLabels: { app: security-radar }
+  template:
+    metadata:
+      labels: { app: security-radar }
+    spec:
+      containers:
+        - name: web
+          image: acrshowcasedev.azurecr.io/security-radar:main
+          ports: [{containerPort: 8080}]
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 10001
+            capabilities: { drop: ["ALL"] }
+            seccompProfile: { type: RuntimeDefault }
+          resources:
+            requests: {cpu: 50m, memory: 64Mi}
+            limits: {cpu: 200m, memory: 128Mi}
+          readinessProbe: {httpGet: {path: /health, port: 8080}}
+          livenessProbe: {httpGet: {path: /health, port: 8080}}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: security-radar-service
+  namespace: showcase
+spec:
+  selector: { app: security-radar }
+  ports: [{port: 80, targetPort: 8080}]
+  type: ClusterIP
