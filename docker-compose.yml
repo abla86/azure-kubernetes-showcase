@@ -1,39 +1,38 @@
 services:
   api:
-    build:
-      context: ./src/Showcase.Api
+    build: ./src/Showcase.Api
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: http://+:8080
-      OTEL_SERVICE_NAME: azure-kubernetes-showcase
-    ports:
-      - "5080:8080"
+    ports: ["5080:8080"]
     restart: unless-stopped
 
   web:
-    build:
-      context: ./src/Web
-    ports:
-      - "5173:8080"
-    depends_on:
-      - api
+    build: ./src/Web
+    ports: ["5173:8080"]
+    depends_on: [api]
 
   care-portal:
-    build:
-      context: ./apps/care-portal/CarePortal.Api
+    build: ./apps/care-portal/CarePortal.Api
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: http://+:8080
-    ports:
-      - "5081:8080"
+    ports: ["5081:8080"]
     restart: unless-stopped
 
   community-hub:
-    build:
-      context: ./apps/community-hub/CommunityHub.Api
+    build: ./apps/community-hub/CommunityHub.Api
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: http://+:8080
-    ports:
-      - "5082:8080"
+    ports: ["5082:8080"]
+    restart: unless-stopped
+
+  security-radar:
+    build:
+      context: ./apps/security-radar
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+    ports: ["5083:8080"]
     restart: unless-stopped
