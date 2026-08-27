@@ -1,0 +1,146 @@
+name: Build, Scan and Publish
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/**"
+      - "src/**"
+      - "docker-compose.yml"
+      - ".github/workflows/build-scan-publish.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "apps/**"
+      - "src/**"
+      - "docker-compose.yml"
+      - ".github/workflows/build-scan-publish.yml"
+
+permissions:
+  contents: read
+  security-events: write
+  id-token: write
+
+env:
+  ACR_NAME: \${{ vars.ACR_NAME }}
+  ACR_LOGIN_SERVER: \${{ vars.ACR_LOGIN_SERVER }}
+
+jobs:
+  build-scan:
+    name: Build and security scan
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        include:
+          - name: care-portal-api
+            context: ./apps/care-portal/CarePortal.Api
+          - name: community-hub-api
+            context: ./apps/community-hub/CommunityHub.Api
+          - name: showcase-api
+            context: ./src/Showcase.Api
+          - name: showcase-web
+            context: ./src/Web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build image
+        uses: docker/build-push-action@v6
+        with:
+          context: \${{ matrix.context }}
+          push: false
+          load: true
+          tags: \${{ matrix.name }}:\${{ github.sha }}
+          cache-from: type=gha,scope=\${{ matrix.name }}
+          cache-to: type=gha,mode=max,scope=\${{ matrix.name }}
+
+      - name: Trivy vulnerability scan
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: \${{ matrix.name }}:\${{ github.sha }}
+          format: sarif
+          output: trivy-\${{ matrix.name }}.sarif
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: "1"
+
+      - name: Upload Trivy SARIF
+        if: always()
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: trivy-\${{ matrix.name }}.sarif
+          category: trivy-\${{ matrix.name }}
+
+      - name: Generate SBOM
+        if: always()
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: \${{ matrix.name }}:\${{ github.sha }}
+          format: cyclonedx
+          output: sbom-\${{ matrix.name }}.cdx.json
+          scan-type: image
+
+      - name: Upload SBOM
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-\${{ matrix.name }}
+          path: sbom-\${{ matrix.name }}.cdx.json
+          retention-days: 30
+
+  publish:
+    name: Push verified images to ACR
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: build-scan
+    runs-on: ubuntu-24.04
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure login using OIDC
+        uses: azure/login@v2
+        with:
+          client-id: \${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: \${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: \${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Login to Azure Container Registry
+        run: az acr login --name "$ACR_NAME"
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build and push Care Portal
+        uses: docker/build-push-action@v6
+        with:
+          context: ./apps/care-portal/CarePortal.Api
+          push: true
+          tags: |
+            \${{ env.ACR_LOGIN_SERVER }}/care-portal-api:\${{ github.sha }}
+            \${{ env.ACR_LOGIN_SERVER }}/care-portal-api:main
+
+      - name: Build and push Community Hub
+        uses: docker/build-push-action@v6
+        with:
+          context: ./apps/community-hub/CommunityHub.Api
+          push: true
+          tags: |
+            \${{ env.ACR_LOGIN_SERVER }}/community-hub-api:\${{ github.sha }}
+            \${{ env.ACR_LOGIN_SERVER }}/community-hub-api:main
+
+      - name: Build and push Showcase API
+        uses: docker/build-push-action@v6
+        with:
+          context: ./src/Showcase.Api
+          push: true
+          tags: |
+            \${{ env.ACR_LOGIN_SERVER }}/showcase-api:\${{ github.sha }}
+            \${{ env.ACR_LOGIN_SERVER }}/showcase-api:main
+
+      - name: Build and push Showcase Web
+        uses: docker/build-push-action@v6
+        with:
+          context: ./src/Web
+          push: true
+          tags: |
+            \${{ env.ACR_LOGIN_SERVER }}/showcase-web:\${{ github.sha }}
+            \${{ env.ACR_LOGIN_SERVER }}/showcase-web:main
