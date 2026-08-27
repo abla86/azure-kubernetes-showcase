@@ -14,3 +14,9 @@ resources:
   - networking/gateway.yaml
   - networking/routes.yaml
   - networking/cert-manager.yaml
+
+images:
+  - name: acrshowcase.azurecr.io/care-portal-api
+    newName: acrshowcasedev.azurecr.io/care-portal-api
+  - name: acrshowcase.azurecr.io/community-hub-api
+    newName: acrshowcasedev.azurecr.io/community-hub-api
