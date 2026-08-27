@@ -19,10 +19,10 @@ jobs:
     env:
       ARM_USE_OIDC: "true"
       ARM_USE_AZUREAD: "true"
-      ARM_CLIENT_ID: \${{ secrets.AZURE_CLIENT_ID }}
-      ARM_TENANT_ID: \${{ secrets.AZURE_TENANT_ID }}
-      ARM_SUBSCRIPTION_ID: \${{ secrets.AZURE_SUBSCRIPTION_ID }}
-      TF_VAR_github_actions_client_id: \${{ secrets.AZURE_CLIENT_ID }}
+      ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      TF_VAR_github_actions_client_id: ${{ secrets.AZURE_CLIENT_ID }}
     defaults:
       run:
         working-directory: infra/terraform
@@ -36,9 +36,9 @@ jobs:
       - name: Terraform init with Azure AD/OIDC backend
         run: |
           terraform init -input=false \
-            -backend-config="resource_group_name=\${{ vars.TFSTATE_RESOURCE_GROUP }}" \
-            -backend-config="storage_account_name=\${{ vars.TFSTATE_STORAGE_ACCOUNT }}" \
-            -backend-config="container_name=\${{ vars.TFSTATE_CONTAINER }}" \
+            -backend-config="resource_group_name=${{ vars.TFSTATE_RESOURCE_GROUP }}" \
+            -backend-config="storage_account_name=${{ vars.TFSTATE_STORAGE_ACCOUNT }}" \
+            -backend-config="container_name=${{ vars.TFSTATE_CONTAINER }}" \
             -backend-config="key=azure-kubernetes-showcase.tfstate" \
             -backend-config="use_oidc=true" \
             -backend-config="use_azuread_auth=true"
