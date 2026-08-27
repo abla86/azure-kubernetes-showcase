@@ -3,18 +3,10 @@ name: Build, Scan and Publish
 on:
   push:
     branches: [main]
-    paths:
-      - "apps/**"
-      - "src/**"
-      - "docker-compose.yml"
-      - ".github/workflows/build-scan-publish.yml"
+    paths: ["apps/**","src/**","docker-compose.yml",".github/workflows/build-scan-publish.yml"]
   pull_request:
     branches: [main]
-    paths:
-      - "apps/**"
-      - "src/**"
-      - "docker-compose.yml"
-      - ".github/workflows/build-scan-publish.yml"
+    paths: ["apps/**","src/**","docker-compose.yml",".github/workflows/build-scan-publish.yml"]
 
 permissions:
   contents: read
@@ -26,10 +18,12 @@ env:
   ACR_LOGIN_SERVER: ${{ vars.ACR_LOGIN_SERVER }}
 
 jobs:
-  build-scan:
-    name: Build and security scan
+  build-scan-publish:
+    name: Build, scan and publish verified image
     runs-on: ubuntu-24.04
+    environment: production
     strategy:
+      fail-fast: true
       matrix:
         include:
           - name: care-portal-api
@@ -45,6 +39,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3
+
+      - name: Azure login using OIDC
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Login to ACR
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: az acr login --name "$ACR_NAME"
 
       - name: Build image
         uses: docker/build-push-action@v6
@@ -90,68 +96,10 @@ jobs:
           path: sbom-${{ matrix.name }}.cdx.json
           retention-days: 30
 
-  publish:
-    name: Push verified images to ACR
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: build-scan
-    runs-on: ubuntu-24.04
-    environment: production
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Azure login using OIDC
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
-      - name: Login to Azure Container Registry
-        run: az acr login --name "$ACR_NAME"
-
-      - uses: docker/setup-buildx-action@v3
-
-      - name: Build and push Care Portal
-        uses: docker/build-push-action@v6
-        with:
-          context: ./apps/care-portal/CarePortal.Api
-          push: true
-          tags: |
-            ${{ env.ACR_LOGIN_SERVER }}/care-portal-api:${{ github.sha }}
-            ${{ env.ACR_LOGIN_SERVER }}/care-portal-api:main
-
-      - name: Build and push Community Hub
-        uses: docker/build-push-action@v6
-        with:
-          context: ./apps/community-hub/CommunityHub.Api
-          push: true
-          tags: |
-            ${{ env.ACR_LOGIN_SERVER }}/community-hub-api:${{ github.sha }}
-            ${{ env.ACR_LOGIN_SERVER }}/community-hub-api:main
-
-      - name: Build and push Showcase API
-        uses: docker/build-push-action@v6
-        with:
-          context: ./src/Showcase.Api
-          push: true
-          tags: |
-            ${{ env.ACR_LOGIN_SERVER }}/showcase-api:${{ github.sha }}
-            ${{ env.ACR_LOGIN_SERVER }}/showcase-api:main
-
-      - name: Build and push Security Radar
-        uses: docker/build-push-action@v6
-        with:
-          context: ./apps/security-radar
-          push: true
-          tags: |
-            ${{ env.ACR_LOGIN_SERVER }}/security-radar:${{ github.sha }}
-            ${{ env.ACR_LOGIN_SERVER }}/security-radar:main
-
-      - name: Build and push Showcase Web
-        uses: docker/build-push-action@v6
-        with:
-          context: ./src/Web
-          push: true
-          tags: |
-            ${{ env.ACR_LOGIN_SERVER }}/showcase-web:${{ github.sha }}
-            ${{ env.ACR_LOGIN_SERVER }}/showcase-web:main
+      - name: Push verified image
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          docker tag "${{ matrix.name }}:${{ github.sha }}" "$ACR_LOGIN_SERVER/${{ matrix.name }}:${{ github.sha }}"
+          docker tag "${{ matrix.name }}:${{ github.sha }}" "$ACR_LOGIN_SERVER/${{ matrix.name }}:main"
+          docker push "$ACR_LOGIN_SERVER/${{ matrix.name }}:${{ github.sha }}"
+          docker push "$ACR_LOGIN_SERVER/${{ matrix.name }}:main"
