@@ -1,7 +1,20 @@
-name: Terraform Apply via Azure OIDC
+name: Terraform Plan and Apply via Azure OIDC
 
 on:
   workflow_dispatch:
+    inputs:
+      action:
+        description: "Choose the Terraform operation"
+        required: true
+        default: plan
+        type: choice
+        options:
+          - plan
+          - apply
+  pull_request:
+    branches: [main]
+    paths:
+      - "infra/terraform/**"
   push:
     branches: [main]
     paths:
@@ -11,17 +24,23 @@ permissions:
   id-token: write
   contents: read
 
+env:
+  ARM_USE_OIDC: "true"
+  ARM_USE_AZUREAD: "true"
+  ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+  ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+  ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+  TF_VAR_github_actions_client_id: ${{ secrets.AZURE_CLIENT_ID }}
+
+concurrency:
+  group: terraform-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   terraform:
+    name: Terraform ${{ github.event_name == 'workflow_dispatch' && inputs.action || 'plan' }}
     runs-on: ubuntu-24.04
     environment: production
-    env:
-      ARM_USE_OIDC: "true"
-      ARM_USE_AZUREAD: "true"
-      ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-      ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-      ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-      TF_VAR_github_actions_client_id: ${{ secrets.AZURE_CLIENT_ID }}
     defaults:
       run:
         working-directory: infra/terraform
@@ -34,6 +53,7 @@ jobs:
 
       - name: Terraform init with Azure AD/OIDC backend
         run: |
+          set -euo pipefail
           terraform init -input=false \
             -backend-config="resource_group_name=${{ vars.TFSTATE_RESOURCE_GROUP }}" \
             -backend-config="storage_account_name=${{ vars.TFSTATE_STORAGE_ACCOUNT }}" \
@@ -51,5 +71,13 @@ jobs:
       - name: Terraform plan
         run: terraform plan -input=false -out=tfplan
 
+      - name: Upload Terraform plan
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-plan-${{ github.sha }}
+          path: infra/terraform/tfplan
+          retention-days: 7
+
       - name: Terraform apply
+        if: github.event_name == 'workflow_dispatch' && inputs.action == 'apply'
         run: terraform apply -input=false -auto-approve tfplan
