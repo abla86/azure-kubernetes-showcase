@@ -149,6 +149,22 @@ This is a portfolio showcase, not a production healthcare or community-managemen
 
 https://github.com/abla86/azure-kubernetes-showcase
 
+## Fast evaluation
+
+**Run the application layer locally:**
+
+```powershell
+docker compose up --build
+```
+
+Then open Security Radar at `http://localhost:5080`, Care Portal at `http://localhost:5001` and Community Hub at `http://localhost:5002`.
+
+This gives a reviewer a fast local path to inspect the services before evaluating the Azure/AKS delivery layer.
+
+## Production considerations
+
+See [`docs/production-considerations.md`](docs/production-considerations.md) for cost, networking, observability and delivery trade-offs. See [`docs/observability-runbook.md`](docs/observability-runbook.md) for a concrete Day-2 troubleshooting path from Gateway to application telemetry.
+
 ## Enterprise delivery layer
 
 The repository also contains the production-oriented delivery patterns below.
