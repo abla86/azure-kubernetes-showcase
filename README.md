@@ -2,7 +2,7 @@
 
 [![CI/CD](https://github.com/abla86/azure-kubernetes-showcase/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/abla86/azure-kubernetes-showcase/actions/workflows/ci-cd.yml)
 
-A cloud-engineering portfolio project demonstrating .NET 10, React/TypeScript, Docker, Kubernetes, Azure IaC and DevSecOps.
+A cloud-engineering portfolio project demonstrating .NET 10, React/TypeScript, Docker, Kubernetes, Azure IaC and DevSecOps, with deliberately small application services and controlled resilience/security demonstrations.
 
 ## What it demonstrates
 
@@ -18,6 +18,7 @@ A cloud-engineering portfolio project demonstrating .NET 10, React/TypeScript, D
 - GitHub Actions CI
 - CodeQL and Dependabot
 - Health endpoints, Serilog and OpenTelemetry in the core API
+- Security Radar for controlled security-event simulation
 
 ## Application modules
 
@@ -42,7 +43,7 @@ A small demonstration service for shared resources. It contains no real personal
 React/TypeScript frontend
         |
         v
-Kubernetes / Nginx
+Kubernetes / Gateway API
         |
         +--> Core Showcase API
         +--> Care Portal
@@ -70,20 +71,27 @@ dotnet test --configuration Release
 docker compose up --build
 ```
 
-The solution file includes the core API, Care Portal and Community Hub.
+The local Compose stack intentionally contains the three application services below. The core API/frontend remain available through their existing project-specific development workflows.
 
 Compose ports:
 
 | Service | Port |
 |---|---:|
-| Main API | 5080 |
-| Frontend | 5173 |
-| Care Portal | 5081 |
-| Community Hub | 5082 |
+| Security Radar | 5080 |
+| Care Portal | 5001 |
+| Community Hub | 5002 |
+
+Start the Compose stack with:
+
+```powershell
+docker compose up --build
+```
+
+The Security Radar's simulation is controlled application behavior; it is not presented as a real SIEM, IDS or attack generator.
 
 ## Kubernetes
 
-The `k8s/` directory contains the namespace, application deployments, services, HPA, NetworkPolicies, probes and Workload Identity ServiceAccount configuration.
+The `k8s/` directory contains the namespace, application deployments, services, HPA, NetworkPolicies, probes, Gateway API routes and Workload Identity ServiceAccount configuration.
 
 CI uses client-side parsing without requiring a live cluster:
 
@@ -161,9 +169,9 @@ The Gateway manifests contain example domain values and therefore require a real
 
 ### Supply-chain security
 
-`.github/workflows/build-scan-publish.yml` builds the four container images, scans each image with Trivy for HIGH/CRITICAL vulnerabilities, uploads SARIF results and publishes a CycloneDX SBOM artifact.
+`.github/workflows/build-scan-publish.yml` builds the application container images defined in its matrix, scans each image with Trivy for HIGH/CRITICAL vulnerabilities, uploads SARIF results and publishes a CycloneDX SBOM artifact.
 
-Only images that pass the build/scan job can reach the publish job. Publishing uses Azure Login with GitHub OIDC and ACR RBAC; no ACR admin credentials are used.
+Only the exact locally loaded image that passes the build/scan step is pushed; the workflow does not rebuild a different image between scanning and publication. Publishing uses Azure Login with GitHub OIDC and ACR RBAC; no ACR admin credentials are used.
 
 ### Terraform delivery
 
@@ -189,3 +197,36 @@ These are deployment prerequisites, not fake values committed as secrets.
 ## Verification discipline
 
 A workflow file existing in GitHub is not evidence that the corresponding Azure resource or Kubernetes workload is deployed. Deployment, runtime health, telemetry ingestion, TLS issuance and GitOps synchronization are only marked as operational after a successful environment-specific verification.
+
+
+## Resilience and security demonstrations
+
+### Controlled chaos test
+
+`.github/workflows/chaos.yml` provides an explicitly manual resilience test. After authenticating to AKS through GitHub OIDC, it deletes one selected application pod and verifies that the Deployment reaches its desired state again. This is a controlled recovery test, not evidence of a measured sub-two-second SLA.
+
+### Security Radar
+
+`apps/security-radar/` provides a small visual operations surface with a controlled simulation endpoint. The endpoint deliberately waits before rejecting the simulated request and reports the measured delay. It demonstrates application-level detection and response behavior without generating real malicious traffic.
+
+### Deception layer
+
+The repository does **not** currently claim that it has a production deception network, real honey tokens, SIEM ingestion, or live NetworkPolicy/IP blocking visualization. Those capabilities would require actual telemetry sources and runtime integration. Keeping this distinction explicit is intentional.
+
+## Verification matrix
+
+| Capability | Source implementation | Runtime proof required |
+|---|---|---|
+| Container build | GitHub Actions | CI success |
+| Vulnerability scanning | Trivy | CI success with policy threshold |
+| SBOM | CycloneDX artifact | CI artifact |
+| IaC security | Checkov | CI success |
+| Kubernetes schema validation | Kubeconform | CI success |
+| Pod recovery | Chaos workflow | Successful AKS run |
+| OIDC authentication | GitHub/Azure configuration | Successful Azure login |
+| ACR publication | GitHub/Azure configuration | Successful push |
+| OpenTelemetry ingestion | App + Azure configuration | Runtime telemetry observed |
+| TLS | Gateway/cert-manager manifests | Issued certificate + HTTPS test |
+| GitOps synchronization | Argo CD manifest | Argo CD application healthy/synced |
+
+This matrix prevents configuration from being presented as runtime evidence.
