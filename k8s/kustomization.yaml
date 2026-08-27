@@ -11,6 +11,8 @@ resources:
   - apps/care-portal-deployment.yaml
   - apps/community-hub-deployment.yaml
   - apps/security-radar-deployment.yaml
+  - autoscaling.yaml
+  - disruption-budgets.yaml
   - networkpolicy.yaml
   - networking/gateway.yaml
   - networking/routes.yaml
