@@ -16,6 +16,10 @@ resources:
   - networking/cert-manager.yaml
 
 images:
+  - name: azure-kubernetes-showcase-api
+    newName: acrshowcasedev.azurecr.io/showcase-api
+  - name: azure-kubernetes-showcase-web
+    newName: acrshowcasedev.azurecr.io/showcase-web
   - name: acrshowcase.azurecr.io/care-portal-api
     newName: acrshowcasedev.azurecr.io/care-portal-api
   - name: acrshowcase.azurecr.io/community-hub-api
