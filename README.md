@@ -14,23 +14,32 @@ docker compose up --build
 
 Then open Security Radar at `http://localhost:5080`, Care Portal at `http://localhost:5001` and Community Hub at `http://localhost:5002`.
 
+**Canonical local verification:**
+
+```powershell
+python scripts/local_smoke_test.py
+```
+
+The smoke test starts the Compose stack, waits for service health, verifies Security Radar capabilities, exercises the controlled ghost route and rate limiter, validates the local security-event feed, and always tears the stack down afterwards.
+
 ## What it demonstrates
 
 - ASP.NET Core / .NET 10 APIs
 - React + TypeScript + Vite
 - Core Showcase API, Care Portal and Community Hub modules
 - Multi-stage non-root Docker containers
-- Kubernetes Deployments, Services, probes, HPA and NetworkPolicy
+- Kubernetes Deployments, Services, startup/readiness/liveness probes, HPA and NetworkPolicy
 - Restricted Pod Security
 - Azure Bicep and modular Terraform
 - AKS OIDC / Workload Identity
 - ACR pull permissions
 - GitHub Actions CI/CD
 - CodeQL, Dependabot, Trivy and SBOM generation
-- OpenTelemetry and Azure Monitor integration
+- OpenTelemetry with optional local collector and Azure Monitor integration
 - Security Radar for controlled security-event simulation
 - Automated local API security self-tests
 - Controlled Kubernetes resilience testing
+- IaC parity checks and repository-maintenance automation
 
 ## Architecture
 
@@ -43,8 +52,8 @@ GitHub Actions
   |   |   |   |   +--> SBOM
   |   |   |   +------> Trivy
   |   |   +----------> CodeQL
-  |   +--------------> Checkov / Kubeconform
-  +------------------> Build / Test
+  |   +--------------> Checkov / Kubeconform / policy
+  +------------------> Build / Test / Smoke
             |
             v
         ACR (OIDC)
@@ -90,7 +99,7 @@ A small demonstration service for shared resources. It contains no real personal
 ### Security Radar
 `apps/security-radar/`
 
-A controlled operations/security demonstration with a local event feed, bounded-delay simulation endpoint and application-level ghost route. It does not claim to be a production SIEM or intrusion-detection platform.
+A controlled operations/security demonstration with a local event feed, bounded-delay simulation endpoint, rate limiting and application-level ghost route. It does not claim to be a production SIEM or intrusion-detection platform.
 
 ## Local development
 
@@ -100,16 +109,18 @@ Prerequisites: .NET 10 SDK, Node.js 22+, Docker Desktop, kubectl and optionally 
 dotnet restore
 dotnet build --configuration Release
 dotnet test --configuration Release
-docker compose up --build
+python scripts/local_smoke_test.py
 ```
 
-The local Compose stack contains the three application services used for the defensive self-test plus Security Radar. The infrastructure layer remains separately deployable to Azure/AKS.
+The local Compose stack contains the application services used for the defensive self-test plus Security Radar. The infrastructure layer remains separately deployable to Azure/AKS.
 
 ## Automated security self-test
 
 `security/api-self-test.py` checks only the project's declared local endpoints. It verifies health responses and ensures sensitive-looking paths such as `.env`, `config.json` and `/admin` are not unexpectedly exposed.
 
-The GitHub workflow starts the local Compose stack automatically, waits for the services, executes the self-test and checks the controlled Security Radar ghost route. Failures collect container logs before teardown.
+`scripts/local_smoke_test.py` is the canonical integration smoke test. It fails on missing or incorrect required behavior and returns a non-zero exit code when any required assertion fails.
+
+The main CI workflow runs the same smoke test automatically on pushes, pull requests and manual dispatch. Failed Compose runs collect Docker diagnostics.
 
 ## Kubernetes
 
@@ -117,13 +128,25 @@ The `k8s/` directory contains the namespace, application deployments, services, 
 
 The NetworkPolicies use default-deny behavior for the protected workloads and explicitly permit required DNS egress. This reduces uncontrolled outbound communication while preserving cluster name resolution.
 
+`scripts/validate_manifests.py` enforces the required workload controls, including non-root execution, no privilege escalation, read-only root filesystems, dropped capabilities, seccomp and startup/readiness/liveness probes. Checkov and Kubeconform provide additional infrastructure and schema validation in CI.
+
 ## Azure IaC
 
 Terraform is modularized into networking, ACR, AKS and IAM/Workload Identity. The AKS configuration enables OIDC and Workload Identity and explicitly uses Azure CNI Overlay with Azure Network Policy. The networking mode is documented as an environment-specific trade-off rather than a universal best practice.
 
-Bicep remains available as a second IaC representation.
+Bicep remains available as a second IaC representation. CI compiles all Bicep files and validates Terraform formatting and configuration without requiring an Azure deployment.
 
 The repository does not claim that Azure resources are deployed merely because the configuration exists. Deployment may create billable resources.
+
+### IaC parity
+
+See [`docs/iac-parity-matrix.md`](docs/iac-parity-matrix.md) and [`docs/iac-parity-exceptions.md`](docs/iac-parity-exceptions.md). Differences are documented explicitly rather than being marked as verified parity when evidence is incomplete.
+
+## Cost controls
+
+Terraform includes a configurable resource-group budget guardrail. Budget thresholds and notification recipients are variables rather than hardcoded secrets. The repository does not automatically delete or resize Azure resources based solely on a cost signal.
+
+The local cost audit is self-contained and does not require a sibling checkout.
 
 ## CI / DevSecOps
 
@@ -131,7 +154,7 @@ GitHub Actions includes:
 
 1. .NET restore, build and tests
 2. Frontend install, lint and build
-3. Kubernetes manifest validation
+3. Kubernetes manifest validation and workload security policy
 4. Bicep compilation
 5. Terraform format and validation
 6. Docker builds for application containers
@@ -139,8 +162,13 @@ GitHub Actions includes:
 8. CycloneDX SBOM generation
 9. CodeQL analysis
 10. Checkov infrastructure security checks
-11. Automated local API security self-testing
-12. Scheduled health/security checks on the dedicated tool repositories
+11. Kubeconform Kubernetes schema validation
+12. IaC parity-contract checks
+13. Automated local API security self-testing
+14. Canonical local smoke testing of the Compose stack
+15. Automated repository maintenance checks
+
+Terraform planning is automatic; actual Terraform apply is explicitly opt-in through the deployment workflow.
 
 ## Security
 
@@ -177,6 +205,8 @@ See [`docs/production-considerations.md`](docs/production-considerations.md) for
 
 Configuration in GitHub is not treated as proof of runtime behavior. Runtime claims require successful environment-specific verification, including deployment, HTTPS/TLS, telemetry ingestion, GitOps synchronization and recovery tests.
 
+When a required test or file is missing, the repository validation policy treats that as a failure rather than silently skipping it.
+
 ## Portfolio tools
 
 The adjacent repositories extend the engineering lifecycle:
@@ -185,6 +215,12 @@ The adjacent repositories extend the engineering lifecycle:
 - `cloud-waste-auditor` — Terraform/FinOps cost-risk guardrail
 - `k8s-pod-doctor` — Kubernetes Day-2 first-line diagnosis
 
+## Automated maintenance
+
+Repository maintenance runs on a schedule and manually. It validates required documentation, scans for unfinished placeholders, checks parity-exception records and creates a maintenance issue on failure instead of silently changing source code.
+
+The repository also maintains a changelog and architecture log so engineering decisions and material changes remain traceable.
+
 ## Scope
 
 This is a portfolio showcase, not a production healthcare or community-management system. The application modules are intentionally small demonstrations of service boundaries, containers, Kubernetes and Azure platform engineering.
@@ -192,7 +228,3 @@ This is a portfolio showcase, not a production healthcare or community-managemen
 ## Repository
 
 https://github.com/abla86/azure-kubernetes-showcase
-
-## Automated repository metadata
-
-See [generated repository snapshot](docs/generated/repository-snapshot.md) for the current repository head and tracked engineering areas.
