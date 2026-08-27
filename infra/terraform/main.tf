@@ -28,6 +28,7 @@ module "aks" {
 
 module "iam" {
   source = "./modules/iam"
+  location = var.location
   resource_group_name = azurerm_resource_group.main.name
   aks_identity_principal_id = module.aks.aks_identity_principal_id
   acr_id = module.acr.acr_id
