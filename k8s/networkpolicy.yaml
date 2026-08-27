@@ -7,27 +7,22 @@ spec:
   podSelector:
     matchLabels:
       app: showcase-api
-  policyTypes:
-    - Ingress
-    - Egress
+  policyTypes: [Ingress, Egress]
   ingress:
     - from:
         - podSelector:
             matchLabels:
               app: showcase-web
       ports:
-        - protocol: TCP
-          port: 8080
+        - { protocol: TCP, port: 8080 }
   egress:
     - to:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: kube-system
       ports:
-        - protocol: UDP
-          port: 53
-        - protocol: TCP
-          port: 53
+        - { protocol: UDP, port: 53 }
+        - { protocol: TCP, port: 53 }
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -38,27 +33,22 @@ spec:
   podSelector:
     matchLabels:
       app: care-portal-api
-  policyTypes:
-    - Ingress
-    - Egress
+  policyTypes: [Ingress, Egress]
   ingress:
     - from:
         - podSelector:
             matchLabels:
               app: showcase-web
       ports:
-        - protocol: TCP
-          port: 8080
+        - { protocol: TCP, port: 8080 }
   egress:
     - to:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: kube-system
       ports:
-        - protocol: UDP
-          port: 53
-        - protocol: TCP
-          port: 53
+        - { protocol: UDP, port: 53 }
+        - { protocol: TCP, port: 53 }
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -69,24 +59,19 @@ spec:
   podSelector:
     matchLabels:
       app: community-hub-api
-  policyTypes:
-    - Ingress
-    - Egress
+  policyTypes: [Ingress, Egress]
   ingress:
     - from:
         - podSelector:
             matchLabels:
               app: showcase-web
       ports:
-        - protocol: TCP
-          port: 8080
+        - { protocol: TCP, port: 8080 }
   egress:
     - to:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: kube-system
       ports:
-        - protocol: UDP
-          port: 53
-        - protocol: TCP
-          port: 53
+        - { protocol: UDP, port: 53 }
+        - { protocol: TCP, port: 53 }
