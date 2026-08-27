@@ -19,7 +19,9 @@ spec:
     metadata:
       labels:
         app: showcase-api
+        azure.workload.identity/use: "true"
     spec:
+      serviceAccountName: api-workload-identity-sa
       securityContext:
         runAsNonRoot: true
         seccompProfile:
