@@ -144,12 +144,12 @@ kubectl get deployments,pods,services -n showcase
 
 ## Azure Infrastructure as Code
 
-Two small, auditable Azure IaC examples are included:
+Auditable Azure Infrastructure as Code is included in both Bicep and Terraform. The Bicep example now provisions the core showcase path (Log Analytics, Azure Container Registry and an AKS cluster with a system-assigned identity and ACR pull role assignment). The Terraform example currently demonstrates the foundational resource-group and Log Analytics layer.
 
 - `infra/bicep/main.bicep`
 - `infra/terraform/main.tf`
 
-GitHub Actions validates both representations on pushes and pull requests. The project deliberately demonstrates **Azure provisioning skills without claiming that Azure resources have already been deployed**.
+GitHub Actions validates both representations on pushes and pull requests. The repository does **not** claim that the Azure resources have been deployed from this repository. Deploying the Bicep template creates billable Azure resources; review sizing, region and cost before deployment.
 
 For a local Bicep compilation check:
 
@@ -179,6 +179,10 @@ GitHub Actions is configured for:
 7. CodeQL analysis for C# and JavaScript/TypeScript
 
 Dependabot monitors NuGet, npm, Docker and GitHub Actions dependencies.
+
+## Contributing
+
+See [`CONTRIBUTING.md`](CONTRIBUTING.md) for concrete contribution areas and pull-request expectations. Issues are structured for reproducible bugs and feature proposals.
 
 ## Testing
 
