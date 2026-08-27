@@ -1,11 +1,21 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Diagnostics.Metrics;
 using Microsoft.AspNetCore.RateLimiting;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using System.Threading.RateLimiting;
 
-var builder = WebApplication.CreateBuilder(args);
+const string serviceName = "security-radar";
+var otelEnabled = string.Equals(
+    Environment.GetEnvironmentVariable("OTEL_ENABLED"),
+    "true",
+    StringComparison.OrdinalIgnoreCase);
 
+var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddHealthChecks();
+
 builder.Services.AddRateLimiter(options =>
 {
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
@@ -16,6 +26,33 @@ builder.Services.AddRateLimiter(options =>
         limiter.QueueLimit = 0;
     });
 });
+
+if (otelEnabled)
+{
+    builder.Services.AddOpenTelemetry()
+        .ConfigureResource(resource => resource.AddService(serviceName))
+        .WithTracing(tracing => tracing
+            .AddAspNetCoreInstrumentation()
+            .AddOtlpExporter(options =>
+            {
+                var endpoint = Environment.GetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT");
+                if (Uri.TryCreate(endpoint, UriKind.Absolute, out var uri))
+                {
+                    options.Endpoint = uri;
+                }
+            }))
+        .WithMetrics(metrics => metrics
+            .AddAspNetCoreInstrumentation()
+            .AddMeter("AzureKubernetesShowcase.SecurityRadar")
+            .AddOtlpExporter(options =>
+            {
+                var endpoint = Environment.GetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT");
+                if (Uri.TryCreate(endpoint, UriKind.Absolute, out var uri))
+                {
+                    options.Endpoint = uri;
+                }
+            }));
+}
 
 var app = builder.Build();
 
@@ -31,6 +68,9 @@ app.Use(async (context, next) =>
 });
 
 var events = new ConcurrentQueue<object>();
+var meter = new Meter("AzureKubernetesShowcase.SecurityRadar");
+var deceptionCounter = meter.CreateCounter<long>("security.deception.events", description: "Controlled deception events");
+var rateLimitedCounter = meter.CreateCounter<long>("security.rate_limited.events", description: "Requests rejected by the deception rate limiter");
 
 void Record(string route, string action, long delayMs = 0)
 {
@@ -47,12 +87,19 @@ void Record(string route, string action, long delayMs = 0)
 
 app.MapHealthChecks("/health");
 
-app.MapPost("/api/simulate-attack", async (HttpContext context) =>
+app.MapPost("/api/simulate-attack", async (HttpContext context, ILogger<Program> logger) =>
 {
     var started = Stopwatch.GetTimestamp();
     await Task.Delay(TimeSpan.FromSeconds(2), context.RequestAborted);
     var elapsed = (long)Stopwatch.GetElapsedTime(started).TotalMilliseconds;
 
+    logger.LogWarning(
+        "SecurityDeceptionEvent Route={Route} Classification={Classification} Action={Action}",
+        "/api/simulate-attack",
+        "controlled-simulation",
+        "logged-and-rejected");
+
+    deceptionCounter.Add(1);
     Record("/api/simulate-attack", "controlled-simulation-rejected", elapsed);
 
     return Results.BadRequest(new
@@ -78,6 +125,8 @@ app.MapMethods("/ghost/{**path}", new[] { "GET", "POST", "PUT", "PATCH", "DELETE
         "controlled-decoy",
         "logged-and-rejected");
 
+    deceptionCounter.Add(1);
+
     await Task.Delay(TimeSpan.FromSeconds(1.5), context.RequestAborted);
     var elapsed = (long)Stopwatch.GetElapsedTime(started).TotalMilliseconds;
 
@@ -98,13 +147,14 @@ app.MapGet("/api/events", () =>
 
 app.MapGet("/api/status", () => Results.Ok(new
 {
-    service = "security-radar",
+    service = serviceName,
     status = "operational",
     controlledSimulation = true,
     ghostRoute = true,
     rateLimiting = true,
     structuredSecurityEvents = true,
     localEventFeed = true,
+    telemetryEnabled = otelEnabled,
     timestamp = DateTimeOffset.UtcNow
 }));
 
