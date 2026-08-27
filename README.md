@@ -140,3 +140,52 @@ This is a portfolio showcase, not a production healthcare or community-managemen
 ## Repository
 
 https://github.com/abla86/azure-kubernetes-showcase
+
+## Enterprise delivery layer
+
+The repository also contains the production-oriented delivery patterns below.
+
+### Observability
+
+The .NET services use OpenTelemetry instrumentation for ASP.NET Core, HTTP client and runtime metrics. Azure Monitor's OpenTelemetry exporter is configured with `DefaultAzureCredential`, so AKS Workload Identity can authenticate telemetry without embedding an Application Insights connection string in the repository.
+
+Terraform provisions Application Insights on the existing Log Analytics workspace and grants the dedicated workload identity the **Monitoring Metrics Publisher** role. Microsoft documents this role as the required ingestion permission for Entra-authenticated Application Insights telemetry. 
+
+### GitOps and Kubernetes delivery
+
+`k8s/kustomization.yaml` is the deployment root for Kustomize. `k8s/gitops/application.yaml` defines an Argo CD Application that tracks the `main` branch and enables automated sync, pruning and self-healing.
+
+The repository uses Kubernetes Gateway API rather than adding a new dependency on the legacy NGINX ingress controller. The intended Azure ingress implementation is **Application Gateway for Containers / ALB Controller**, with HTTPS listeners and cert-manager-managed certificates.
+
+The Gateway manifests contain example domain values and therefore require a real DNS name and ACME email before public certificate issuance. They are not presented as a live public endpoint until those values are configured.
+
+### Supply-chain security
+
+`.github/workflows/build-scan-publish.yml` builds the four container images, scans each image with Trivy for HIGH/CRITICAL vulnerabilities, uploads SARIF results and publishes a CycloneDX SBOM artifact.
+
+Only images that pass the build/scan job can reach the publish job. Publishing uses Azure Login with GitHub OIDC and ACR RBAC; no ACR admin credentials are used.
+
+### Terraform delivery
+
+`.github/workflows/terraform-deploy.yml` provides an OIDC-based plan/apply path with an Azure Storage remote state backend using Microsoft Entra authentication.
+
+The workflow expects the Azure identity and Terraform-state storage configuration to be supplied through GitHub Environment secrets/variables. It is intentionally not described as a successful Azure deployment until a real workflow run completes successfully.
+
+## Required external configuration
+
+Before a real cloud deployment, configure:
+
+- GitHub Environment `production`
+- `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID` secrets
+- `ACR_NAME` and `ACR_LOGIN_SERVER` repository/environment variables
+- `TFSTATE_RESOURCE_GROUP`, `TFSTATE_STORAGE_ACCOUNT` and `TFSTATE_CONTAINER` variables
+- Azure federated identity credentials for the GitHub repository/workflow
+- Azure Storage Blob Data Contributor permission for Terraform state
+- A real DNS name and ACME email for public TLS
+- Application Gateway for Containers / ALB Controller prerequisites
+
+These are deployment prerequisites, not fake values committed as secrets.
+
+## Verification discipline
+
+A workflow file existing in GitHub is not evidence that the corresponding Azure resource or Kubernetes workload is deployed. Deployment, runtime health, telemetry ingestion, TLS issuance and GitOps synchronization are only marked as operational after a successful environment-specific verification.
