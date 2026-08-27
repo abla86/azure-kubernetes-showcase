@@ -1,0 +1,121 @@
+name: Repository Maintenance
+
+on:
+  schedule:
+    - cron: "17 4 * * 1"
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "README.md"
+      - "CHANGELOG.md"
+      - "docs/**"
+      - ".github/workflows/maintenance.yml"
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: repository-maintenance
+  cancel-in-progress: false
+
+jobs:
+  documentation-and-hygiene:
+    name: Documentation and repository hygiene
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate required documentation
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s README.md
+          test -s CHANGELOG.md
+          test -s docs/architecture-log.md
+          test -s docs/iac-parity-matrix.md
+          grep -qi "Known Limitations\|Production Gaps\|Production Considerations" README.md
+          grep -qi "Terraform" README.md
+          grep -qi "Kubernetes" README.md
+          grep -qi "Security" README.md
+
+      - name: Scan for unfinished repository placeholders
+        shell: bash
+        run: |
+          set -euo pipefail
+          matches=$(grep -RInE --exclude-dir=.git --exclude='*.lock' \
+            -e 'TODO[[:space:]]*:' \
+            -e 'FIXME[[:space:]]*:' \
+            -e 'CHANGE_ME' \
+            -e 'REPLACE_ME' \
+            -e '__[A-Z0-9_]+__' \
+            . || true)
+
+          if [ -n "$matches" ]; then
+            echo "Unresolved repository placeholders found:"
+            echo "$matches"
+            exit 1
+          fi
+
+      - name: Validate changelog references current engineering controls
+        shell: bash
+        run: |
+          set -euo pipefail
+          for term in \
+            "Kubernetes" \
+            "OpenTelemetry" \
+            "Terraform" \
+            "Security"; do
+            grep -qi "$term" CHANGELOG.md
+          done
+
+      - name: Detect documentation drift markers
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f docs/iac-parity-exceptions.md
+          grep -qi "Application Insights" docs/iac-parity-exceptions.md
+          grep -qi "runtime" docs/iac-parity-exceptions.md
+
+      - name: Create maintenance issue on failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          title="maintenance: repository review found drift"
+          marker="<!-- automated-maintenance -->"
+
+          existing=$(gh issue list \
+            --repo "$REPO" \
+            --state open \
+            --search "$title in:title" \
+            --limit 1 \
+            --json number \
+            --jq '.[0].number // empty')
+
+          if [ -n "$existing" ]; then
+            echo "Existing maintenance issue #$existing; no duplicate created."
+            exit 0
+          fi
+
+          body=$(cat <<EOF
+$marker
+
+The scheduled repository maintenance checks found one or more documentation or hygiene problems.
+
+Review the failed workflow run and correct the repository state.
+
+This issue is created automatically and intentionally does not modify repository files.
+EOF
+)
+
+          gh issue create \
+            --repo "$REPO" \
+            --title "$title" \
+            --body "$body"
