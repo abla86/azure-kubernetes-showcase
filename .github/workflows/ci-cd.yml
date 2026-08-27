@@ -17,11 +17,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 10.0.x
-
       - run: dotnet restore
       - run: dotnet build --configuration Release --no-restore
       - run: dotnet test --configuration Release --verbosity normal --collect:"XPlat Code Coverage"
@@ -34,13 +32,11 @@ jobs:
         working-directory: src/Web
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
           cache-dependency-path: src/Web/package-lock.json
-
       - run: npm ci
       - run: npm run lint
       - run: npm run build
@@ -54,31 +50,32 @@ jobs:
         with:
           version: latest
       - run: kubectl apply --dry-run=client --validate=false -f k8s/
+      - name: Validate workload security policy
+        run: python scripts/validate_manifests.py
 
   azure-iac:
     name: Azure IaC validation
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - name: Validate Bicep
         uses: azure/cli@v2
         with:
-          inlineScript: az bicep build --file infra/bicep/main.bicep
-
+          inlineScript: |
+            set -e
+            while IFS= read -r -d '' file; do
+              az bicep build --file "$file" --stdout >/dev/null
+            done < <(find infra/bicep -name '*.bicep' -print0)
       - name: Validate Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: 1.6.6
-
+          terraform_version: 1.7.5
       - name: Terraform format check
         working-directory: infra/terraform
         run: terraform fmt -check -recursive
-
       - name: Terraform init
         working-directory: infra/terraform
-        run: terraform init -backend=false
-
+        run: terraform init -backend=false -input=false
       - name: Terraform validate
         working-directory: infra/terraform
         run: terraform validate
@@ -89,18 +86,16 @@ jobs:
     needs: [backend, frontend]
     steps:
       - uses: actions/checkout@v4
-
       - name: Build main API
         run: docker build -t azure-kubernetes-showcase-api:${{ github.sha }} ./src/Showcase.Api
-
       - name: Build frontend
         run: docker build -t azure-kubernetes-showcase-web:${{ github.sha }} ./src/Web
-
       - name: Build care portal
         run: docker build -t care-portal-api:${{ github.sha }} ./apps/care-portal/CarePortal.Api
-
       - name: Build community hub
         run: docker build -t community-hub-api:${{ github.sha }} ./apps/community-hub/CommunityHub.Api
+      - name: Build security radar
+        run: docker build -t security-radar:${{ github.sha }} ./apps/security-radar
 
   security:
     name: CodeQL security analysis
@@ -111,16 +106,48 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v4
-
       - uses: github/codeql-action/init@v3
         with:
           languages: csharp,javascript-typescript
           queries: security-extended
-
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 10.0.x
-
       - run: dotnet build --configuration Release
-
       - uses: github/codeql-action/analyze@v3
+
+  resilience-self-test:
+    name: Non-destructive local resilience and security self-test
+    runs-on: ubuntu-latest
+    needs: [docker]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Start local ecosystem
+        run: docker compose up --build -d
+      - name: Wait for services
+        shell: bash
+        run: |
+          set -euo pipefail
+          for url in \
+            http://127.0.0.1:5001/health \
+            http://127.0.0.1:5002/health \
+            http://127.0.0.1:5080/health; do
+            for i in {1..30}; do
+              if curl --fail --silent --show-error "$url" >/dev/null; then
+                break
+              fi
+              sleep 2
+            done
+            curl --fail --silent --show-error "$url" >/dev/null
+          done
+      - name: Run API self-test
+        run: python scripts/api_fuzzer.py
+      - name: Verify security radar event feed
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error -X POST http://127.0.0.1:5080/api/simulate-attack >/dev/null || test $? -eq 0
+          curl --fail --silent --show-error http://127.0.0.1:5080/api/events
+      - name: Teardown
+        if: always()
+        run: docker compose down -v
