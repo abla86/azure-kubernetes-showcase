@@ -26,7 +26,7 @@ variable "application_insights_id" {
   type = string
 }
 
-variable "github_actions_client_id" {
+variable "github_actions_principal_object_id" {
   type     = string
   nullable = true
   default  = null
@@ -45,8 +45,8 @@ resource "azurerm_role_assignment" "appinsights_publish" {
 }
 
 resource "azurerm_role_assignment" "acr_push" {
-  count                = var.github_actions_client_id != null ? 1 : 0
+  count                = var.github_actions_principal_object_id != null ? 1 : 0
   scope                = var.acr_id
   role_definition_name = "AcrPush"
-  principal_id         = var.github_actions_client_id
+  principal_id         = var.github_actions_principal_object_id
 }
