@@ -68,9 +68,10 @@ app.Use(async (context, next) =>
 });
 
 var events = new ConcurrentQueue<object>();
-var meter = new Meter("AzureKubernetesShowcase.SecurityRadar");
-var deceptionCounter = meter.CreateCounter<long>("security.deception.events", description: "Controlled deception events");
-var rateLimitedCounter = meter.CreateCounter<long>("security.rate_limited.events", description: "Requests rejected by the deception rate limiter");
+using var meter = new Meter("AzureKubernetesShowcase.SecurityRadar");
+var deceptionCounter = meter.CreateCounter<long>(
+    "security.deception.events",
+    description: "Controlled deception events");
 
 void Record(string route, string action, long delayMs = 0)
 {
@@ -87,7 +88,9 @@ void Record(string route, string action, long delayMs = 0)
 
 app.MapHealthChecks("/health");
 
-app.MapPost("/api/simulate-attack", async (HttpContext context, ILogger<Program> logger) =>
+app.MapPost("/api/simulate-attack", async (
+    HttpContext context,
+    ILogger<Program> logger) =>
 {
     var started = Stopwatch.GetTimestamp();
     await Task.Delay(TimeSpan.FromSeconds(2), context.RequestAborted);
@@ -99,7 +102,9 @@ app.MapPost("/api/simulate-attack", async (HttpContext context, ILogger<Program>
         "controlled-simulation",
         "logged-and-rejected");
 
-    deceptionCounter.Add(1);
+    deceptionCounter.Add(1, new KeyValuePair<string, object?>(
+        "route", "/api/simulate-attack"));
+
     Record("/api/simulate-attack", "controlled-simulation-rejected", elapsed);
 
     return Results.BadRequest(new
@@ -112,9 +117,9 @@ app.MapPost("/api/simulate-attack", async (HttpContext context, ILogger<Program>
     });
 }).RequireRateLimiting("DeceptionWall");
 
-app.MapMethods("/ghost/{**path}", new[] { "GET", "POST", "PUT", "PATCH", "DELETE" }, async (
-    HttpContext context,
-    ILogger<Program> logger) =>
+app.MapMethods("/ghost/{**path}",
+    new[] { "GET", "POST", "PUT", "PATCH", "DELETE" },
+    async (HttpContext context, ILogger<Program> logger) =>
 {
     var started = Stopwatch.GetTimestamp();
     var route = context.Request.Path.ToString();
@@ -125,7 +130,7 @@ app.MapMethods("/ghost/{**path}", new[] { "GET", "POST", "PUT", "PATCH", "DELETE
         "controlled-decoy",
         "logged-and-rejected");
 
-    deceptionCounter.Add(1);
+    deceptionCounter.Add(1, new KeyValuePair<string, object?>("route", route));
 
     await Task.Delay(TimeSpan.FromSeconds(1.5), context.RequestAborted);
     var elapsed = (long)Stopwatch.GetElapsedTime(started).TotalMilliseconds;
