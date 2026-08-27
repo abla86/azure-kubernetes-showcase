@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 COPY SecurityRadar.Web/SecurityRadar.Web.csproj SecurityRadar.Web/
 RUN dotnet restore SecurityRadar.Web/SecurityRadar.Web.csproj
