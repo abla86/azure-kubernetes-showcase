@@ -10,9 +10,11 @@ resources:
   - web.yaml
   - apps/care-portal-deployment.yaml
   - apps/community-hub-deployment.yaml
+  - apps/security-radar-deployment.yaml
   - networkpolicy.yaml
   - networking/gateway.yaml
   - networking/routes.yaml
+  - networking/security-radar-route.yaml
   - networking/cert-manager.yaml
 
 images:
