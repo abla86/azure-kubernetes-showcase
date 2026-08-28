@@ -22,3 +22,7 @@
 - Commit: docs: add repository change audit and scope controls
 - Branch: main
 
+### 2026-08-28T18:12:17Z — e067fc4
+- Commit: docs: link repository change-control audit
+- Branch: main
+
