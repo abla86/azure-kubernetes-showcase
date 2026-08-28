@@ -14,3 +14,7 @@
 - Commit: docs: define strict missing-test failure policy
 - Branch: main
 
+### 2026-08-28T18:10:54Z — fcdec88
+- Commit: docs: add repository change-control audit
+- Branch: main
+
