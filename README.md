@@ -170,6 +170,23 @@ GitHub Actions includes:
 
 Terraform planning is automatic; actual Terraform apply is explicitly opt-in through the deployment workflow.
 
+## Security architecture — infrastructure and delivery
+
+CloudForge treats security as a set of controls across the software supply chain, container runtime, Kubernetes boundary and Azure identity layer.
+
+| Layer | Control | What it demonstrates |
+|---|---|---|
+| Source | CodeQL, Dependabot | Static analysis and dependency monitoring |
+| Build | Trivy, SBOM, Checkov | Image, dependency and IaC supply-chain checks |
+| Kubernetes | Restricted Pod Security, non-root, seccomp, dropped capabilities | Workload hardening and least privilege |
+| Network | Default-deny NetworkPolicies with explicit DNS egress | Explicit workload communication boundaries |
+| Identity | OIDC / Workload Identity and ACR permissions | Short-lived workload identity instead of stored cloud credentials |
+| Configuration | Kubeconform, policy validation and IaC parity checks | Preventing invalid or divergent infrastructure configuration |
+| Runtime | OpenTelemetry and diagnostic runbook | Security-relevant observability and Day-2 diagnosis |
+| Resilience | Controlled pod deletion and reconciliation test | Verifiable recovery behaviour rather than a resilience claim |
+
+This is intentionally different from application-level security in HealthTech Platform: CloudForge demonstrates how security controls are embedded in delivery and infrastructure rather than primarily in API business logic.
+
 ## Security
 
 - Non-root runtime containers
