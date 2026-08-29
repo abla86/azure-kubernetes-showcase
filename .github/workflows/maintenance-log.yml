@@ -44,12 +44,23 @@ jobs:
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin main
+          git rebase origin/main
           git add docs/worklog.md
           if git diff --cached --quiet; then
             exit 0
           fi
           git commit -m "docs: update automated worklog"
-          git push
+
+          for attempt in 1 2 3; do
+            if git push; then
+              exit 0
+            fi
+            git fetch origin main
+            git rebase origin/main
+          done
+          echo "Unable to push automated worklog after retries."
+          exit 1
 
       - name: Documentation sanity check
         shell: bash
