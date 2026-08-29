@@ -46,12 +46,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          matches=$(grep -RInE --exclude-dir=.git --exclude='*.lock' \
+          matches=$(git grep -nIE \
             -e 'TODO[[:space:]]*:' \
             -e 'FIXME[[:space:]]*:' \
             -e 'CHANGE_ME' \
             -e 'REPLACE_ME' \
-            . || true)
+            -- . ':(exclude)*.lock' || true)
 
           if [ -n "$matches" ]; then
             echo "Unresolved repository placeholders found:"
