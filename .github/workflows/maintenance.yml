@@ -1,16 +1,7 @@
 name: Repository Maintenance
 
 on:
-  schedule:
-    - cron: "17 4 * * 1"
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - "README.md"
-      - "CHANGELOG.md"
-      - "docs/**"
-      - ".github/workflows/maintenance.yml"
 
 permissions:
   contents: read
