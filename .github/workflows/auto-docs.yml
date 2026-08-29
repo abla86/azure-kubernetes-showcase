@@ -29,6 +29,13 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Synchronize with current main
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git reset --hard origin/main
+
       - name: Update generated repository snapshot
         shell: bash
         run: |
