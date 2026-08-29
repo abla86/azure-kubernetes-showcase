@@ -42,3 +42,7 @@
 - Commit: ci: keep CodeQL analysis local when upload unavailable
 - Branch: main
 
+### 2026-08-29T02:07:15Z — c6cca4c
+- Commit: ci: keep CodeQL manual until code scanning is enabled
+- Branch: main
+
