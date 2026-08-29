@@ -78,3 +78,7 @@
 - Commit: docs: remove duplicated repository metadata sections
 - Branch: main
 
+### 2026-08-29T21:01:51Z — 7248e69
+- Commit: docs: expose infrastructure security architecture
+- Branch: main
+
