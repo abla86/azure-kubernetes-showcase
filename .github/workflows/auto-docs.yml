@@ -93,4 +93,34 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add README.md docs/generated/repository-snapshot.md
           git commit -m "docs: sync generated repository metadata"
-          git push
+
+          for attempt in 1 2 3; do
+            if git push; then
+              exit 0
+            fi
+            git fetch origin main
+            git rebase origin/main
+            {
+              echo "# Repository Snapshot"
+              echo
+              echo "Generated automatically from \`main\`."
+              echo
+              echo "## Head"
+              echo
+              echo "- Commit: \`$(git rev-parse HEAD)\`"
+              echo "- Commit date: \`$(git log -1 --format=%cI)\`"
+              echo "- Subject: $(git log -1 --format=%s)"
+              echo
+              echo "## Engineering areas"
+              echo
+              for path in \                "apps" "src" "k8s" "infra" "security" "scripts" ".github/workflows"; do
+                if [ -d "$path" ]; then
+                  echo "- \`$path/\` present"
+                fi
+              done
+            } > docs/generated/repository-snapshot.md
+            git add docs/generated/repository-snapshot.md
+            git commit --amend --no-edit
+          done
+          echo "Unable to push generated documentation after retries."
+          exit 1
