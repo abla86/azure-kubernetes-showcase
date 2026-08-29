@@ -229,9 +229,6 @@ This is a portfolio showcase, not a production healthcare or community-managemen
 
 https://github.com/abla86/azure-kubernetes-showcase
 
-## Automated repository metadata
-
-See [generated repository snapshot](docs/generated/repository-snapshot.md) for the current repository head and tracked engineering areas.
 
 ## Change-control audit
 
@@ -239,10 +236,4 @@ See [docs/REPOSITORY-CHANGE-AUDIT-2026-08-28.md](docs/REPOSITORY-CHANGE-AUDIT-20
 
 
 
-## Automated repository metadata
 
-See [generated repository snapshot](docs/generated/repository-snapshot.md) for the current repository head and tracked engineering areas.
-
-## Automated repository metadata
-
-See [generated repository snapshot](docs/generated/repository-snapshot.md) for the current repository head and tracked engineering areas.
