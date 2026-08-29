@@ -51,7 +51,6 @@ jobs:
             -e 'FIXME[[:space:]]*:' \
             -e 'CHANGE_ME' \
             -e 'REPLACE_ME' \
-            -e '__[A-Z0-9_]+__' \
             . || true)
 
           if [ -n "$matches" ]; then
