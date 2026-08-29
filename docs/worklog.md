@@ -50,3 +50,7 @@
 - Commit: docs: update automated worklog
 - Branch: main
 
+### 2026-08-29T02:08:29Z — 61f3a29
+- Commit: ci: make legacy maintenance check manual
+- Branch: main
+
