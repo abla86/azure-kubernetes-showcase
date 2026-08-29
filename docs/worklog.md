@@ -38,3 +38,7 @@
 - Commit: fix: remove false-positive Python dunder placeholder scan
 - Branch: main
 
+### 2026-08-29T02:06:34Z — b14a748
+- Commit: ci: keep CodeQL analysis local when upload unavailable
+- Branch: main
+
