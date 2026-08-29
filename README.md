@@ -172,6 +172,8 @@ Terraform planning is automatic; actual Terraform apply is explicitly opt-in thr
 
 ## Security architecture — infrastructure and delivery
 
+**Portfolio security focus:** supply-chain security, workload hardening, least privilege, identity, network boundaries and verified recovery.
+
 CloudForge treats security as a set of controls across the software supply chain, container runtime, Kubernetes boundary and Azure identity layer.
 
 | Layer | Control | What it demonstrates |
