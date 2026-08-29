@@ -4,9 +4,9 @@ Generated automatically from `main`.
 
 ## Head
 
-- Commit: `af344e280b8e7332127e80a367a81646ab27121b`
-- Commit date: `2026-08-27T07:53:23+02:00`
-- Subject: docs: align README with automated validation and verification
+- Commit: `a7f1812dfe9a226c36fabf5de0af66b8b99aa9a4`
+- Commit date: `2026-08-29T04:00:50+02:00`
+- Subject: ci: retry generated docs push after concurrent updates
 
 ## Engineering areas
 
