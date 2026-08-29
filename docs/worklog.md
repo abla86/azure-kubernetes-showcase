@@ -82,3 +82,7 @@
 - Commit: docs: expose infrastructure security architecture
 - Branch: main
 
+### 2026-08-29T21:22:00Z — 7ceee75
+- Commit: docs: clarify security focus for portfolio review
+- Branch: main
+
