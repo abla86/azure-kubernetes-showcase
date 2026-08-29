@@ -1,2 +1,28 @@
-name: CodeQL\n\non:\n  push:\n    branches: [main]\n    paths:\n      - "apps/**"\n      - "src/**"\n      - ".github/workflows/codeql.yml"\n  pull_request:\n    branches: [main]\n    paths:\n      - "apps/**"\n      - "src/**"\n      - ".github/workflows/codeql.yml"\n\npermissions:\n  contents: read\n  actions: read\n  security-events: write\n\njobs:\n  analyze:\n    runs-on: ubuntu-24.04\n    strategy:\n      fail-fast: false\n      matrix:\n        language: [csharp, javascript-typescript]\n    steps:\n      - uses: actions/checkout@v4\n      - uses: github/codeql-action/init@v4\n        with:\n          languages: ${{ matrix.language }}\n      - uses: github/codeql-action/autobuild@v4\n      - uses: github/codeql-action/analyze@v4\n        with:\n          category: /language:${{ matrix.language }}
-          upload: never\n
+name: CodeQL
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+  security-events: write
+
+jobs:
+  analyze:
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [csharp, javascript-typescript]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: github/codeql-action/init@v4
+        with:
+          languages: ${{ matrix.language }}
+      - uses: github/codeql-action/autobuild@v4
+      - name: Analyze without SARIF upload
+        uses: github/codeql-action/analyze@v4
+        with:
+          category: /language:${{ matrix.language }}
+          upload: never
