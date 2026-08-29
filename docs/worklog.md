@@ -66,3 +66,7 @@
 - Commit: Add repository-wide governance and preservation rules
 - Branch: main
 
+### 2026-08-29T14:24:52Z — 8b023f2
+- Commit: Add GitHub dependency review for pull requests
+- Branch: main
+
