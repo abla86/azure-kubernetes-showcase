@@ -58,3 +58,7 @@
 - Commit: docs: update automated worklog
 - Branch: main
 
+### 2026-08-29T02:09:08Z — 8a9c4de
+- Commit: ci: make CodeQL manual and local until scanning upload is enabled
+- Branch: main
+
