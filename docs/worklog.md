@@ -62,3 +62,7 @@
 - Commit: ci: make CodeQL manual and local until scanning upload is enabled
 - Branch: main
 
+### 2026-08-29T14:21:22Z — a75607c
+- Commit: Add repository-wide governance and preservation rules
+- Branch: main
+
