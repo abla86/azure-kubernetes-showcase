@@ -27,6 +27,7 @@ def iter_documents() -> list[tuple[Path, dict[str, Any]]]:
 
 def validate() -> int:
     errors: list[str] = []
+    yaml_files = list(K8S_DIR.rglob("*.y*ml"))
 
     if not K8S_DIR.exists():
         print(f"ERROR: Kubernetes directory not found: {K8S_DIR}")
@@ -64,7 +65,7 @@ def validate() -> int:
                 if not isinstance(container.get(probe), dict):
                     errors.append(f"{prefix} missing {probe}")
 
-    print(f"Kubernetes policy scan complete: {len(list(K8S_DIR.rglob('*.y*ml')))} YAML files inspected")
+    print(f"Kubernetes policy scan complete: {len(yaml_files)} YAML files inspected")
     if errors:
         print(f"POLICY VIOLATIONS: {len(errors)}")
         for error in errors:
