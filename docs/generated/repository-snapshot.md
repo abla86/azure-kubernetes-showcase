@@ -4,9 +4,9 @@ Generated automatically from `main`.
 
 ## Head
 
-- Commit: `e8dfa9c10b30674123fdbfc5d792592fc6667c24`
-- Commit date: `2026-09-06T01:32:35+02:00`
-- Subject: docs: remove duplicate generated metadata section
+- Commit: `3c637118357c5a9daf20ab0601339c35b2d4f9b9`
+- Commit date: `2026-09-06T01:56:39+02:00`
+- Subject: Remove duplicate repository metadata section
 
 ## Engineering areas
 
