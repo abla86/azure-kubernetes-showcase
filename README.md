@@ -2,7 +2,7 @@
 
 [![CI/CD](https://github.com/abla86/azure-kubernetes-showcase/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/abla86/azure-kubernetes-showcase/actions/workflows/ci-cd.yml)
 
-A cloud-engineering portfolio project demonstrating .NET 10, React/TypeScript, Docker, Kubernetes, Azure IaC and DevSecOps, with deliberately small application services and controlled resilience/security demonstrations.
+A cloud-engineering portfolio project demonstrating .NET 10, React/TypeScript, Docker, Kubernetes, Azure IaC and DevSecOps, with deliberately small application services and controlled resilience/security checks.
 
 ## Fast evaluation
 
@@ -128,11 +128,11 @@ The `k8s/` directory contains the namespace, application deployments, services, 
 
 The NetworkPolicies use default-deny behavior for the protected workloads and explicitly permit required DNS egress. This reduces uncontrolled outbound communication while preserving cluster name resolution.
 
-`scripts/validate_manifests.py` enforces the required workload controls, including non-root execution, no privilege escalation, read-only root filesystems, dropped capabilities, seccomp and startup/readiness/liveness probes. Checkov and Kubeconform provide additional infrastructure and schema validation in CI.
+`scripts/validate_manifests.py` enforces the required workload controls, including non-root execution, no privilege escalation, read-only root filesystems, dropped capabilities, seccomp and startup/readiness/liveness probes.
 
 ## Azure IaC
 
-Terraform is modularized into networking, ACR, AKS and IAM/Workload Identity. The AKS configuration enables OIDC and Workload Identity and explicitly uses Azure CNI Overlay with Azure Network Policy. The networking mode is documented as an environment-specific trade-off rather than a universal best practice.
+Terraform is modularized into networking, ACR, AKS and IAM/Workload Identity. The AKS configuration enables OIDC and Workload Identity and explicitly uses Azure CNI Overlay with Azure Network Policy.
 
 Bicep remains available as a second IaC representation. CI compiles all Bicep files and validates Terraform formatting and configuration without requiring an Azure deployment.
 
@@ -140,11 +140,11 @@ The repository does not claim that Azure resources are deployed merely because t
 
 ### IaC parity
 
-See [`docs/iac-parity-matrix.md`](docs/iac-parity-matrix.md) and [`docs/iac-parity-exceptions.md`](docs/iac-parity-exceptions.md). Differences are documented explicitly rather than being marked as verified parity when evidence is incomplete.
+See [`docs/iac-parity-matrix.md`](docs/iac-parity-matrix.md) and [`docs/iac-parity-exceptions.md`](docs/iac-parity-exceptions.md). Differences are documented explicitly rather than being marked as accidental drift.
 
 ## Cost controls
 
-Terraform includes a configurable resource-group budget guardrail. Budget thresholds and notification recipients are variables rather than hardcoded secrets. The repository does not automatically delete or resize Azure resources based solely on a cost signal.
+Terraform includes a configurable resource-group budget guardrail. Budget thresholds and notification recipients are variables rather than hardcoded secrets. The repository does not automatically optimize cloud spend; it makes the cost boundaries visible.
 
 The local cost audit is self-contained and does not require a sibling checkout.
 
@@ -187,7 +187,7 @@ CloudForge treats security as a set of controls across the software supply chain
 | Runtime | OpenTelemetry and diagnostic runbook | Security-relevant observability and Day-2 diagnosis |
 | Resilience | Controlled pod deletion and reconciliation test | Verifiable recovery behaviour rather than a resilience claim |
 
-This is intentionally different from application-level security in HealthTech Platform: CloudForge demonstrates how security controls are embedded in delivery and infrastructure rather than primarily in API business logic.
+This is intentionally different from application-level security in HealthTech Platform: CloudForge demonstrates how security controls are embedded in delivery and infrastructure rather than primary application features.
 
 ## Security
 
@@ -214,15 +214,15 @@ The repository also includes `k8s-pod-doctor` as a standalone operations tool fo
 
 ## Production considerations
 
-See [`docs/production-considerations.md`](docs/production-considerations.md) for cost, networking, observability and delivery trade-offs. The repository intentionally distinguishes architecture/configuration from runtime evidence.
+See [`docs/production-considerations.md`](docs/production-considerations.md) for cost, networking, observability and delivery trade-offs. The repository intentionally distinguishes architecture choices from operational guarantees.
 
 ## Resilience
 
-`.github/workflows/chaos.yml` provides an explicitly triggered resilience test that authenticates to AKS using OIDC, deletes one selected pod and verifies that Kubernetes reconciliation restores the Deployment to its desired state. It does not claim an SLA or run destructive tests automatically.
+[`.github/workflows/chaos.yml`](.github/workflows/chaos.yml) provides an explicitly triggered resilience test that authenticates to AKS using OIDC, deletes one selected pod and verifies that Kubernetes reconciliation restores the workload.
 
 ## Verification discipline
 
-Configuration in GitHub is not treated as proof of runtime behavior. Runtime claims require successful environment-specific verification, including deployment, HTTPS/TLS, telemetry ingestion, GitOps synchronization and recovery tests.
+Configuration in GitHub is not treated as proof of runtime behavior. Runtime claims require successful environment-specific verification, including deployment, HTTPS/TLS, telemetry ingestion, GitHub Actions and smoke tests.
 
 When a required test or file is missing, the repository validation policy treats that as a failure rather than silently skipping it.
 
@@ -248,30 +248,9 @@ This is a portfolio showcase, not a production healthcare or community-managemen
 
 https://github.com/abla86/azure-kubernetes-showcase
 
-
 ## Change-control audit
 
 See [docs/REPOSITORY-CHANGE-AUDIT-2026-08-28.md](docs/REPOSITORY-CHANGE-AUDIT-2026-08-28.md) for the repository change-control and traceability record.
-
-
-
-
-
-## Automated repository metadata
-
-See [generated repository snapshot](docs/generated/repository-snapshot.md) for the current repository head and tracked engineering areas.
-
-## Automated repository metadata
-
-See [generated repository snapshot](docs/generated/repository-snapshot.md) for the current repository head and tracked engineering areas.
-
-## Automated repository metadata
-
-See [generated repository snapshot](docs/generated/repository-snapshot.md) for the current repository head and tracked engineering areas.
-
-## Automated repository metadata
-
-See [generated repository snapshot](docs/generated/repository-snapshot.md) for the current repository head and tracked engineering areas.
 
 ## Automated repository metadata
 
