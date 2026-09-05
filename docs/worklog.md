@@ -98,3 +98,7 @@
 - Commit: docs: clean internal maintenance notices and restore public documentation
 - Branch: main
 
+### 2026-09-05T23:23:17Z — 8001ea5
+- Commit: Fix Kubernetes manifest scan file counting and keep validation output accurate
+- Branch: main
+
