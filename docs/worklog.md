@@ -102,3 +102,7 @@
 - Commit: Fix Kubernetes manifest scan file counting and keep validation output accurate
 - Branch: main
 
+### 2026-09-05T23:25:16Z — 45e162e
+- Commit: Remove duplicated repository metadata sections from README
+- Branch: main
+
