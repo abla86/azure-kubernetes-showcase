@@ -4,9 +4,9 @@ Generated automatically from `main`.
 
 ## Head
 
-- Commit: `7ceee75697143bd60041d1521465b92443726cd7`
-- Commit date: `2026-08-29T23:21:50+02:00`
-- Subject: docs: clarify security focus for portfolio review
+- Commit: `e2db594f6720daa33cd8d93efd31f6b7d711a6ca`
+- Commit date: `2026-09-05T14:06:27Z`
+- Subject: docs: sync generated repository metadata
 
 ## Engineering areas
 
