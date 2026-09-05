@@ -114,3 +114,7 @@
 - Commit: docs: remove duplicate generated metadata section
 - Branch: main
 
+### 2026-09-05T23:33:10Z — d37b95b
+- Commit: fix(security-radar): build and run on .NET 10
+- Branch: main
+
