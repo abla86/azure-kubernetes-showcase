@@ -94,3 +94,7 @@
 - Commit: docs: add repository skill profile
 - Branch: main
 
+### 2026-09-05T14:06:25Z — 0f27d82
+- Commit: docs: clean internal maintenance notices and restore public documentation
+- Branch: main
+
