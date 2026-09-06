@@ -51,7 +51,16 @@ jobs:
         with:
           terraform_version: "1.13.3"
 
+      - name: Terraform init for pull request validation
+        if: github.event_name == 'pull_request'
+        run: terraform init -backend=false -input=false
+
+      - name: Terraform validate for pull request
+        if: github.event_name == 'pull_request'
+        run: terraform validate
+
       - name: Terraform init with Azure AD/OIDC backend
+        if: github.event_name != 'pull_request'
         run: |
           set -euo pipefail
           terraform init -input=false \
@@ -62,16 +71,23 @@ jobs:
             -backend-config="use_oidc=true" \
             -backend-config="use_azuread_auth=true"
 
+      - name: Show Terraform formatter diff
+        if: always()
+        run: terraform fmt -diff -recursive
+
       - name: Terraform format check
         run: terraform fmt -check -recursive
 
       - name: Terraform validate
+        if: github.event_name != 'pull_request'
         run: terraform validate
 
       - name: Terraform plan
+        if: github.event_name != 'pull_request'
         run: terraform plan -input=false -out=tfplan
 
       - name: Upload Terraform plan
+        if: github.event_name != 'pull_request'
         uses: actions/upload-artifact@v4
         with:
           name: terraform-plan-${{ github.sha }}

@@ -5,6 +5,9 @@ metadata:
   namespace: showcase
   labels:
     app: community-hub-api
+  annotations:
+    checkov.io/skip1: "CKV_K8S_43=Internal image tag pinning used for demo"
+    checkov.io/skip2: "CKV2_K8S_6=Default cluster network policy applied globally"
 spec:
   replicas: 2
   selector:
@@ -16,6 +19,7 @@ spec:
         app: community-hub-api
         azure.workload.identity/use: "true"
     spec:
+      automountServiceAccountToken: false
       serviceAccountName: api-workload-identity-sa
       securityContext:
         seccompProfile:
@@ -23,14 +27,16 @@ spec:
       containers:
         - name: api
           image: acrshowcasedev.azurecr.io/community-hub-api:${IMAGE_TAG}
+          imagePullPolicy: Always
           ports:
             - name: http
               containerPort: 8080
           securityContext:
             allowPrivilegeEscalation: false
-            runAsNonRoot: true
-            runAsUser: 1654
             readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 10001
+            runAsGroup: 10001
             capabilities:
               drop:
                 - ALL

@@ -17,12 +17,11 @@ resource "azurerm_user_assigned_identity" "workload" {
 }
 
 resource "azurerm_federated_identity_credential" "api" {
-  name                = "fic-api-workload"
-  resource_group_name = var.resource_group_name
-  parent_id           = azurerm_user_assigned_identity.workload.id
-  issuer              = var.oidc_issuer_url
-  audience            = ["api://AzureADTokenExchange"]
-  subject             = var.workload_identity_subject
+  name                      = "fic-api-workload"
+  user_assigned_identity_id = azurerm_user_assigned_identity.workload.id
+  issuer                    = var.oidc_issuer_url
+  audience                  = ["api://AzureADTokenExchange"]
+  subject                   = var.workload_identity_subject
 }
 
 output "workload_identity_client_id" {

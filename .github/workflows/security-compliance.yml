@@ -26,6 +26,9 @@ jobs:
       - uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.7.5
+      - name: Terraform fmt diagnostic
+        working-directory: infra/terraform
+        run: terraform fmt -diff -recursive
       - name: Terraform fmt check
         working-directory: infra/terraform
         run: terraform fmt -check -recursive
