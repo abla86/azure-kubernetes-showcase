@@ -186,3 +186,7 @@
 - Commit: fix: align Azure OpenTelemetry dependencies
 - Branch: main
 
+### 2026-09-06T00:38:12Z — ebc21a3
+- Commit: fix: align care portal Azure OpenTelemetry dependencies
+- Branch: main
+
