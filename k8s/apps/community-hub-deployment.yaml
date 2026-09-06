@@ -20,7 +20,6 @@ spec:
       serviceAccountName: api-workload-identity-sa
       securityContext:
         seccompProfile:
-        seccompProfile:
           type: RuntimeDefault
       containers:
         - name: api
