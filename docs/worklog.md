@@ -206,3 +206,7 @@
 - Commit: fix: make Gateway hostname renderable
 - Branch: main
 
+### 2026-09-06T00:44:56Z — 5843082
+- Commit: feat: connect verified images to AKS release deployment
+- Branch: main
+
