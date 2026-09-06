@@ -1,6 +1,6 @@
 resource "azurerm_resource_group" "rg" {
   name     = var.resource_group_name
-  location = var.location
+  location                           = var.location
   tags = {
     project     = "azure-kubernetes-showcase"
     environment = var.environment
@@ -8,24 +8,24 @@ resource "azurerm_resource_group" "rg" {
 }
 
 module "networking" {
-  source              = "./modules/networking"
-  resource_group_name = azurerm_resource_group.rg.name
-  location            = var.location
-  environment         = var.environment
+  source                             = "./modules/networking"
+  resource_group_name                = azurerm_resource_group.rg.name
+  location                           = var.location
+  environment                        = var.environment
 }
 
 module "acr" {
-  source              = "./modules/acr"
-  resource_group_name = azurerm_resource_group.rg.name
-  location            = var.location
-  environment         = var.environment
+  source                             = "./modules/acr"
+  resource_group_name                = azurerm_resource_group.rg.name
+  location                           = var.location
+  environment                        = var.environment
 }
 
 module "aks" {
-  source              = "./modules/aks"
-  resource_group_name = azurerm_resource_group.rg.name
-  location            = var.location
-  environment         = var.environment
+  source                             = "./modules/aks"
+  resource_group_name                = azurerm_resource_group.rg.name
+  location                           = var.location
+  environment                        = var.environment
   subnet_id            = module.networking.subnet_id
   kubernetes_version   = var.kubernetes_version
   node_count           = var.node_count
@@ -34,8 +34,8 @@ module "aks" {
 
 resource "azurerm_application_insights" "app" {
   name                = "appi-showcase-${var.environment}"
-  location            = var.location
-  resource_group_name = azurerm_resource_group.rg.name
+  location                           = var.location
+  resource_group_name                = azurerm_resource_group.rg.name
   application_type    = "web"
   workspace_id        = module.aks.log_analytics_workspace_id
   tags = {
