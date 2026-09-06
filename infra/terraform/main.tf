@@ -36,7 +36,7 @@ resource "azurerm_application_insights" "app" {
   name                = "appi-showcase-${var.environment}"
   location            = var.location
   resource_group_name = azurerm_resource_group.rg.name
-  application_type    = "web"
+  application_type = "web"
   workspace_id        = module.aks.log_analytics_workspace_id
   tags = {
     project     = "azure-kubernetes-showcase"
