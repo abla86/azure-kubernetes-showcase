@@ -20,11 +20,12 @@ spec:
       containers:
         - name: web
           image: azure-kubernetes-showcase-web:${IMAGE_TAG}
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
             - containerPort: 8080
           securityContext:
             runAsNonRoot: true
+            runAsUser: 1654
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
             capabilities:
