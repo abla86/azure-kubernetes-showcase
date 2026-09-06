@@ -25,7 +25,7 @@ spec:
             - containerPort: 8080
           securityContext:
             runAsNonRoot: true
-            runAsUser: 1654
+            runAsUser: 10001
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
             capabilities:
