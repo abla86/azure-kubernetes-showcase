@@ -72,7 +72,7 @@ jobs:
             -backend-config="use_azuread_auth=true"
 
       - name: Show Terraform formatter diff
-        if: failure()
+        if: always()
         run: terraform fmt -diff -recursive
 
       - name: Terraform format check
