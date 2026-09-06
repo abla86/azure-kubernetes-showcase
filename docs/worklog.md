@@ -162,3 +162,7 @@
 - Commit: Run frontend Playwright end-to-end checks in CI
 - Branch: main
 
+### 2026-09-06T00:27:10Z — 7e47c60
+- Commit: Set the production frontend document title
+- Branch: main
+
