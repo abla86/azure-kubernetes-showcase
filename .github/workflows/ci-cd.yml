@@ -162,7 +162,7 @@ jobs:
         run: |
           npm ci
           npx playwright install --with-deps chromium
-          npm run test:e2e -- --reporter=line
+          npm run test:e2e:ci
 
       - name: Set local telemetry mode
         run: echo "OTEL_ENABLED=false" >> "$GITHUB_ENV"
