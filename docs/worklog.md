@@ -134,3 +134,7 @@
 - Commit: docs: sync generated repository metadata
 - Branch: main
 
+### 2026-09-06T00:22:46Z — ebc535c
+- Commit: Expose Playwright end-to-end test command
+- Branch: main
+
