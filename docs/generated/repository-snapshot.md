@@ -4,9 +4,9 @@ Generated automatically from `main`.
 
 ## Head
 
-- Commit: `ef928801f31013d50051fe07883d323aa0a3cc85`
-- Commit date: `2026-09-06T00:38:52Z`
-- Subject: docs: sync generated repository metadata
+- Commit: `bc52666e25145019e940478fee821f3f8636c472`
+- Commit date: `2026-09-06T02:39:41+02:00`
+- Subject: fix: make Gateway hostname renderable
 
 ## Engineering areas
 
