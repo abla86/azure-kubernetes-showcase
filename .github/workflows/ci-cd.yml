@@ -157,6 +157,13 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - name: Run frontend end-to-end test suite
+        working-directory: src/Web
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+          npm run test:e2e -- --reporter=line
+
       - name: Set local telemetry mode
         run: echo "OTEL_ENABLED=false" >> "$GITHUB_ENV"
       - name: Run canonical local smoke test
