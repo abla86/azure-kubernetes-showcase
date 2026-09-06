@@ -194,3 +194,7 @@
 - Commit: fix: align community hub Azure OpenTelemetry dependencies
 - Branch: main
 
+### 2026-09-06T00:38:36Z — 054bfb3
+- Commit: fix: declare Python validation dependency
+- Branch: main
+
