@@ -3,10 +3,10 @@ name: Build, Scan and Publish
 on:
   push:
     branches: [main]
-    paths: ["apps/**", "src/**", "docker-compose.yml", ".github/workflows/build-scan-publish.yml"]
+    paths: ["apps/**", "src/**", "docker-compose.yml", "k8s/**", "scripts/**", ".github/workflows/build-scan-publish.yml"]
   pull_request:
     branches: [main]
-    paths: ["apps/**", "src/**", "docker-compose.yml", ".github/workflows/build-scan-publish.yml"]
+    paths: ["apps/**", "src/**", "docker-compose.yml", "k8s/**", "scripts/**", ".github/workflows/build-scan-publish.yml"]
 
 permissions:
   contents: read
@@ -104,3 +104,62 @@ jobs:
           docker tag "${{ matrix.name }}:${{ github.sha }}" "$ACR_LOGIN_SERVER/${{ matrix.name }}:main"
           docker push "$ACR_LOGIN_SERVER/${{ matrix.name }}:${{ github.sha }}"
           docker push "$ACR_LOGIN_SERVER/${{ matrix.name }}:main"
+
+  kubernetes-render-check:
+    name: Render and validate Kubernetes release manifests
+    runs-on: ubuntu-24.04
+    needs: [build-scan-publish]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install manifest dependencies
+        run: python -m pip install --disable-pip-version-check pyyaml
+      - name: Validate Kubernetes source policy
+        run: python scripts/validate_manifests.py
+      - name: Verify required deployment placeholders
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -R "${IMAGE_TAG}\|__APP_HOSTNAME__\|__CERT_MANAGER_EMAIL__" k8s >/dev/null
+          test -f k8s/kustomization.yaml
+
+  kubernetes-deploy:
+    name: Deploy release to AKS
+    runs-on: ubuntu-24.04
+    needs: [build-scan-publish, kubernetes-render-check]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - uses: azure/aks-set-context@v4
+        with:
+          resource-group: ${{ vars.AKS_RESOURCE_GROUP }}
+          cluster-name: ${{ vars.AKS_CLUSTER_NAME }}
+      - uses: azure/setup-kubectl@v4
+        with:
+          version: latest
+      - name: Render release manifests
+        shell: pwsh
+        env:
+          IMAGE_TAG: ${{ github.sha }}
+          APP_HOSTNAME: ${{ vars.APP_HOSTNAME }}
+          CERT_MANAGER_EMAIL: ${{ vars.CERT_MANAGER_EMAIL }}
+        run: |
+          ./scripts/render-k8s.ps1 -ImageTag $env:IMAGE_TAG -AppHostname $env:APP_HOSTNAME -CertManagerEmail $env:CERT_MANAGER_EMAIL
+      - name: Apply release manifests
+        run: kubectl apply -k .rendered-k8s
+      - name: Wait for rollout
+        run: |
+          set -euo pipefail
+          kubectl -n showcase rollout status deployment/showcase-api --timeout=180s
+          kubectl -n showcase rollout status deployment/showcase-web --timeout=180s
+          kubectl -n showcase rollout status deployment/care-portal-api --timeout=180s
+          kubectl -n showcase rollout status deployment/community-hub-api --timeout=180s
+          kubectl -n showcase rollout status deployment/security-radar --timeout=180s
