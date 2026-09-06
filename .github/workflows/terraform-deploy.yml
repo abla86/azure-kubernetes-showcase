@@ -71,6 +71,10 @@ jobs:
             -backend-config="use_oidc=true" \
             -backend-config="use_azuread_auth=true"
 
+      - name: Show Terraform formatter diff
+        if: failure()
+        run: terraform fmt -diff -recursive
+
       - name: Terraform format check
         run: terraform fmt -check -recursive
 
