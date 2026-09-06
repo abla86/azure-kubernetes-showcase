@@ -150,3 +150,7 @@
 - Commit: Complete Kubernetes workload health and filesystem security settings
 - Branch: main
 
+### 2026-09-06T00:25:10Z — 1900187
+- Commit: Align API liveness probe with the implemented health endpoint
+- Branch: main
+
