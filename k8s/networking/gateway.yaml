@@ -22,3 +22,23 @@ spec:
       allowedRoutes:
         namespaces:
           from: Same
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: showcase-web
+  namespace: showcase
+spec:
+  parentRefs:
+    - name: showcase-gateway
+      sectionName: https
+  hostnames:
+    - showcase.example.com
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: showcase-web
+          port: 80
