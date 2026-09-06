@@ -73,10 +73,15 @@ def main() -> int:
     compose_started = False
 
     try:
-        result = subprocess.run(
-            ["docker", "compose", "up", "-d", "--build"],
-            check=False,
-        )
+        try:
+            result = subprocess.run(
+                ["docker", "compose", "up", "-d", "--build"],
+                check=False,
+                timeout=180,
+            )
+        except subprocess.TimeoutExpired:
+            results.append(expect("compose-start", False, "docker compose startup exceeded 180 seconds"))
+            return 1
         compose_started = True
         results.append(
             expect(
@@ -263,7 +268,10 @@ def main() -> int:
         return 0
     finally:
         if compose_started:
-            subprocess.run(["docker", "compose", "down", "-v"], check=False)
+            try:
+                subprocess.run(["docker", "compose", "down", "-v"], check=False, timeout=60)
+            except subprocess.TimeoutExpired:
+                print("[FAIL] compose-cleanup: docker compose down exceeded 60 seconds")
 
 
 if __name__ == "__main__":
