@@ -1,4 +1,27 @@
 services:
+  api:
+    build:
+      context: ./src/Showcase.Api
+      dockerfile: Dockerfile
+    ports:
+      - "5000:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+    networks: [showcase-net]
+    restart: unless-stopped
+
+  web:
+    build:
+      context: ./src/Web
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - api
+    networks: [showcase-net]
+    restart: unless-stopped
+
   care-portal:
     build:
       context: ./apps/care-portal/CarePortal.Api
