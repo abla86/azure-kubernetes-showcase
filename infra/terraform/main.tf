@@ -53,5 +53,5 @@ module "iam" {
   environment                     = var.environment
   oidc_issuer_url                 = module.aks.oidc_issuer_url
   application_insights_id         = azurerm_application_insights.app.id
-  github_actions_principal_object_id = var.github_actions_principal_object_id
+  github_actions_principal_object_id   = var.github_actions_principal_object_id
 }
