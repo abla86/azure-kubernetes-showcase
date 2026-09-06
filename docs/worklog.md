@@ -158,3 +158,7 @@
 - Commit: Route the public gateway to the main showcase web application
 - Branch: main
 
+### 2026-09-06T00:26:28Z — 83a05d7
+- Commit: Run frontend Playwright end-to-end checks in CI
+- Branch: main
+
