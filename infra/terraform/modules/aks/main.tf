@@ -45,6 +45,10 @@ resource "azurerm_kubernetes_cluster" "aks" {
   workload_identity_enabled         = true
   role_based_access_control_enabled = true
 
+  node_provisioning_profile {
+    mode = "Manual"
+  }
+
   default_node_pool {
     name            = "system"
     node_count      = var.node_count
