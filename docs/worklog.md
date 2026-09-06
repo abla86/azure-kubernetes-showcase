@@ -166,3 +166,7 @@
 - Commit: Set the production frontend document title
 - Branch: main
 
+### 2026-09-06T00:28:09Z — 09d9d51
+- Commit: Add deterministic Playwright configuration for frontend E2E tests
+- Branch: main
+
