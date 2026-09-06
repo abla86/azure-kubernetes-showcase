@@ -25,9 +25,16 @@ spec:
             - containerPort: 8080
           securityContext:
             allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
             capabilities:
               drop:
                 - ALL
+          startupProbe:
+            httpGet:
+              path: /
+              port: 8080
+            periodSeconds: 2
+            failureThreshold: 30
           resources:
             requests:
               cpu: 50m
