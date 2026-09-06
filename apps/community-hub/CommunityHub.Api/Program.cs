@@ -16,12 +16,6 @@ builder.Services
     {
         options.Credential = credential;
     })
-    .WithTracing(tracing => tracing
-        .AddAspNetCoreInstrumentation()
-        .AddHttpClientInstrumentation())
-    .WithMetrics(metrics => metrics
-        .AddAspNetCoreInstrumentation()
-        .AddRuntimeInstrumentation());
 
 builder.Services.AddControllers();
 builder.Services.AddHealthChecks();
