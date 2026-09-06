@@ -4,7 +4,7 @@ metadata:
   name: letsencrypt-prod
 spec:
   acme:
-    email: REPLACE_WITH_REAL_EMAIL
+    email: __CERT_MANAGER_EMAIL__
     server: https://acme-v02.api.letsencrypt.org/directory
     privateKeySecretRef:
       name: letsencrypt-prod-account
@@ -27,4 +27,4 @@ spec:
     name: letsencrypt-prod
     kind: ClusterIssuer
   dnsNames:
-    - showcase.example.com
+    - __APP_HOSTNAME__
