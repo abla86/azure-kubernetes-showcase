@@ -49,7 +49,8 @@ jobs:
           dotnet-version: 10.0.x
       - run: dotnet restore
       - run: dotnet build --configuration Release --no-restore
-      - run: dotnet test --configuration Release --verbosity normal --collect:"XPlat Code Coverage"
+      - name: Test without rebuilding
+        run: dotnet test --configuration Release --no-build --verbosity normal --collect:"XPlat Code Coverage"
 
   frontend:
     name: Frontend lint and build
@@ -67,6 +68,23 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm run build
+
+  frontend-e2e:
+    name: Frontend E2E
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: src/Web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: src/Web/package-lock.json
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
 
   kubernetes:
     name: Kubernetes manifest validation
@@ -168,6 +186,9 @@ jobs:
         run: echo "OTEL_ENABLED=false" >> "$GITHUB_ENV"
       - name: Run canonical local smoke test
         run: python scripts/local_smoke_test.py
+
+      - name: Verify smoke-test dry-run path
+        run: python scripts/local_smoke_test.py --dry-run
       - name: Collect Docker diagnostics on failure
         if: failure()
         run: |
