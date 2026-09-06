@@ -4,9 +4,9 @@ Generated automatically from `main`.
 
 ## Head
 
-- Commit: `b6bc99b7f8a6a418937240d9ce9eab79fc9b8407`
-- Commit date: `2026-09-06T02:38:50+02:00`
-- Subject: fix: use immutable web image tags and internal service
+- Commit: `ef928801f31013d50051fe07883d323aa0a3cc85`
+- Commit date: `2026-09-06T00:38:52Z`
+- Subject: docs: sync generated repository metadata
 
 ## Engineering areas
 
