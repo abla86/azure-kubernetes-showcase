@@ -4,9 +4,9 @@ Generated automatically from `main`.
 
 ## Head
 
-- Commit: `36bd8c16c4bd9bb17537bdb016850e20475c67cd`
-- Commit date: `2026-09-06T02:23:12+02:00`
-- Subject: Include main API and web frontend in local smoke validation
+- Commit: `0736930efbd5c8c9cb1fceacbf372ee1a8c4a5c1`
+- Commit date: `2026-09-06T02:23:41+02:00`
+- Subject: Fix API Kubernetes probes to use the implemented health endpoint
 
 ## Engineering areas
 
