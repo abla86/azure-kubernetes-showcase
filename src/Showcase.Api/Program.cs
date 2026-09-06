@@ -106,4 +106,100 @@ app.MapGet("/api/events", () =>
 
 app.Run();
 
+public partial class Program;var telemetry = builder.Services
+    .AddOpenTelemetry()
+    .ConfigureResource(resource => resource.AddService("azure-kubernetes-showcase"));
+
+if (builder.Configuration.GetValue<bool>("OTEL_ENABLED"))
+{
+    telemetry.UseAzureMonitorExporter(options =>
+    {
+        options.Credential = new DefaultAzureCredential();
+    });
+}
+
+telemetry
+    .WithTracing(tracing => tracing
+        .AddAspNetCoreInstrumentation()
+        .AddHttpClientInstrumentation())
+    .WithMetrics(metrics => metrics
+        .AddAspNetCoreInstrumentation()
+        .AddRuntimeInstrumentation());
+
+builder.Services.AddHealthChecks();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("frontend", policy =>
+    {
+        policy
+            .AllowAnyOrigin()
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
+var app = builder.Build();
+
+app.Use(async (context, next) =>
+{
+    context.Response.Headers["X-Clacks-Overhead"] = "GNU Terry Pratchett";
+    context.Response.Headers["X-Defense-Depth"] = "Zero-Trust-Active";
+    await next();
+});
+
+app.UseSerilogRequestLogging();
+app.UseCors("frontend");
+
+// Controlled API self-test surface. It is deliberately scoped to the local app.
+app.MapGet("/.well-known/security.txt", () => Results.Text(
+    "Contact: https://github.com/abla86/azure-kubernetes-showcase/security/policy\n" +
+    "Expires: 2027-08-27T00:00:00Z\n" +
+    "Preferred-Languages: no, en\n" +
+    "Policy: https://github.com/abla86/azure-kubernetes-showcase/blob/main/SECURITY.md\n",
+    "text/plain"));
+
+app.MapGet("/api/health", () =>
+    Results.Ok(new
+    {
+        status = "healthy",
+        service = "azure-kubernetes-showcase",
+        timestamp = DateTimeOffset.UtcNow
+    }));
+
+app.MapGet("/api/info", () =>
+    Results.Ok(new
+    {
+        application = "Azure Kubernetes Showcase",
+        version = "1.0.0",
+        runtime = ".NET 10",
+        environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"
+    }));
+
+app.MapGet("/api/metrics", () =>
+    Results.Ok(new
+    {
+        status = "operational",
+        uptimeMilliseconds = Environment.TickCount64
+    }));
+
+app.MapGet("/api/events", () =>
+    Results.Ok(new[]
+    {
+        new
+        {
+            type = "deployment",
+            message = "Application running",
+            timestamp = DateTimeOffset.UtcNow
+        },
+        new
+        {
+            type = "observability",
+            message = "Health and telemetry endpoints enabled",
+            timestamp = DateTimeOffset.UtcNow
+        }
+    }));
+
+app.Run();
+
 public partial class Program;
