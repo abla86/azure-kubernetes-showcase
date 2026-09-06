@@ -182,3 +182,7 @@
 - Commit: Remove remaining duplicate generated metadata from README
 - Branch: main
 
+### 2026-09-06T00:37:58Z — 5baf404
+- Commit: fix: align Azure OpenTelemetry dependencies
+- Branch: main
+
