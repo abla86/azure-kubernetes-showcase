@@ -12,7 +12,7 @@ spec:
     - name: https
       protocol: HTTPS
       port: 443
-      hostname: showcase.example.com
+      hostname: __APP_HOSTNAME__
       tls:
         mode: Terminate
         certificateRefs:
@@ -33,7 +33,7 @@ spec:
     - name: showcase-gateway
       sectionName: https
   hostnames:
-    - showcase.example.com
+    - __APP_HOSTNAME__
   rules:
     - matches:
         - path:
