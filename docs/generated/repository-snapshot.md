@@ -4,9 +4,9 @@ Generated automatically from `main`.
 
 ## Head
 
-- Commit: `ea952a9b99c00316497ef5e4c17ba011f10bb5a7`
-- Commit date: `2026-09-06T00:25:10Z`
-- Subject: docs: update automated worklog
+- Commit: `8bd5462f618c62831fca5f120c3a231e7c75fbac`
+- Commit date: `2026-09-06T00:25:15Z`
+- Subject: docs: sync generated repository metadata
 
 ## Engineering areas
 
