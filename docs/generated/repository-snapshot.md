@@ -4,9 +4,9 @@ Generated automatically from `main`.
 
 ## Head
 
-- Commit: `e9ba283500eba7f592898df415613c63010e9014`
-- Commit date: `2026-09-06T00:20:18Z`
-- Subject: docs: update automated worklog
+- Commit: `36bd8c16c4bd9bb17537bdb016850e20475c67cd`
+- Commit date: `2026-09-06T02:23:12+02:00`
+- Subject: Include main API and web frontend in local smoke validation
 
 ## Engineering areas
 
