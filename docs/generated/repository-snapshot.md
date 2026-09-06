@@ -4,9 +4,9 @@ Generated automatically from `main`.
 
 ## Head
 
-- Commit: `054bfb3290662a311ccb60ded722fe03b2f05a04`
-- Commit date: `2026-09-06T02:38:27+02:00`
-- Subject: fix: declare Python validation dependency
+- Commit: `b6bc99b7f8a6a418937240d9ce9eab79fc9b8407`
+- Commit date: `2026-09-06T02:38:50+02:00`
+- Subject: fix: use immutable web image tags and internal service
 
 ## Engineering areas
 
