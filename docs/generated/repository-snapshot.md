@@ -4,9 +4,9 @@ Generated automatically from `main`.
 
 ## Head
 
-- Commit: `bc52666e25145019e940478fee821f3f8636c472`
-- Commit date: `2026-09-06T02:39:41+02:00`
-- Subject: fix: make Gateway hostname renderable
+- Commit: `989aeb3251e38d02fd009232c37c5fbee1eb9355`
+- Commit date: `2026-09-06T02:39:46+02:00`
+- Subject: fix: render all required Kubernetes deployment values
 
 ## Engineering areas
 
