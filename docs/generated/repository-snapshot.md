@@ -4,9 +4,9 @@ Generated automatically from `main`.
 
 ## Head
 
-- Commit: `3f1092f8ed14353c76729d027f9a5c4a7f5fb2e3`
-- Commit date: `2026-09-06T00:31:20Z`
-- Subject: docs: sync generated repository metadata
+- Commit: `054bfb3290662a311ccb60ded722fe03b2f05a04`
+- Commit date: `2026-09-06T02:38:27+02:00`
+- Subject: fix: declare Python validation dependency
 
 ## Engineering areas
 
