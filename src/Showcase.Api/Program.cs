@@ -57,7 +57,7 @@ app.UseCors("frontend");
 
 // Controlled API self-test surface. It is deliberately scoped to the local app.
 app.MapGet("/.well-known/security.txt", () => Results.Text(
-    "Contact: mailto:REPLACE-WITH-REAL-SECURITY-CONTACT@example.invalid\n" +
+    "Contact: https://github.com/abla86/azure-kubernetes-showcase/security/policy\n" +
     "Expires: 2027-08-27T00:00:00Z\n" +
     "Preferred-Languages: no, en\n" +
     "Policy: https://github.com/abla86/azure-kubernetes-showcase/blob/main/SECURITY.md\n",
