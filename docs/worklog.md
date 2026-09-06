@@ -154,3 +154,7 @@
 - Commit: Align API liveness probe with the implemented health endpoint
 - Branch: main
 
+### 2026-09-06T00:25:54Z — b643983
+- Commit: Route the public gateway to the main showcase web application
+- Branch: main
+
