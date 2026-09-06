@@ -202,3 +202,7 @@
 - Commit: docs: sync generated repository metadata
 - Branch: main
 
+### 2026-09-06T00:39:43Z — bc52666
+- Commit: fix: make Gateway hostname renderable
+- Branch: main
+
