@@ -4,9 +4,9 @@ Generated automatically from `main`.
 
 ## Head
 
-- Commit: `c35fe954d332001985a1d79342457e399a9c0dee`
-- Commit date: `2026-09-06T00:25:54Z`
-- Subject: docs: update automated worklog
+- Commit: `8785b63c281caa09c0c96bc61095906358227e0c`
+- Commit date: `2026-09-06T02:30:05+02:00`
+- Subject: Remove duplicated generated metadata sections
 
 ## Engineering areas
 
