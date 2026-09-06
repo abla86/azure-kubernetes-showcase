@@ -19,7 +19,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: web
-          image: azure-kubernetes-showcase-web:latest
+          image: azure-kubernetes-showcase-web:${IMAGE_TAG}
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
@@ -57,7 +57,7 @@ metadata:
   name: showcase-web
   namespace: showcase
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   selector:
     app: showcase-web
   ports:
