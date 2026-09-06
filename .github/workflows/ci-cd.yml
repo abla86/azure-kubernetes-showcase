@@ -12,7 +12,8 @@ on:
       - "scripts/**"
       - "docker-compose.yml"
       - "Makefile"
-      - ".github/workflows/ci-cd.yml"
+      - "infra/**"
+      - ".github/workflows/**"
   pull_request:
     branches: [main]
     paths:
@@ -24,7 +25,8 @@ on:
       - "scripts/**"
       - "docker-compose.yml"
       - "Makefile"
-      - ".github/workflows/ci-cd.yml"
+      - "infra/**"
+      - ".github/workflows/**"
   workflow_dispatch:
 
 permissions:
