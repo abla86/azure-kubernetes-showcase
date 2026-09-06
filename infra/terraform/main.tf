@@ -45,13 +45,13 @@ resource "azurerm_application_insights" "app" {
 }
 
 module "iam" {
-  source                            = "./modules/iam"
-  acr_id                            = module.acr.acr_id
-  principal_id                      = module.aks.kubelet_identity_object_id
-  resource_group_name               = azurerm_resource_group.rg.name
-  location                          = var.location
-  environment                       = var.environment
-  oidc_issuer_url                   = module.aks.oidc_issuer_url
-  application_insights_id           = azurerm_application_insights.app.id
+  source                             = "./modules/iam"
+  acr_id                             = module.acr.acr_id
+  principal_id                       = module.aks.kubelet_identity_object_id
+  resource_group_name                = azurerm_resource_group.rg.name
+  location                           = var.location
+  environment                        = var.environment
+  oidc_issuer_url                    = module.aks.oidc_issuer_url
+  application_insights_id            = azurerm_application_insights.app.id
   github_actions_principal_object_id = var.github_actions_principal_object_id
 }
