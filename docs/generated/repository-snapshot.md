@@ -4,9 +4,9 @@ Generated automatically from `main`.
 
 ## Head
 
-- Commit: `be35d7de6a0e5280901a51a1fa58be0ec3369bd0`
-- Commit date: `2026-09-06T00:39:52Z`
-- Subject: docs: sync generated repository metadata
+- Commit: `48eb53edeb25e1d3e17f79a0ac460110896361d2`
+- Commit date: `2026-09-07T07:18:21+02:00`
+- Subject: feat: add interactive portfolio demonstration
 
 ## Engineering areas
 
