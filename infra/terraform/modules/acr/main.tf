@@ -11,17 +11,20 @@ variable "environment" {
 }
 
 resource "azurerm_container_registry" "acr" {
-  name                         = "acrshowcase${var.environment}"
-  resource_group_name          = var.resource_group_name
-  location                     = var.location
-  sku                          = "Premium"
-  admin_enabled                = false
-  anonymous_pull_enabled       = false
-  data_endpoint_enabled       = true
-  quarantine_policy_enabled   = true
-  retention_policy_in_days     = 7
-  trust_policy_enabled        = true
-  zone_redundancy_enabled     = true
+  name                      = "acrshowcase${var.environment}"
+  resource_group_name       = var.resource_group_name
+  location                  = var.location
+  sku                       = "Premium"
+  admin_enabled             = false
+  anonymous_pull_enabled    = false
+  data_endpoint_enabled     = true
+  quarantine_policy_enabled = true
+  retention_policy_in_days  = 7
+  zone_redundancy_enabled   = true
+
+  trust_policy {
+    enabled = true
+  }
 }
 
 output "acr_id" {
