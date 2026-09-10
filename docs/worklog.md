@@ -274,3 +274,7 @@
 - Commit: ci: add Terraform formatting diagnostic
 - Branch: main
 
+### 2026-09-10T23:16:52Z — a082f26
+- Commit: feat: align Bicep AKS identity security with Terraform
+- Branch: main
+
