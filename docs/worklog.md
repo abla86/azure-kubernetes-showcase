@@ -282,3 +282,7 @@
 - Commit: ci: pin kubeconform validator image
 - Branch: main
 
+### 2026-09-10T23:17:44Z — a534436
+- Commit: fix: use current Azure federated credential schema
+- Branch: main
+
