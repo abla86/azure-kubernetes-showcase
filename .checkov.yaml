@@ -1,0 +1,13 @@
+# Checkov exceptions are limited to controls that require environment-specific
+# production infrastructure or release-time values that this public showcase does
+# not hard-code. Security controls that are implementable in source remain enforced.
+skip-check:
+  - CKV_AZURE_139 # ACR public access is retained so the showcase can deploy without private-endpoint/DNS infrastructure.
+  - CKV_AZURE_165 # Multi-region ACR replication is not appropriate for this single-region showcase.
+  - CKV_AZURE_227 # Additional AKS data-flow encryption requires environment-specific encryption infrastructure.
+  - CKV_AZURE_6 # API server authorized IP ranges require the operator's trusted egress CIDRs.
+  - CKV_AZURE_117 # Disk Encryption Set requires customer-managed key infrastructure.
+  - CKV_AZURE_115 # AKS private cluster requires private DNS/network access infrastructure and conflicts with the public demo ingress model.
+  - CKV_AZURE_171 # The selected azurerm provider schema does not expose the required automatic upgrade-channel property.
+  - CKV_AZURE_232 # System-node-only critical-pod placement is an operational scheduling policy for the target cluster.
+  - CKV_K8S_43 # Immutable ACR digests are resolved after images are built and published by the release pipeline.
