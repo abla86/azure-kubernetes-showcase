@@ -278,3 +278,7 @@
 - Commit: feat: align Bicep AKS identity security with Terraform
 - Branch: main
 
+### 2026-09-10T23:17:14Z — 5c383ed
+- Commit: ci: pin kubeconform validator image
+- Branch: main
+
