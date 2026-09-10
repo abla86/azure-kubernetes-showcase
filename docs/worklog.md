@@ -310,3 +310,7 @@
 - Commit: docs: sync generated repository metadata
 - Branch: main
 
+### 2026-09-10T23:27:40Z — 96fc59f
+- Commit: ci: pin kubectl to supported Kubernetes release
+- Branch: main
+
