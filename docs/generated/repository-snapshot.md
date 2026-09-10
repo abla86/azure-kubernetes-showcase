@@ -4,9 +4,9 @@ Generated automatically from `main`.
 
 ## Head
 
-- Commit: `48eb53edeb25e1d3e17f79a0ac460110896361d2`
-- Commit date: `2026-09-07T07:18:21+02:00`
-- Subject: feat: add interactive portfolio demonstration
+- Commit: `e47f5af1d8158e0d7399f0bd4c0b3ecf4211f360`
+- Commit date: `2026-09-11T01:02:06+02:00`
+- Subject: Fix Kustomize image replacement targets
 
 ## Engineering areas
 
