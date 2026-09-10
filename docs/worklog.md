@@ -258,3 +258,7 @@
 - Commit: Tighten Bicep resource prefix validation
 - Branch: main
 
+### 2026-09-10T23:15:16Z — 157485e
+- Commit: fix: add OpenTelemetry core package to care API
+- Branch: main
+
