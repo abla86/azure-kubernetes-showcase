@@ -294,3 +294,7 @@
 - Commit: security: harden community hub pod runtime defaults
 - Branch: main
 
+### 2026-09-10T23:26:45Z — 54fa741
+- Commit: security: add network policies for web and security radar
+- Branch: main
+
