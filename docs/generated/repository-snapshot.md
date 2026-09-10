@@ -4,8 +4,8 @@ Generated automatically from `main`.
 
 ## Head
 
-- Commit: `c44d0623c872ef279a5d7170471669ef2502d716`
-- Commit date: `2026-09-10T23:26:47Z`
+- Commit: `078a4bbff75c28e92ff91d6123daac9fce51c17c`
+- Commit date: `2026-09-10T23:26:57Z`
 - Subject: docs: sync generated repository metadata
 
 ## Engineering areas
