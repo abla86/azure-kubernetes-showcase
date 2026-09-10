@@ -326,3 +326,7 @@
 - Commit: docs: sync generated repository metadata
 - Branch: main
 
+### 2026-09-10T23:31:27Z — 7402fab
+- Commit: ci: make Azure Terraform deployment explicitly manual
+- Branch: main
+
