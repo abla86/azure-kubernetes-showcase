@@ -4,9 +4,9 @@ Generated automatically from `main`.
 
 ## Head
 
-- Commit: `3f5c841bcc62d887215736a5ab46db36a38e4eaa`
-- Commit date: `2026-09-10T23:28:29Z`
-- Subject: docs: sync generated repository metadata
+- Commit: `a375d370ed785125c3ca0ad1813c2f721382507d`
+- Commit date: `2026-09-11T01:30:31+02:00`
+- Subject: fix: preserve AKS log workspace output
 
 ## Engineering areas
 
