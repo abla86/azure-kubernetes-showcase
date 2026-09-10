@@ -4,9 +4,9 @@ Generated automatically from `main`.
 
 ## Head
 
-- Commit: `5d16272c3cf6cd218179da0804b09d49060e7bc0`
-- Commit date: `2026-09-10T23:17:44Z`
-- Subject: docs: update automated worklog
+- Commit: `7057971206695ef063e7b527b92068cc6079e133`
+- Commit date: `2026-09-11T01:26:13+02:00`
+- Subject: security: harden web pod runtime defaults
 
 ## Engineering areas
 
