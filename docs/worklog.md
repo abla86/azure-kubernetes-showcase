@@ -286,3 +286,7 @@
 - Commit: fix: use current Azure federated credential schema
 - Branch: main
 
+### 2026-09-10T23:26:14Z — 7057971
+- Commit: security: harden web pod runtime defaults
+- Branch: main
+
