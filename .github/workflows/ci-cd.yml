@@ -76,8 +76,8 @@ jobs:
       - uses: azure/setup-kubectl@v4
         with:
           version: latest
-      - name: Render and dry-run manifests
-        run: kubectl kustomize k8s/ | kubectl apply --dry-run=client --validate=false -f -
+      - name: Render Kustomize manifests
+        run: kubectl kustomize k8s/ > rendered-k8s.yaml
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
