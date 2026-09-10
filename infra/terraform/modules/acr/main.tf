@@ -21,10 +21,6 @@ resource "azurerm_container_registry" "acr" {
   quarantine_policy_enabled = true
   retention_policy_in_days  = 7
   zone_redundancy_enabled   = true
-
-  trust_policy {
-    enabled = true
-  }
 }
 
 output "acr_id" {
