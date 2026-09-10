@@ -338,3 +338,7 @@
 - Commit: fix(terraform): align ACR resource with azurerm 5.x schema
 - Branch: main
 
+### 2026-09-10T23:36:54Z — 070de31
+- Commit: security: document justified Checkov exceptions
+- Branch: main
+
