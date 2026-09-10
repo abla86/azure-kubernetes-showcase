@@ -330,3 +330,7 @@
 - Commit: ci: make Azure Terraform deployment explicitly manual
 - Branch: main
 
+### 2026-09-10T23:31:39Z — 441b705
+- Commit: security: align Bicep ACR with hardened Terraform baseline
+- Branch: main
+
