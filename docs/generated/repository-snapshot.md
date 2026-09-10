@@ -4,9 +4,9 @@ Generated automatically from `main`.
 
 ## Head
 
-- Commit: `5f4600c9461fe6f16f221474de192676230e8688`
-- Commit date: `2026-09-11T01:26:20+02:00`
-- Subject: security: harden care portal pod runtime defaults
+- Commit: `fdd8fcba7b9b29a0b658ad4546c294c0d78e5c90`
+- Commit date: `2026-09-10T23:26:34Z`
+- Subject: docs: sync generated repository metadata
 
 ## Engineering areas
 
