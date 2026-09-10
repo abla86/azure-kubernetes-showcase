@@ -4,9 +4,9 @@ Generated automatically from `main`.
 
 ## Head
 
-- Commit: `e47f5af1d8158e0d7399f0bd4c0b3ecf4211f360`
-- Commit date: `2026-09-11T01:02:06+02:00`
-- Subject: Fix Kustomize image replacement targets
+- Commit: `22b4c8e0bbe802914a408fb95a366e3350239770`
+- Commit date: `2026-09-11T01:02:24+02:00`
+- Subject: Format Terraform root configuration
 
 ## Engineering areas
 
