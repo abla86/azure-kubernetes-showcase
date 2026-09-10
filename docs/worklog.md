@@ -262,3 +262,7 @@
 - Commit: fix: add OpenTelemetry core package to care API
 - Branch: main
 
+### 2026-09-10T23:15:33Z — 5e9daf5
+- Commit: security: enforce non-root web container
+- Branch: main
+
