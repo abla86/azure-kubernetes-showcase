@@ -19,14 +19,31 @@ resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
   }
 }
 
-resource registry 'Microsoft.ContainerRegistry/registries@2023-07-01' = {
+resource registry 'Microsoft.ContainerRegistry/registries@2026-03-01-preview' = {
   name: '${namePrefix}acr'
   location: location
   sku: {
-    name: 'Basic'
+    name: 'Premium'
   }
   properties: {
     adminUserEnabled: false
+    anonymousPullEnabled: false
+    dataEndpointEnabled: true
+    policies: {
+      quarantinePolicy: {
+        status: 'enabled'
+      }
+      retentionPolicy: {
+        days: 7
+        status: 'enabled'
+      }
+      trustPolicy: {
+        status: 'enabled'
+        type: 'Notary'
+      }
+    }
+    publicNetworkAccess: 'Enabled'
+    zoneRedundancy: 'Enabled'
   }
 }
 
