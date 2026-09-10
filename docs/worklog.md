@@ -314,3 +314,7 @@
 - Commit: ci: pin kubectl to supported Kubernetes release
 - Branch: main
 
+### 2026-09-10T23:28:27Z — ecdf43f
+- Commit: security: pin pod security standard to Kubernetes 1.37
+- Branch: main
+
