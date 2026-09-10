@@ -56,7 +56,6 @@ app.Use(async (context, next) =>
 app.UseSerilogRequestLogging();
 app.UseCors("frontend");
 
-// Controlled API self-test surface. It is deliberately scoped to the local app.
 app.MapGet("/.well-known/security.txt", () => Results.Text(
     "Contact: https://github.com/abla86/azure-kubernetes-showcase/security/policy\n" +
     "Expires: 2027-08-27T00:00:00Z\n" +
