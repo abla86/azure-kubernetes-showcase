@@ -1,30 +1,51 @@
 @description('Azure region for all showcase resources.')
 param location string = resourceGroup().location
+
 @description('Short, lowercase resource prefix. Azure Container Registry names require at least five characters.')
 @minLength(5)
 param namePrefix string = 'azkshowcase'
+
 @description('AKS node count for the demonstration environment.')
 param agentCount int = 2
+
 @description('AKS node VM size. Review Azure pricing before deployment.')
 param agentVmSize string = 'Standard_B2s'
 
 resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
   name: '${namePrefix}-logs'
   location: location
-  properties: { retentionInDays: 30 }
+  properties: {
+    retentionInDays: 30
+  }
 }
+
 resource registry 'Microsoft.ContainerRegistry/registries@2023-07-01' = {
   name: '${namePrefix}acr'
   location: location
-  sku: { name: 'Basic' }
-  properties: { adminUserEnabled: false }
+  sku: {
+    name: 'Basic'
+  }
+  properties: {
+    adminUserEnabled: false
+  }
 }
+
 resource aks 'Microsoft.ContainerService/managedClusters@2024-09-01' = {
   name: '${namePrefix}-aks'
   location: location
-  identity: { type: 'SystemAssigned' }
+  identity: {
+    type: 'SystemAssigned'
+  }
   properties: {
     dnsPrefix: '${namePrefix}-aks'
+    oidcIssuerProfile: {
+      enabled: true
+    }
+    securityProfile: {
+      workloadIdentity: {
+        enabled: true
+      }
+    }
     agentPoolProfiles: [{
       name: 'system'
       count: agentCount
