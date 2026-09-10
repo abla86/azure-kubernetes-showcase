@@ -254,3 +254,7 @@
 - Commit: Normalize Terraform formatting
 - Branch: main
 
+### 2026-09-10T23:04:36Z — 55268e5
+- Commit: Tighten Bicep resource prefix validation
+- Branch: main
+
