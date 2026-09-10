@@ -4,9 +4,9 @@ Generated automatically from `main`.
 
 ## Head
 
-- Commit: `ab21bd1507efe3c713577cf6fa77d44f1fccfd77`
-- Commit date: `2026-09-11T01:02:52+02:00`
-- Subject: Harden AKS node provisioning and format network profile
+- Commit: `d5a8f511a11d222109aecb5a30ea4411ca21c754`
+- Commit date: `2026-09-10T23:04:12Z`
+- Subject: docs: sync generated repository metadata
 
 ## Engineering areas
 
