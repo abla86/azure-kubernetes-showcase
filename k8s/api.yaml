@@ -20,6 +20,13 @@ spec:
         runAsNonRoot: true
         seccompProfile:
           type: RuntimeDefault
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: DoNotSchedule
+          labelSelector:
+            matchLabels:
+              app: showcase-api
       containers:
         - name: api
           image: azure-kubernetes-showcase-api:${IMAGE_TAG}
