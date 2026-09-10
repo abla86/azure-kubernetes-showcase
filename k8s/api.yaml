@@ -15,6 +15,7 @@ spec:
         azure.workload.identity/use: "true"
     spec:
       serviceAccountName: api-workload-identity-sa
+      automountServiceAccountToken: false
       securityContext:
         runAsNonRoot: true
         seccompProfile:
@@ -22,11 +23,13 @@ spec:
       containers:
         - name: api
           image: azure-kubernetes-showcase-api:${IMAGE_TAG}
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
             - containerPort: 8080
           securityContext:
             runAsNonRoot: true
+            runAsUser: 10001
+            runAsGroup: 10001
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
             capabilities:
