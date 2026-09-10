@@ -41,7 +41,6 @@ resource "azurerm_kubernetes_cluster" "aks" {
   resource_group_name               = var.resource_group_name
   dns_prefix                        = "aks-showcase-${var.environment}"
   kubernetes_version                = var.kubernetes_version
-  automatic_channel_upgrade         = "patch"
   oidc_issuer_enabled               = true
   workload_identity_enabled         = true
   role_based_access_control_enabled = true
@@ -50,7 +49,7 @@ resource "azurerm_kubernetes_cluster" "aks" {
   sku_tier                          = "Standard"
 
   key_vault_secrets_provider {
-    secret_rotation_enabled = true
+    secret_rotation_enabled  = true
     secret_rotation_interval = "2m"
   }
 
