@@ -334,3 +334,7 @@
 - Commit: security: align Bicep ACR with hardened Terraform baseline
 - Branch: main
 
+### 2026-09-10T23:36:40Z — 85e1b8e
+- Commit: fix(terraform): align ACR resource with azurerm 5.x schema
+- Branch: main
+
