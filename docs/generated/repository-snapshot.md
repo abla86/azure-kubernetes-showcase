@@ -4,9 +4,9 @@ Generated automatically from `main`.
 
 ## Head
 
-- Commit: `e92a1a750bfbcc0dab30a7244f08ec40b2f1ecab`
-- Commit date: `2026-09-10T23:02:38Z`
-- Subject: docs: update automated worklog
+- Commit: `ab21bd1507efe3c713577cf6fa77d44f1fccfd77`
+- Commit date: `2026-09-11T01:02:52+02:00`
+- Subject: Harden AKS node provisioning and format network profile
 
 ## Engineering areas
 
