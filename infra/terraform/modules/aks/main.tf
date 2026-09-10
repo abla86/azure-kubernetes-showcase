@@ -41,9 +41,18 @@ resource "azurerm_kubernetes_cluster" "aks" {
   resource_group_name               = var.resource_group_name
   dns_prefix                        = "aks-showcase-${var.environment}"
   kubernetes_version                = var.kubernetes_version
+  automatic_channel_upgrade         = "patch"
   oidc_issuer_enabled               = true
   workload_identity_enabled         = true
   role_based_access_control_enabled = true
+  local_account_disabled            = true
+  azure_policy_enabled              = true
+  sku_tier                          = "Standard"
+
+  key_vault_secrets_provider {
+    secret_rotation_enabled = true
+    secret_rotation_interval = "2m"
+  }
 
   node_provisioning_profile {
     mode = "Manual"
@@ -56,6 +65,8 @@ resource "azurerm_kubernetes_cluster" "aks" {
     vnet_subnet_id  = var.subnet_id
     type            = "VirtualMachineScaleSets"
     os_disk_size_gb = 50
+    os_disk_type    = "Ephemeral"
+    max_pods        = 50
   }
 
   identity {
