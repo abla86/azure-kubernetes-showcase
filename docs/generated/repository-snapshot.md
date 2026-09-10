@@ -4,9 +4,9 @@ Generated automatically from `main`.
 
 ## Head
 
-- Commit: `a375d370ed785125c3ca0ad1813c2f721382507d`
-- Commit date: `2026-09-11T01:30:31+02:00`
-- Subject: fix: preserve AKS log workspace output
+- Commit: `2819cd06408589309fef2de2a807e873ff66a4d2`
+- Commit date: `2026-09-10T23:30:38Z`
+- Subject: docs: update automated worklog
 
 ## Engineering areas
 
