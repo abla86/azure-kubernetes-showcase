@@ -238,3 +238,7 @@
 - Commit: Harden AKS node provisioning and format network profile
 - Branch: main
 
+### 2026-09-10T23:03:18Z — ca8abdd
+- Commit: Fix Care Portal telemetry configuration
+- Branch: main
+
