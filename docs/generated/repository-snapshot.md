@@ -4,9 +4,9 @@ Generated automatically from `main`.
 
 ## Head
 
-- Commit: `bf5841b5979c7c9eabcf18d1e4f70684bd1507ae`
-- Commit date: `2026-09-11T01:27:13+02:00`
-- Subject: security: associate NSG with AKS subnet
+- Commit: `a5a63bffe12f5164270b8ae05fe21a0cbf5039b3`
+- Commit date: `2026-09-10T23:27:14Z`
+- Subject: docs: sync generated repository metadata
 
 ## Engineering areas
 
