@@ -1,6 +1,7 @@
 @description('Azure region for all showcase resources.')
 param location string = resourceGroup().location
-@description('Short, lowercase resource prefix.')
+@description('Short, lowercase resource prefix. Azure Container Registry names require at least five characters.')
+@minLength(5)
 param namePrefix string = 'azkshowcase'
 @description('AKS node count for the demonstration environment.')
 param agentCount int = 2
@@ -38,19 +39,5 @@ resource aks 'Microsoft.ContainerService/managedClusters@2024-09-01' = {
       loadBalancerSku: 'standard'
       outboundType: 'loadBalancer'
     }
-    oidcIssuerProfile: { enabled: true }
-    securityProfile: { workloadIdentity: { enabled: true } }
   }
 }
-resource acrPull 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(registry.id, aks.id, 'acrpull')
-  scope: registry
-  properties: {
-    principalId: aks.identity.principalId
-    principalType: 'ServicePrincipal'
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '7f951dda-4ed3-4680-a7ca-43fe172d538d')
-  }
-}
-output aksName string = aks.name
-output registryName string = registry.name
-output logWorkspaceName string = logAnalytics.name
