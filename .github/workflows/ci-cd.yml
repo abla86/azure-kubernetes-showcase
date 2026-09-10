@@ -75,7 +75,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: azure/setup-kubectl@v4
         with:
-          version: latest
+          version: 1.37.0
       - name: Render Kustomize manifests
         run: kubectl kustomize k8s/ > rendered-k8s.yaml
       - uses: actions/setup-python@v5
