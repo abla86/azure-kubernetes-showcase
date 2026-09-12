@@ -120,7 +120,6 @@ Then the local services are available on the ports documented by the Compose con
 The `k8s/` directory contains the Kubernetes deployment model, including:
 
 - Namespace and workloads
-- Services
 - startup/readiness/liveness probes
 - HPA
 - Gateway API routes
@@ -163,7 +162,7 @@ The repository contains workflows for:
 15. Repository maintenance and documentation checks
 16. Explicitly triggered AKS resilience testing
 
-GitHub's Azure deployment documentation recommends an existing AKS/ACR target and authenticated Azure credentials for deployment workflows. This repository uses Azure OIDC rather than committing long-lived Azure credentials. citeturn0search0
+The Azure deployment workflow uses OIDC rather than long-lived Azure credentials stored in the repository.
 
 ## Security architecture
 
@@ -229,10 +228,6 @@ The repository includes:
 ## Repository
 
 https://github.com/abla86/azure-kubernetes-showcase
-
-## Automated repository metadata
-
-See [generated repository snapshot](docs/generated/repository-snapshot.md) for the current repository head and tracked engineering areas.
 
 ## Automated repository metadata
 
