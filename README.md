@@ -2,80 +2,59 @@
 
 [![CI/CD](https://github.com/abla86/azure-kubernetes-showcase/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/abla86/azure-kubernetes-showcase/actions/workflows/ci-cd.yml)
 
-A cloud-engineering portfolio project demonstrating .NET 10, React/TypeScript, Docker, Kubernetes, Azure IaC and DevSecOps, with deliberately small application services and controlled resilience/security checks.
+A public cloud-engineering portfolio project demonstrating **.NET 10, React/TypeScript, Docker, Kubernetes, Azure, Infrastructure as Code, CI/CD, DevSecOps and observability**.
 
-## Fast evaluation
+> **Portfolio status:** Public repository and deployment-ready infrastructure showcase. Azure deployment is intentionally opt-in because it creates billable cloud resources. Runtime deployment claims are not made until an actual Azure/AKS environment has been provisioned and verified.
 
-**Test the application layer locally:**
-
-```powershell
-docker compose up --build
-```
-
-Then open Security Radar at `http://localhost:5080`, Care Portal at `http://localhost:5001` and Community Hub at `http://localhost:5002`.
-
-**Canonical local verification:**
-
-```powershell
-python scripts/local_smoke_test.py
-```
-
-The smoke test starts the Compose stack, waits for service health, verifies Security Radar capabilities, exercises the controlled ghost route and rate limiter, validates the local security-event feed, and always tears the stack down afterwards.
-
-## What it demonstrates
+## What this project demonstrates
 
 - ASP.NET Core / .NET 10 APIs
 - React + TypeScript + Vite
-- Core Showcase API, Care Portal and Community Hub modules
-- Multi-stage non-root Docker containers
-- Kubernetes Deployments, Services, startup/readiness/liveness probes, HPA and NetworkPolicy
+- Modular service boundaries
+- Multi-stage, non-root Docker images
+- Kubernetes Deployments, Services, probes, HPA and NetworkPolicy
 - Restricted Pod Security
+- Azure Kubernetes Service (AKS)
+- Azure Container Registry (ACR)
 - Azure Bicep and modular Terraform
 - AKS OIDC / Workload Identity
-- ACR pull permissions
 - GitHub Actions CI/CD
 - CodeQL, Dependabot, Trivy and SBOM generation
-- OpenTelemetry with optional local collector and Azure Monitor integration
-- Security Radar for controlled security-event simulation
-- Automated local API security self-tests
+- OpenTelemetry and Azure Monitor integration points
+- Automated API security self-tests
 - Controlled Kubernetes resilience testing
-- IaC parity checks and repository-maintenance automation
+- IaC validation and parity checks
+- Day-2 diagnostic documentation
 
 ## Architecture
 
 ```text
-Developer / PR
-      |
-      v
-GitHub Actions
-  |   |   |   |   |
-  |   |   |   |   +--> SBOM
-  |   |   |   +------> Trivy
-  |   |   +----------> CodeQL
-  |   +--------------> Checkov / Kubeconform / policy
-  +------------------> Build / Test / Smoke
-            |
-            v
-        ACR (OIDC)
-            |
-            v
-          ArgoCD
-            |
-            v
-           AKS
-            |
-    +-------+--------+
-    |       |        |
-    v       v        v
-  Core    Care    Community
-  API    Portal      Hub
-            |
-            +---- Security Radar
-            |
-            v
-  NetworkPolicy / Restricted Pods
-            |
-            v
+Developer / Pull Request
+          |
+          v
+    GitHub Actions
+   /  |  |  |  \
+  v   v  v  v   v
+Build Test CodeQL Trivy SBOM
+          |
+          v
+       Azure ACR
+          |
+          v
+        Argo CD
+          |
+          v
+         AKS
+          |
+     +----+----+----+
+     |    |    |    |
+    Core Care Community Security
+     API Portal   Hub    Radar
+          |
+          v
+ NetworkPolicy / Pod Security
+          |
+          v
  OpenTelemetry -> Azure Monitor
 ```
 
@@ -84,309 +63,169 @@ GitHub Actions
 ### Core Showcase API
 `src/Showcase.Api/`
 
-The original portfolio API with health, information, metrics and example event endpoints.
+The main .NET API containing health, information, metrics and example event endpoints.
 
 ### Care Portal
 `apps/care-portal/CarePortal.Api/`
 
-A small demonstration service for care-coordination concepts. It contains no patient data and uses in-memory example data only.
+A deliberately small demonstration service for service-boundary and API design. It contains no patient data and uses demonstration data only.
 
 ### Community Hub
 `apps/community-hub/CommunityHub.Api/`
 
-A small demonstration service for shared resources. It contains no real personal data and uses in-memory example data only.
+A small demonstration service for shared-resource scenarios. It contains no real personal data.
 
 ### Security Radar
 `apps/security-radar/`
 
-A controlled operations/security demonstration with a local event feed, bounded-delay simulation endpoint, rate limiting and application-level ghost route. It does not claim to be a production SIEM or intrusion-detection platform.
+A controlled security/operations demonstration with a local event feed, bounded-delay simulation, rate limiting and an application-level test route. It is **not** presented as a production SIEM or intrusion-detection platform.
 
-## Local development
+## Local verification
 
-Prerequisites: .NET 10 SDK, Node.js 22+, Docker Desktop, kubectl and optionally Azure CLI/Terraform.
+### Prerequisites
+
+- .NET 10 SDK
+- Node.js 22+
+- Docker Desktop
+- Python 3.12+
+- kubectl
+- Azure CLI and Terraform for infrastructure work
+
+### Build and test
 
 ```powershell
 dotnet restore
 dotnet build --configuration Release
 dotnet test --configuration Release
+
+cd src/Web
+npm ci
+npm run lint
+npm run build
+cd ../..
+
 python scripts/local_smoke_test.py
 ```
 
-The local Compose stack contains the application services used for the defensive self-test plus Security Radar. The infrastructure layer remains separately deployable to Azure/AKS.
+### Run the local stack
 
-## Automated security self-test
+```powershell
+docker compose up --build
+```
 
-`security/api-self-test.py` checks only the project's declared local endpoints. It verifies health responses and ensures sensitive-looking paths such as `.env`, `config.json` and `/admin` are not unexpectedly exposed.
-
-`scripts/local_smoke_test.py` is the canonical integration smoke test. It fails on missing or incorrect required behavior and returns a non-zero exit code when any required assertion fails.
-
-The main CI workflow runs the same smoke test automatically on pushes, pull requests and manual dispatch. Failed Compose runs collect Docker diagnostics.
+Then the local services are available on the ports documented by the Compose configuration. The canonical smoke test starts the stack, verifies health and security behavior, and tears the stack down afterwards.
 
 ## Kubernetes
 
-The `k8s/` directory contains the namespace, application deployments, services, HPA, NetworkPolicies, probes, Gateway API routes and Workload Identity ServiceAccount configuration.
+The `k8s/` directory contains the Kubernetes deployment model, including:
 
-The NetworkPolicies use default-deny behavior for the protected workloads and explicitly permit required DNS egress. This reduces uncontrolled outbound communication while preserving cluster name resolution.
+- Namespace and workloads
+- Services
+- startup/readiness/liveness probes
+- HPA
+- Gateway API routes
+- Workload Identity ServiceAccount configuration
+- default-deny NetworkPolicies with required DNS egress
+- restricted workload security settings
 
-`scripts/validate_manifests.py` enforces the required workload controls, including non-root execution, no privilege escalation, read-only root filesystems, dropped capabilities, seccomp and startup/readiness/liveness probes.
+`scripts/validate_manifests.py` checks the declared workload security controls, including non-root execution, privilege-escalation prevention, read-only filesystems, dropped capabilities and seccomp configuration.
 
-## Azure IaC
+## Azure Infrastructure as Code
 
-Terraform is modularized into networking, ACR, AKS and IAM/Workload Identity. The AKS configuration enables OIDC and Workload Identity and explicitly uses Azure CNI Overlay with Azure Network Policy.
+Terraform is organized into networking, ACR, AKS and IAM/Workload Identity modules. The AKS configuration uses OIDC and Workload Identity and is designed around Azure CNI Overlay with Azure Network Policy.
 
-Bicep remains available as a second IaC representation. CI compiles all Bicep files and validates Terraform formatting and configuration without requiring an Azure deployment.
+Bicep is retained as a second IaC representation. CI compiles Bicep and validates Terraform without requiring an Azure deployment.
 
-The repository does not claim that Azure resources are deployed merely because the configuration exists. Deployment may create billable resources.
+### Important deployment boundary
 
-### IaC parity
+The repository does **not** claim that Azure resources exist merely because Terraform or Bicep files exist. An actual deployment requires an Azure subscription and correctly configured GitHub OIDC trust, state storage and repository variables/secrets.
 
-See [`docs/iac-parity-matrix.md`](docs/iac-parity-matrix.md) and [`docs/iac-parity-exceptions.md`](docs/iac-parity-exceptions.md). Differences are documented explicitly rather than being marked as accidental drift.
+The deployment workflow is manual and supports `plan` and `apply`. `apply` must remain an explicit operator action because it can create billable Azure resources.
 
-## Cost controls
+## GitHub Actions / DevSecOps
 
-Terraform includes a configurable resource-group budget guardrail. Budget thresholds and notification recipients are variables rather than hardcoded secrets. The repository does not automatically optimize cloud spend; it makes the cost boundaries visible.
-
-The local cost audit is self-contained and does not require a sibling checkout.
-
-## CI / DevSecOps
-
-GitHub Actions includes:
+The repository contains workflows for:
 
 1. .NET restore, build and tests
-2. Frontend install, lint and build
-3. Kubernetes manifest validation and workload security policy
+2. Frontend lint and build
+3. Kubernetes manifest/security validation
 4. Bicep compilation
-5. Terraform format and validation
-6. Docker builds for application containers
+5. Terraform formatting and validation
+6. Container builds
 7. Trivy vulnerability scanning
 8. CycloneDX SBOM generation
 9. CodeQL analysis
-10. Checkov infrastructure security checks
-11. Kubeconform Kubernetes schema validation
+10. Checkov IaC checks
+11. Kubeconform schema validation
 12. IaC parity-contract checks
-13. Automated local API security self-testing
-14. Canonical local smoke testing of the Compose stack
-15. Automated repository maintenance checks
+13. Local API security self-testing
+14. Canonical local smoke testing
+15. Repository maintenance and documentation checks
+16. Explicitly triggered AKS resilience testing
 
-Terraform planning is automatic; actual Terraform apply is explicitly opt-in through the deployment workflow.
+GitHub's Azure deployment documentation recommends an existing AKS/ACR target and authenticated Azure credentials for deployment workflows. This repository uses Azure OIDC rather than committing long-lived Azure credentials. citeturn0search0
 
-## Security architecture — infrastructure and delivery
+## Security architecture
 
-**Portfolio security focus:** supply-chain security, workload hardening, least privilege, identity, network boundaries and verified recovery.
-
-CloudForge treats security as a set of controls across the software supply chain, container runtime, Kubernetes boundary and Azure identity layer.
-
-| Layer | Control | What it demonstrates |
+| Layer | Control | Purpose |
 |---|---|---|
 | Source | CodeQL, Dependabot | Static analysis and dependency monitoring |
-| Build | Trivy, SBOM, Checkov | Image, dependency and IaC supply-chain checks |
-| Kubernetes | Restricted Pod Security, non-root, seccomp, dropped capabilities | Workload hardening and least privilege |
-| Network | Default-deny NetworkPolicies with explicit DNS egress | Explicit workload communication boundaries |
-| Identity | OIDC / Workload Identity and ACR permissions | Short-lived workload identity instead of stored cloud credentials |
-| Configuration | Kubeconform, policy validation and IaC parity checks | Preventing invalid or divergent infrastructure configuration |
-| Runtime | OpenTelemetry and diagnostic runbook | Security-relevant observability and Day-2 diagnosis |
-| Resilience | Controlled pod deletion and reconciliation test | Verifiable recovery behaviour rather than a resilience claim |
-
-This is intentionally different from application-level security in HealthTech Platform: CloudForge demonstrates how security controls are embedded in delivery and infrastructure rather than primary application features.
-
-## Security
-
-- Non-root runtime containers
-- `runAsNonRoot`
-- `seccompProfile: RuntimeDefault`
-- `allowPrivilegeEscalation: false`
-- Capabilities dropped with `ALL`
-- Restricted Pod Security labels
-- NetworkPolicy isolation
-- OIDC / Workload Identity
-- Managed identity access to ACR
-- CodeQL and Dependabot
-- Trivy image scanning and SBOM generation
-- Controlled deception/self-test paths
+| Build | Trivy, SBOM, Checkov | Supply-chain and IaC checks |
+| Container | Non-root, read-only filesystem, dropped capabilities | Runtime hardening |
+| Kubernetes | Restricted Pod Security, seccomp, probes | Workload hardening |
+| Network | Default-deny NetworkPolicies | Explicit communication boundaries |
+| Identity | OIDC / Workload Identity | Avoid stored cloud credentials |
+| Configuration | Kubeconform and policy validation | Prevent invalid manifests/configuration |
+| Runtime | OpenTelemetry and runbooks | Observability and diagnosis |
+| Resilience | Controlled pod deletion/reconciliation test | Verifiable recovery behavior |
 
 No credentials, production data or patient information are included.
 
+## Resilience testing
+
+`.github/workflows/chaos.yml` provides an explicitly triggered, bounded resilience test. It is designed to authenticate to AKS using OIDC, delete a selected workload pod and verify Kubernetes reconciliation.
+
+This workflow should only be run against an intentionally provisioned showcase environment.
+
 ## Day-2 operations
 
-See [`docs/observability-runbook.md`](docs/observability-runbook.md) for a concrete diagnostic path from Gateway and routing through NetworkPolicy, pod health, application logs and OpenTelemetry.
+See `docs/observability-runbook.md` for the diagnostic path from routing and NetworkPolicy through pod health, application logs and telemetry.
 
-The repository also includes `k8s-pod-doctor` as a standalone operations tool for first-line diagnosis of common pod failures such as `CrashLoopBackOff` and `OOMKilled`.
+The repository also contains `k8s-pod-doctor` for first-line diagnosis of common pod failures such as `CrashLoopBackOff` and `OOMKilled`.
 
-## Production considerations
+## Cost controls
 
-See [`docs/production-considerations.md`](docs/production-considerations.md) for cost, networking, observability and delivery trade-offs. The repository intentionally distinguishes architecture choices from operational guarantees.
+Terraform contains a configurable resource-group budget guardrail. Budget thresholds and notification recipients are variables rather than hardcoded secrets.
 
-## Resilience
-
-[`.github/workflows/chaos.yml`](.github/workflows/chaos.yml) provides an explicitly triggered resilience test that authenticates to AKS using OIDC, deletes one selected pod and verifies that Kubernetes reconciliation restores the workload.
+**Important:** a budget configuration is a guardrail, not a guarantee of zero Azure cost.
 
 ## Verification discipline
 
-Configuration in GitHub is not treated as proof of runtime behavior. Runtime claims require successful environment-specific verification, including deployment, HTTPS/TLS, telemetry ingestion, GitHub Actions and smoke tests.
+The project deliberately separates:
 
-When a required test or file is missing, the repository validation policy treats that as a failure rather than silently skipping it.
+- **configuration** — what the repository declares;
+- **static verification** — what CI can validate without Azure;
+- **local runtime verification** — what Docker Compose and local tests demonstrate;
+- **cloud runtime verification** — what can only be demonstrated after deployment to Azure/AKS.
 
-## Portfolio tools
+A configuration file is never treated as proof that a cloud resource or runtime behavior exists.
 
-The adjacent repositories extend the engineering lifecycle:
+## Portfolio scope
 
-- `git-secrets-sentinel` — local shift-left secret detection
-- `cloud-waste-auditor` — Terraform/FinOps cost-risk guardrail
-- `k8s-pod-doctor` — Kubernetes Day-2 first-line diagnosis
+This is a **cloud-engineering portfolio showcase**, not a production healthcare or community-management platform. The application modules are intentionally small so that the engineering concerns around containers, Kubernetes, Azure, IaC, CI/CD, security and observability remain visible.
 
-## Automated maintenance
+## Repository quality
 
-Repository maintenance runs on a schedule and manually. It validates required documentation, scans for unfinished placeholders, checks parity-exception records and creates a maintenance issue on failure instead of silently changing source code.
+The repository includes:
 
-The repository also maintains a changelog and architecture log so engineering decisions and material changes remain traceable.
-
-## Scope
-
-This is a portfolio showcase, not a production healthcare or community-management system. The application modules are intentionally small demonstrations of service boundaries, containers, Kubernetes and Azure platform engineering.
+- `SECURITY.md`
+- `CONTRIBUTING.md`
+- `CODE_OF_CONDUCT.md`
+- `CHANGELOG.md`
+- architecture and operational documentation
+- automated maintenance checks
+- reproducible local verification commands
 
 ## Repository
 
 https://github.com/abla86/azure-kubernetes-showcase
-
-## Change-control audit
-
-See [docs/REPOSITORY-CHANGE-AUDIT-2026-08-28.md](docs/REPOSITORY-CHANGE-AUDIT-2026-08-28.md) for the repository change-control and traceability record.
-
-## Automated repository metadata
-
-See [generated repository snapshot](docs/generated/repository-snapshot.md) for the current repository head and tracked engineering areas.
-
-
-
-
-
-
-
-
-## Automated repository metadata
-
-See [generated repository snapshot](docs/generated/repository-snapshot.md) for the current repository head and tracked engineering areas.
-
-## Automated repository metadata
-
-See [generated repository snapshot](docs/generated/repository-snapshot.md) for the current repository head and tracked engineering areas.
-
-## Automated repository metadata
-
-See [generated repository snapshot](docs/generated/repository-snapshot.md) for the current repository head and tracked engineering areas.
-
-## Automated repository metadata
-
-See [generated repository snapshot](docs/generated/repository-snapshot.md) for the current repository head and tracked engineering areas.
-
-## Automated repository metadata
-
-See [generated repository snapshot](docs/generated/repository-snapshot.md) for the current repository head and tracked engineering areas.
-
-## Automated repository metadata
-
-See [generated repository snapshot](docs/generated/repository-snapshot.md) for the current repository head and tracked engineering areas.
-
-## Automated repository metadata
-
-See [generated repository snapshot](docs/generated/repository-snapshot.md) for the current repository head and tracked engineering areas.
-
-## Automated repository metadata
-
-See [generated repository snapshot](docs/generated/repository-snapshot.md) for the current repository head and tracked engineering areas.
-
-## Automated repository metadata
-
-See [generated repository snapshot](docs/generated/repository-snapshot.md) for the current repository head and tracked engineering areas.
-
-## Automated repository metadata
-
-See [generated repository snapshot](docs/generated/repository-snapshot.md) for the current repository head and tracked engineering areas.
-
-## Automated repository metadata
-
-See [generated repository snapshot](docs/generated/repository-snapshot.md) for the current repository head and tracked engineering areas.
-
-## Automated repository metadata
-
-See [generated repository snapshot](docs/generated/repository-snapshot.md) for the current repository head and tracked engineering areas.
-
-## Automated repository metadata
-
-See [generated repository snapshot](docs/generated/repository-snapshot.md) for the current repository head and tracked engineering areas.
-
-## Automated repository metadata
-
-See [generated repository snapshot](docs/generated/repository-snapshot.md) for the current repository head and tracked engineering areas.
-
-## Automated repository metadata
-
-See [generated repository snapshot](docs/generated/repository-snapshot.md) for the current repository head and tracked engineering areas.
-
-## Automated repository metadata
-
-See [generated repository snapshot](docs/generated/repository-snapshot.md) for the current repository head and tracked engineering areas.
-
-## Automated repository metadata
-
-See [generated repository snapshot](docs/generated/repository-snapshot.md) for the current repository head and tracked engineering areas.
-
-## Automated repository metadata
-
-See [generated repository snapshot](docs/generated/repository-snapshot.md) for the current repository head and tracked engineering areas.
-
-## Automated repository metadata
-
-See [generated repository snapshot](docs/generated/repository-snapshot.md) for the current repository head and tracked engineering areas.
-
-## Automated repository metadata
-
-See [generated repository snapshot](docs/generated/repository-snapshot.md) for the current repository head and tracked engineering areas.
-
-## Automated repository metadata
-
-See [generated repository snapshot](docs/generated/repository-snapshot.md) for the current repository head and tracked engineering areas.
-
-## Automated repository metadata
-
-See [generated repository snapshot](docs/generated/repository-snapshot.md) for the current repository head and tracked engineering areas.
-
-## Automated repository metadata
-
-See [generated repository snapshot](docs/generated/repository-snapshot.md) for the current repository head and tracked engineering areas.
-
-## Automated repository metadata
-
-See [generated repository snapshot](docs/generated/repository-snapshot.md) for the current repository head and tracked engineering areas.
-
-## Automated repository metadata
-
-See [generated repository snapshot](docs/generated/repository-snapshot.md) for the current repository head and tracked engineering areas.
-
-## Automated repository metadata
-
-See [generated repository snapshot](docs/generated/repository-snapshot.md) for the current repository head and tracked engineering areas.
-
-## Automated repository metadata
-
-See [generated repository snapshot](docs/generated/repository-snapshot.md) for the current repository head and tracked engineering areas.
-
-## Automated repository metadata
-
-See [generated repository snapshot](docs/generated/repository-snapshot.md) for the current repository head and tracked engineering areas.
-
-## Automated repository metadata
-
-See [generated repository snapshot](docs/generated/repository-snapshot.md) for the current repository head and tracked engineering areas.
-
-## Automated repository metadata
-
-See [generated repository snapshot](docs/generated/repository-snapshot.md) for the current repository head and tracked engineering areas.
-
-## Automated repository metadata
-
-See [generated repository snapshot](docs/generated/repository-snapshot.md) for the current repository head and tracked engineering areas.
-
-## Automated repository metadata
-
-See [generated repository snapshot](docs/generated/repository-snapshot.md) for the current repository head and tracked engineering areas.
