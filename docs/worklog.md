@@ -346,3 +346,7 @@
 - Commit: docs: finalize Azure Kubernetes showcase README
 - Branch: main
 
+### 2026-09-12T05:40:17Z — a6323ad
+- Commit: docs: add concise Azure deployment runbook
+- Branch: main
+
