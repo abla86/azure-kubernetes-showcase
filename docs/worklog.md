@@ -342,3 +342,7 @@
 - Commit: security: document justified Checkov exceptions
 - Branch: main
 
+### 2026-09-12T05:38:25Z — 67ef333
+- Commit: docs: finalize Azure Kubernetes showcase README
+- Branch: main
+
