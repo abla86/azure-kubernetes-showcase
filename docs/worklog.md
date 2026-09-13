@@ -374,3 +374,7 @@
 - Commit: Bump Microsoft.AspNetCore.OpenApi from 10.0.11 to 10.0.12 (#38)
 - Branch: main
 
+### 2026-09-13T03:29:55Z — ade2406
+- Commit: Bump Azure.Core and Azure.Monitor.OpenTelemetry.Exporter (#32)
+- Branch: main
+
