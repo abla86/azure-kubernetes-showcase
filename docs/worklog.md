@@ -362,3 +362,7 @@
 - Commit: Bump Azure.Core from 1.60.0 to 1.62.0 (#37)
 - Branch: main
 
+### 2026-09-13T03:28:16Z — a84f670
+- Commit: Bump Microsoft.NET.Test.Sdk from 17.14.1 to 18.9.0 (#9)
+- Branch: main
+
