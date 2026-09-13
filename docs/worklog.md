@@ -414,3 +414,7 @@
 - Commit: build(deps): bump actions/setup-node from 4 to 7 (#1)
 - Branch: main
 
+### 2026-09-13T03:43:42Z — bd5dd19
+- Commit: Bump OpenTelemetry.Exporter.OpenTelemetryProtocol from 1.15.3 to 1.18.0 (#25)
+- Branch: main
+
