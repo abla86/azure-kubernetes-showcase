@@ -382,3 +382,7 @@
 - Commit: build(deps-dev): bump @types/node from 24.13.3 to 26.4.1 in /src/Web (#22)
 - Branch: main
 
+### 2026-09-13T03:30:27Z — 6aed891
+- Commit: Bump OpenTelemetry.Exporter.OpenTelemetryProtocol from 1.14.0 to 1.15.3 (#20)
+- Branch: main
+
