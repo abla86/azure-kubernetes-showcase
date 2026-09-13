@@ -1,0 +1,61 @@
+variable "resource_group_name" {
+  description = "Azure resource group."
+  type        = string
+  default     = "rg-azure-kubernetes-showcase"
+}
+
+variable "location" {
+  description = "Azure region."
+  type        = string
+  default     = "norwayeast"
+}
+
+variable "environment" {
+  description = "Deployment environment."
+  type        = string
+  default     = "dev"
+}
+
+variable "kubernetes_version" {
+  description = "AKS Kubernetes version. Set null to use the supported default."
+  type        = string
+  default     = null
+  nullable    = true
+}
+
+variable "node_count" {
+  description = "Initial AKS system node count."
+  type        = number
+  default     = 2
+}
+
+variable "node_vm_size" {
+  description = "AKS system node VM size."
+  type        = string
+  default     = "Standard_D2s_v5"
+}
+
+variable "github_actions_principal_object_id" {
+  description = "Object ID of the Microsoft Entra principal used by GitHub Actions OIDC."
+  type        = string
+  default     = null
+  nullable    = true
+}
+
+variable "monthly_budget_eur" {
+  description = "Monthly resource-group budget used as a cost guardrail."
+  type        = number
+  default     = 50
+}
+
+variable "budget_alert_emails" {
+  description = "Email recipients for Azure budget notifications."
+  type        = list(string)
+  default     = []
+}
+
+variable "budget_start_date" {
+  description = "First day of the month used as the Azure budget period start. Use RFC3339 UTC format."
+  type        = string
+  default     = "2026-08-01T00:00:00Z"
+}

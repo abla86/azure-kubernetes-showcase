@@ -2,18 +2,76 @@ services:
   api:
     build:
       context: ./src/Showcase.Api
+      dockerfile: Dockerfile
+    ports:
+      - "5000:8080"
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: http://+:8080
-      OTEL_SERVICE_NAME: azure-kubernetes-showcase
-    ports:
-      - "5080:8080"
+    networks: [showcase-net]
     restart: unless-stopped
 
   web:
     build:
       context: ./src/Web
+      dockerfile: Dockerfile
     ports:
-      - "5173:8080"
+      - "8080:8080"
     depends_on:
       - api
+    networks: [showcase-net]
+    restart: unless-stopped
+
+  care-portal:
+    build:
+      context: ./apps/care-portal/CarePortal.Api
+      dockerfile: Dockerfile
+    ports:
+      - "5001:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+    networks: [showcase-net]
+    restart: unless-stopped
+
+  community-hub:
+    build:
+      context: ./apps/community-hub/CommunityHub.Api
+      dockerfile: Dockerfile
+    ports:
+      - "5002:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+    networks: [showcase-net]
+    restart: unless-stopped
+
+  security-radar:
+    build:
+      context: ./apps/security-radar
+      dockerfile: Dockerfile
+    ports:
+      - "5080:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      OTEL_ENABLED: ${OTEL_ENABLED:-false}
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://otel-collector:4317}
+    networks: [showcase-net]
+    restart: unless-stopped
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.132.0
+    profiles: ["observability"]
+    command: ["--config=/etc/otelcol-contrib/config.yaml"]
+    volumes:
+      - ./observability/otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml:ro
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+    networks: [showcase-net]
+    restart: unless-stopped
+
+networks:
+  showcase-net:
+    driver: bridge

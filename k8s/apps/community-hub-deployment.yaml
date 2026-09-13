@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: community-hub-api
+  namespace: showcase
+  labels:
+    app: community-hub-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: community-hub-api
+  template:
+    metadata:
+      labels:
+        app: community-hub-api
+        azure.workload.identity/use: "true"
+    spec:
+      serviceAccountName: api-workload-identity-sa
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: api
+          image: acrshowcasedev.azurecr.io/community-hub-api:${IMAGE_TAG}
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8080
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 10001
+            runAsGroup: 10001
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          resources:
+            requests:
+              cpu: 100m
+              memory: 64Mi
+            limits:
+              cpu: 300m
+              memory: 256Mi
+          startupProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 2
+            failureThreshold: 30
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: community-hub-service
+  namespace: showcase
+spec:
+  selector:
+    app: community-hub-api
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+  type: ClusterIP

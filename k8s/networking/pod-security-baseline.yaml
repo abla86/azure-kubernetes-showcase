@@ -1,0 +1,39 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: showcase-workload-hardening
+spec:
+  validationFailureAction: Enforce
+  background: true
+  rules:
+    - name: require-non-root-and-no-privilege-escalation
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+              namespaces:
+                - showcase
+      validate:
+        message: "Showcase workloads must run non-root with privilege escalation disabled."
+        pattern:
+          spec:
+            containers:
+              - securityContext:
+                  runAsNonRoot: true
+                  allowPrivilegeEscalation: false
+    - name: require-read-only-root-filesystem
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+              namespaces:
+                - showcase
+      validate:
+        message: "Showcase workloads must use a read-only root filesystem."
+        pattern:
+          spec:
+            containers:
+              - securityContext:
+                  readOnlyRootFilesystem: true

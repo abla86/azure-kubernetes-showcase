@@ -1,0 +1,4 @@
+Contact: mailto:security@example.com
+Expires: 2027-08-27T00:00:00Z
+Preferred-Languages: no, en
+Policy: https://github.com/abla86/azure-kubernetes-showcase/blob/main/SECURITY.md
