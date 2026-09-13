@@ -36,25 +36,21 @@ permissions:
 
 concurrency:
   group: ci-cd-${{ github.ref }}
-  cancel-in-progress:true
+  cancel-in-progress: true
 
 jobs:
   backend:
     name: Backend build and test
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
-
-dependabot/github_actions/actions/setup-dotnet-6
-
+      - uses: actions/checkout@v7
       - uses: actions/setup-dotnet@v6
-main
-      - uses: actions/setup-dotnet@v4 main
         with:
           dotnet-version: 10.0.x
       - run: dotnet restore
       - run: dotnet build --configuration Release --no-restore
-      - run: dotnet test --configuration Release --verbosity normal --collect:"XPlat Code Coverage"
+      - name: Test without rebuilding
+        run: dotnet test --configuration Release --no-build --verbosity normal --collect:"XPlat Code Coverage"
 
   frontend:
     name: Frontend lint and build
@@ -63,13 +59,8 @@ main
       run:
         working-directory: src/Web
     steps:
-      - uses: actions/checkout@v4
-dependabot/github_actions/actions/setup-node-7
-
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
-=======
-      - uses: actions/setup-node@v4
-main
         with:
           node-version: 22
           cache: npm
@@ -78,19 +69,46 @@ main
       - run: npm run lint
       - run: npm run build
 
+  frontend-e2e:
+    name: Frontend E2E
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: src/Web
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: src/Web/package-lock.json
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+
+  kubernetes-dry-run:
+    name: Kubernetes manifest render
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: azure/setup-kubectl@v5
+        with:
+          version: 1.37.0
+      - name: Render manifests without a cluster
+        run: |
+          set -euo pipefail
+          kubectl kustomize k8s/ > rendered-k8s.yaml
+          test -s rendered-k8s.yaml
+          grep -q '^apiVersion:' rendered-k8s.yaml
+
   kubernetes:
     name: Kubernetes manifest validation
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
-      - uses: azure/setup-kubectl@v5
-        with:
-          version: 1.37.0
-      - name: Render Kustomize manifests
-        run: kubectl kustomize k8s/ > rendered-k8s.yaml
+      - uses: actions/checkout@v7
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: "3.14"
       - name: Install YAML parser
         run: python -m pip install --disable-pip-version-check pyyaml
       - name: Validate workload security policy
@@ -100,7 +118,7 @@ main
     name: Azure IaC validation
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Validate Bicep
         uses: azure/cli@v2
         with:
@@ -128,7 +146,7 @@ main
     runs-on: ubuntu-24.04
     needs: [backend, frontend]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Build main API
         run: docker build -t azure-kubernetes-showcase-api:${{ github.sha }} ./src/Showcase.Api
       - name: Build frontend
@@ -148,41 +166,38 @@ main
       actions: read
       contents: read
     steps:
-      - uses: actions/checkout@v4
-      - uses: github/codeql-action/init@v3
+      - uses: actions/checkout@v7
+      - uses: github/codeql-action/init@v4
         with:
           languages: csharp,javascript-typescript
           queries: security-extended
-dependabot/github_actions/actions/setup-dotnet-6
-
-      - uses: actions/setup-dotnet@v6=======
-      - uses: actions/setup-dotnet@v4
-main
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: 10.0.x
       - run: dotnet build --configuration Release
-      - uses: github/codeql-action/analyze@v3
+      - uses: github/codeql-action/analyze@v4
 
   resilience-self-test:
     name: Non-destructive local resilience and security self-test
     runs-on: ubuntu-24.04
     needs: [docker]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: "3.14"
       - name: Run frontend end-to-end test suite
         working-directory: src/Web
         run: |
           npm ci
           npx playwright install --with-deps chromium
           npm run test:e2e:ci
-
       - name: Set local telemetry mode
         run: echo "OTEL_ENABLED=false" >> "$GITHUB_ENV"
       - name: Run canonical local smoke test
         run: python scripts/local_smoke_test.py
+      - name: Verify smoke-test dry-run path
+        run: python scripts/local_smoke_test.py --dry-run
       - name: Collect Docker diagnostics on failure
         if: failure()
         run: |
