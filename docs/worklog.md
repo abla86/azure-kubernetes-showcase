@@ -442,3 +442,7 @@
 - Commit: Bump coverlet.collector from 6.0.4 to 10.0.1 (#8)
 - Branch: main
 
+### 2026-09-13T03:48:35Z — b6daefa
+- Commit: Bump Azure.Monitor.OpenTelemetry.Exporter from 1.8.3 to 1.9.0 (#29)
+- Branch: main
+
