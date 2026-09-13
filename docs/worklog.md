@@ -418,3 +418,7 @@
 - Commit: Bump OpenTelemetry.Exporter.OpenTelemetryProtocol from 1.15.3 to 1.18.0 (#25)
 - Branch: main
 
+### 2026-09-13T03:44:34Z — 942ed08
+- Commit: Bump Azure.Core and Azure.Monitor.OpenTelemetry.Exporter (#31)
+- Branch: main
+
