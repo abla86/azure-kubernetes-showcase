@@ -446,3 +446,7 @@
 - Commit: Bump Azure.Monitor.OpenTelemetry.Exporter from 1.8.3 to 1.9.0 (#29)
 - Branch: main
 
+### 2026-09-13T03:55:06Z — e430994
+- Commit: fix(ci): resolve corrupted workflow conflict markers
+- Branch: main
+
