@@ -87,15 +87,19 @@ jobs:
       - run: npm run test:e2e
 
   kubernetes-dry-run:
-    name: Kubernetes client dry-run
+    name: Kubernetes manifest render
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: azure/setup-kubectl@v4
         with:
           version: latest
-      - name: Render and dry-run manifests
-        run: kubectl kustomize k8s/ | kubectl apply --dry-run=client --validate=false -f -
+      - name: Render manifests without a cluster
+        run: |
+          set -euo pipefail
+          kubectl kustomize k8s/ > /tmp/rendered-manifests.yaml
+          test -s /tmp/rendered-manifests.yaml
+          grep -q '^apiVersion:' /tmp/rendered-manifests.yaml
 
   kubernetes:
     name: Kubernetes manifest validation
