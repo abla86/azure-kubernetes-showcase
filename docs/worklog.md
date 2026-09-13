@@ -398,3 +398,7 @@
 - Commit: build(deps): bump axios from 1.19.0 to 1.20.0 in /src/Web (#23)
 - Branch: main
 
+### 2026-09-13T03:39:38Z — ea09f6c
+- Commit: Bump Microsoft.AspNetCore.OpenApi from 10.0.11 to 10.0.12 (#39)
+- Branch: main
+
