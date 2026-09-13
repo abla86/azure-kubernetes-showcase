@@ -4,9 +4,9 @@ Generated automatically from `main`.
 
 ## Head
 
-- Commit: `898f3d4d2005e33fb98644f1c2454dd2dec74b66`
-- Commit date: `2026-09-13T23:17:20+02:00`
-- Subject: docs: add RCA and continuous-improvement workflow
+- Commit: `981191bc163c9b6423b368863e53f9fd2335eef0`
+- Commit date: `2026-09-13T21:17:23Z`
+- Subject: docs: sync generated repository metadata
 
 ## Engineering areas
 
