@@ -7,6 +7,8 @@ from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
 SERVICES = {
+    "main-api": "http://127.0.0.1:5000/api/health",
+    "web": "http://127.0.0.1:8080/",
     "care-portal": "http://127.0.0.1:5001/health",
     "community-hub": "http://127.0.0.1:5002/health",
     "security-radar": "http://127.0.0.1:5080/health",
@@ -93,6 +95,19 @@ def main() -> int:
                 "service-health",
                 True,
                 "all local services returned HTTP 200",
+            )
+        )
+
+        status_code, api_payload = request("http://127.0.0.1:5000/api/health")
+        try:
+            api_health = json.loads(api_payload)
+        except json.JSONDecodeError:
+            api_health = {}
+        results.append(
+            expect(
+                "main-api-contract",
+                status_code == 200 and api_health.get("status") == "healthy",
+                "main API health contract is valid" if status_code == 200 and api_health.get("status") == "healthy" else f"HTTP {status_code} or invalid payload",
             )
         )
 
