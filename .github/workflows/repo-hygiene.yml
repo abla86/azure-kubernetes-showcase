@@ -41,7 +41,7 @@ jobs:
           git grep -n -E 'TODO|FIXME' -- ':!README.md' || true
 
       - name: Dependency review
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' && github.base_ref == 'main'
         uses: actions/dependency-review-action@v4
 
       - name: Create maintenance issue on failure

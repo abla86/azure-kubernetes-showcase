@@ -36,7 +36,7 @@ permissions:
 
 concurrency:
   group: ci-cd-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: true 
 
 jobs:
   backend:
@@ -88,6 +88,24 @@ jobs:
 
   kubernetes-dry-run:
     name: Kubernetes manifest render
+   feat/complete-production-verification
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: azure/setup-kubectl@v5
+        with:
+          version: latest
+      - name: Render manifests without a cluster
+        run: |
+          set -euo pipefail
+          kubectl kustomize k8s/ > /tmp/rendered-manifests.yaml
+          test -s /tmp/rendered-manifests.yaml
+          grep -q '^apiVersion:' /tmp/rendered-manifests.yaml
+  kubernetes:
+    name: Kubernetes manifest validation
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
@@ -106,6 +124,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
+main
       - uses: actions/setup-python@v5
         with:
           python-version: "3.14"
@@ -196,6 +215,10 @@ jobs:
         run: echo "OTEL_ENABLED=false" >> "$GITHUB_ENV"
       - name: Run canonical local smoke test
         run: python scripts/local_smoke_test.py
+feat/complete-production-verification
+
+
+main
       - name: Verify smoke-test dry-run path
         run: python scripts/local_smoke_test.py --dry-run
       - name: Collect Docker diagnostics on failure

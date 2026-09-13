@@ -6,18 +6,24 @@
   </PropertyGroup>
 
   <ItemGroup>
+feat/complete-production-verification
+    <PackageReference Include="Azure.Core" Version="1.62.0" />
+    <PackageReference Include="Azure.Monitor.OpenTelemetry.Exporter" Version="1.9.0" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.12" />
+
 dependabot/nuget/src/Showcase.Api/Azure.Monitor.OpenTelemetry.Exporter-1.9.0
     <PackageReference Include="Azure.Identity" Version="1.18.0" />
     <PackageReference Include="Azure.Monitor.OpenTelemetry.Exporter" Version="1.9.0" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.11" />
-=======
+
     <PackageReference Include="Azure.Core" Version="1.62.0" />
 dependabot/nuget/src/Showcase.Api/multi-032c11af81
     <PackageReference Include="Azure.Monitor.OpenTelemetry.Exporter" Version="1.9.0" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.11" />
-=======
+
     <PackageReference Include="Azure.Monitor.OpenTelemetry.Exporter" Version="1.8.3" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.12" />
+main
 main
     <PackageReference Include="OpenTelemetry" Version="1.18.0" />
     <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.18.0" />

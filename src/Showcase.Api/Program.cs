@@ -23,13 +23,7 @@ builder.Services
     .UseAzureMonitorExporter(options =>
     {
         options.Credential = credential;
-    })
-    .WithTracing(tracing => tracing
-        .AddAspNetCoreInstrumentation()
-        .AddHttpClientInstrumentation())
-    .WithMetrics(metrics => metrics
-        .AddAspNetCoreInstrumentation()
-        .AddRuntimeInstrumentation());
+    });
 
 builder.Services.AddHealthChecks();
 

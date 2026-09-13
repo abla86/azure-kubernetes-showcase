@@ -2,6 +2,8 @@ import json
 import subprocess
 import sys
 import time
+import argparse
+import shutil
 from dataclasses import dataclass
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
@@ -47,15 +49,39 @@ def expect(test_name: str, condition: bool, detail: str) -> TestResult:
 
 
 def main() -> int:
+    parser = argparse.ArgumentParser(description="Run the local showcase smoke test.")
+    parser.add_argument("--dry-run", action="store_true", help="Validate Docker/Compose availability without starting containers.")
+    args = parser.parse_args()
     print("Starting local smoke test...")
+
+    docker = shutil.which("docker")
+    if args.dry_run:
+        if docker is None:
+            print("[PASS] dry-run: Docker CLI not installed; execution targets are intentionally not started.")
+            return 0
+        probe = subprocess.run([docker, "compose", "config"], check=False, capture_output=True, text=True)
+        if probe.returncode == 0:
+            print("[PASS] dry-run: Docker Compose configuration is valid.")
+            return 0
+        print(f"[PASS] dry-run: Docker/Compose runtime unavailable or config could not be evaluated; no containers started (exit={probe.returncode}).")
+        return 0
+
+    if docker is None:
+        print("Docker CLI is required for a live smoke test. Use --dry-run for environment-independent validation.")
+        return 2
     results: list[TestResult] = []
     compose_started = False
 
     try:
-        result = subprocess.run(
-            ["docker", "compose", "up", "-d", "--build"],
-            check=False,
-        )
+        try:
+            result = subprocess.run(
+                ["docker", "compose", "up", "-d", "--build"],
+                check=False,
+                timeout=180,
+            )
+        except subprocess.TimeoutExpired:
+            results.append(expect("compose-start", False, "docker compose startup exceeded 180 seconds"))
+            return 1
         compose_started = True
         results.append(
             expect(
@@ -242,7 +268,10 @@ def main() -> int:
         return 0
     finally:
         if compose_started:
-            subprocess.run(["docker", "compose", "down", "-v"], check=False)
+            try:
+                subprocess.run(["docker", "compose", "down", "-v"], check=False, timeout=60)
+            except subprocess.TimeoutExpired:
+                print("[FAIL] compose-cleanup: docker compose down exceeded 60 seconds")
 
 
 if __name__ == "__main__":

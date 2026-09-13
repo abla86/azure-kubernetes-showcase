@@ -26,7 +26,11 @@ jobs:
       - uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.7.5
+feat/complete-production-verification
+      - name: Terraform fmt diagnostic
+
       - name: Show Terraform formatter diff
+ main
         working-directory: infra/terraform
         run: terraform fmt -diff -recursive
       - name: Terraform fmt check
