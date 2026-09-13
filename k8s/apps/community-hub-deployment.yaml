@@ -17,19 +17,22 @@ spec:
         azure.workload.identity/use: "true"
     spec:
       serviceAccountName: api-workload-identity-sa
+      automountServiceAccountToken: false
       securityContext:
         seccompProfile:
           type: RuntimeDefault
       containers:
         - name: api
           image: acrshowcasedev.azurecr.io/community-hub-api:${IMAGE_TAG}
+          imagePullPolicy: Always
           ports:
             - name: http
               containerPort: 8080
           securityContext:
             allowPrivilegeEscalation: false
             runAsNonRoot: true
-            runAsUser: 1654
+            runAsUser: 10001
+            runAsGroup: 10001
             readOnlyRootFilesystem: true
             capabilities:
               drop:

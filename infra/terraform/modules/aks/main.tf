@@ -44,6 +44,18 @@ resource "azurerm_kubernetes_cluster" "aks" {
   oidc_issuer_enabled               = true
   workload_identity_enabled         = true
   role_based_access_control_enabled = true
+  local_account_disabled            = true
+  azure_policy_enabled              = true
+  sku_tier                          = "Standard"
+
+  key_vault_secrets_provider {
+    secret_rotation_enabled  = true
+    secret_rotation_interval = "2m"
+  }
+
+  node_provisioning_profile {
+    mode = "Manual"
+  }
 
   default_node_pool {
     name            = "system"
@@ -52,6 +64,8 @@ resource "azurerm_kubernetes_cluster" "aks" {
     vnet_subnet_id  = var.subnet_id
     type            = "VirtualMachineScaleSets"
     os_disk_size_gb = 50
+    os_disk_type    = "Ephemeral"
+    max_pods        = 50
   }
 
   identity {
@@ -61,9 +75,9 @@ resource "azurerm_kubernetes_cluster" "aks" {
   network_profile {
     network_plugin      = "azure"
     network_plugin_mode = "overlay"
-    network_policy     = "azure"
-    load_balancer_sku = "standard"
-    outbound_type     = "loadBalancer"
+    network_policy      = "azure"
+    load_balancer_sku   = "standard"
+    outbound_type       = "loadBalancer"
   }
 
   oms_agent {

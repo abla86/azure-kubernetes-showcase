@@ -4,9 +4,9 @@ Generated automatically from `main`.
 
 ## Head
 
-- Commit: `be35d7de6a0e5280901a51a1fa58be0ec3369bd0`
-- Commit date: `2026-09-06T00:39:52Z`
-- Subject: docs: sync generated repository metadata
+- Commit: `c72697e7758e1d83708627f5c3ce91731994a8a7`
+- Commit date: `2026-09-12T07:42:59+02:00`
+- Subject: docs: remove generated citation markup and duplicate metadata section
 
 ## Engineering areas
 
