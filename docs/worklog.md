@@ -210,3 +210,247 @@
 - Commit: feat: connect verified images to AKS release deployment
 - Branch: main
 
+### 2026-09-07T05:18:31Z — 48eb53e
+- Commit: feat: add interactive portfolio demonstration
+- Branch: main
+
+### 2026-09-07T08:19:06Z — a7177da
+- Commit: docs: update automated worklog
+- Branch: main
+
+### 2026-09-08T01:26:04Z — 5cb2f63
+- Commit: Add fully playable Cluster Defense game
+- Branch: main
+
+### 2026-09-10T23:02:18Z — 2602db0
+- Commit: docs: sync generated repository metadata
+- Branch: main
+
+### 2026-09-10T23:02:35Z — 22b4c8e
+- Commit: Format Terraform root configuration
+- Branch: main
+
+### 2026-09-10T23:02:49Z — 0e9e1bd
+- Commit: docs: sync generated repository metadata
+- Branch: main
+
+### 2026-09-10T23:03:03Z — ab21bd1
+- Commit: Harden AKS node provisioning and format network profile
+- Branch: main
+
+### 2026-09-10T23:03:18Z — ca8abdd
+- Commit: Fix Care Portal telemetry configuration
+- Branch: main
+
+### 2026-09-10T23:03:27Z — 7af90c9
+- Commit: docs: update automated worklog
+- Branch: main
+
+### 2026-09-10T23:03:59Z — 7df9df9
+- Commit: Make Kubernetes CI validation cluster-independent
+- Branch: main
+
+### 2026-09-10T23:04:10Z — 8cae2a9
+- Commit: Normalize Terraform formatting
+- Branch: main
+
+### 2026-09-10T23:04:36Z — 55268e5
+- Commit: Tighten Bicep resource prefix validation
+- Branch: main
+
+### 2026-09-10T23:15:16Z — 157485e
+- Commit: fix: add OpenTelemetry core package to care API
+- Branch: main
+
+### 2026-09-10T23:15:33Z — 5e9daf5
+- Commit: security: enforce non-root web container
+- Branch: main
+
+### 2026-09-10T23:15:45Z — fb7175f
+- Commit: docs: sync generated repository metadata
+- Branch: main
+
+### 2026-09-10T23:16:24Z — a598349
+- Commit: ci: add Terraform formatting diagnostic
+- Branch: main
+
+### 2026-09-10T23:16:52Z — a082f26
+- Commit: feat: align Bicep AKS identity security with Terraform
+- Branch: main
+
+### 2026-09-10T23:17:14Z — 5c383ed
+- Commit: ci: pin kubeconform validator image
+- Branch: main
+
+### 2026-09-10T23:17:44Z — a534436
+- Commit: fix: use current Azure federated credential schema
+- Branch: main
+
+### 2026-09-10T23:26:14Z — 7057971
+- Commit: security: harden web pod runtime defaults
+- Branch: main
+
+### 2026-09-10T23:26:31Z — 65cc889
+- Commit: security: harden community hub pod runtime defaults
+- Branch: main
+
+### 2026-09-10T23:26:45Z — 54fa741
+- Commit: security: add network policies for web and security radar
+- Branch: main
+
+### 2026-09-10T23:26:55Z — 4e20c22
+- Commit: docs: sync generated repository metadata
+- Branch: main
+
+### 2026-09-10T23:27:11Z — bd618d5
+- Commit: docs: sync generated repository metadata
+- Branch: main
+
+### 2026-09-10T23:27:23Z — a5a63bf
+- Commit: docs: sync generated repository metadata
+- Branch: main
+
+### 2026-09-10T23:27:40Z — 96fc59f
+- Commit: ci: pin kubectl to supported Kubernetes release
+- Branch: main
+
+### 2026-09-10T23:28:27Z — ecdf43f
+- Commit: security: pin pod security standard to Kubernetes 1.37
+- Branch: main
+
+### 2026-09-10T23:30:36Z — 62da759
+- Commit: docs: sync generated repository metadata
+- Branch: main
+
+### 2026-09-10T23:30:48Z — 734adce
+- Commit: docs: sync generated repository metadata
+- Branch: main
+
+### 2026-09-10T23:31:27Z — 7402fab
+- Commit: ci: make Azure Terraform deployment explicitly manual
+- Branch: main
+
+### 2026-09-10T23:31:39Z — 441b705
+- Commit: security: align Bicep ACR with hardened Terraform baseline
+- Branch: main
+
+### 2026-09-10T23:36:40Z — 85e1b8e
+- Commit: fix(terraform): align ACR resource with azurerm 5.x schema
+- Branch: main
+
+### 2026-09-10T23:36:54Z — 070de31
+- Commit: security: document justified Checkov exceptions
+- Branch: main
+
+### 2026-09-12T05:38:25Z — 67ef333
+- Commit: docs: finalize Azure Kubernetes showcase README
+- Branch: main
+
+### 2026-09-12T05:40:17Z — a6323ad
+- Commit: docs: add concise Azure deployment runbook
+- Branch: main
+
+### 2026-09-12T05:43:09Z — 34a36cc
+- Commit: docs: sync generated repository metadata
+- Branch: main
+
+### 2026-09-13T03:21:00Z — e07d496
+- Commit: Bump Microsoft.AspNetCore.OpenApi from 10.0.11 to 10.0.12 (#40)
+- Branch: main
+
+### 2026-09-13T03:22:47Z — e9ee69d
+- Commit: Bump Azure.Core from 1.60.0 to 1.62.0 (#37)
+- Branch: main
+
+### 2026-09-13T03:28:16Z — a84f670
+- Commit: Bump Microsoft.NET.Test.Sdk from 17.14.1 to 18.9.0 (#9)
+- Branch: main
+
+### 2026-09-13T03:28:33Z — eb8e970
+- Commit: Bump Azure.Core from 1.60.0 to 1.62.0 (#35)
+- Branch: main
+
+### 2026-09-13T03:29:25Z — a45055d
+- Commit: Bump Microsoft.AspNetCore.OpenApi from 10.0.11 to 10.0.12 (#38)
+- Branch: main
+
+### 2026-09-13T03:29:55Z — ade2406
+- Commit: Bump Azure.Core and Azure.Monitor.OpenTelemetry.Exporter (#32)
+- Branch: main
+
+### 2026-09-13T03:30:11Z — 34cbc86
+- Commit: build(deps-dev): bump @types/node from 24.13.3 to 26.4.1 in /src/Web (#22)
+- Branch: main
+
+### 2026-09-13T03:30:27Z — 6aed891
+- Commit: Bump OpenTelemetry.Exporter.OpenTelemetryProtocol from 1.14.0 to 1.15.3 (#20)
+- Branch: main
+
+### 2026-09-13T03:30:42Z — 3b52ead
+- Commit: Bump Swashbuckle.AspNetCore from 10.1.0 to 10.2.3 (#18)
+- Branch: main
+
+### 2026-09-13T03:35:03Z — 8a4b7f1
+- Commit: build(deps-dev): bump typescript from 6.0.3 to 7.0.2 in /src/Web (#2)
+- Branch: main
+
+### 2026-09-13T03:35:18Z — 8852ff2
+- Commit: build(deps): bump axios from 1.19.0 to 1.20.0 in /src/Web (#23)
+- Branch: main
+
+### 2026-09-13T03:39:38Z — ea09f6c
+- Commit: Bump Microsoft.AspNetCore.OpenApi from 10.0.11 to 10.0.12 (#39)
+- Branch: main
+
+### 2026-09-13T03:41:23Z — 9d939ee
+- Commit: build(deps-dev): bump typescript-eslint in /src/Web (#24)
+- Branch: main
+
+### 2026-09-13T03:42:06Z — 65c8f52
+- Commit: chore(deps): bump node from 22-alpine to 26-alpine in /src/Web (#6)
+- Branch: main
+
+### 2026-09-13T03:43:16Z — 3b3359e
+- Commit: build(deps): bump actions/setup-node from 4 to 7 (#1)
+- Branch: main
+
+### 2026-09-13T03:43:42Z — bd5dd19
+- Commit: Bump OpenTelemetry.Exporter.OpenTelemetryProtocol from 1.15.3 to 1.18.0 (#25)
+- Branch: main
+
+### 2026-09-13T03:44:34Z — 942ed08
+- Commit: Bump Azure.Core and Azure.Monitor.OpenTelemetry.Exporter (#31)
+- Branch: main
+
+### 2026-09-13T03:45:20Z — 466f69e
+- Commit: Bump xunit.runner.visualstudio from 3.1.4 to 4.0.0 (#10)
+- Branch: main
+
+### 2026-09-13T03:46:50Z — 7b57a96
+- Commit: chore(deps): bump actions/setup-dotnet from 4 to 6 (#4)
+- Branch: main
+
+### 2026-09-13T03:47:32Z — 604b0d1
+- Commit: Bump Swashbuckle.AspNetCore from 10.1.0 to 10.2.3 (#19)
+- Branch: main
+
+### 2026-09-13T03:47:48Z — fcd5cc0
+- Commit: build(deps): bump azure/setup-kubectl from 4 to 5 (#7)
+- Branch: main
+
+### 2026-09-13T03:48:03Z — 75b9a85
+- Commit: Bump coverlet.collector from 6.0.4 to 10.0.1 (#8)
+- Branch: main
+
+### 2026-09-13T03:48:35Z — b6daefa
+- Commit: Bump Azure.Monitor.OpenTelemetry.Exporter from 1.8.3 to 1.9.0 (#29)
+- Branch: main
+
+### 2026-09-13T03:55:06Z — e430994
+- Commit: fix(ci): resolve corrupted workflow conflict markers
+- Branch: main
+
+### 2026-09-13T21:17:33Z — 678d699
+- Commit: docs: sync generated repository metadata
+- Branch: main
+

@@ -26,7 +26,11 @@ jobs:
       - uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.7.5
+feat/complete-production-verification
       - name: Terraform fmt diagnostic
+
+      - name: Show Terraform formatter diff
+ main
         working-directory: infra/terraform
         run: terraform fmt -diff -recursive
       - name: Terraform fmt check
@@ -94,7 +98,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
-      - uses: docker://ghcr.io/yannh/kubeconform:latest
+      - uses: docker://ghcr.io/yannh/kubeconform@sha256:faffaf43f95aa6425306e1ab8d6fcad72acb9049158f38e574c085ea1ec0f64e
         with:
           args: -strict -ignore-missing-schemas -summary k8s
 
