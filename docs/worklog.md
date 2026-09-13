@@ -354,3 +354,7 @@
 - Commit: docs: sync generated repository metadata
 - Branch: main
 
+### 2026-09-13T03:21:00Z — e07d496
+- Commit: Bump Microsoft.AspNetCore.OpenApi from 10.0.11 to 10.0.12 (#40)
+- Branch: main
+
