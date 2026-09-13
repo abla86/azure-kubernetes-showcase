@@ -23,7 +23,7 @@ builder.Services
     .UseAzureMonitorExporter(options =>
     {
         options.Credential = credential;
-    })
+    });
 
 builder.Services.AddHealthChecks();
 
