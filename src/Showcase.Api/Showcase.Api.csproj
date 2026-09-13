@@ -6,6 +6,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+dependabot/nuget/src/Showcase.Api/Azure.Monitor.OpenTelemetry.Exporter-1.9.0
+    <PackageReference Include="Azure.Identity" Version="1.18.0" />
+    <PackageReference Include="Azure.Monitor.OpenTelemetry.Exporter" Version="1.9.0" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.11" />
+=======
     <PackageReference Include="Azure.Core" Version="1.62.0" />
 dependabot/nuget/src/Showcase.Api/multi-032c11af81
     <PackageReference Include="Azure.Monitor.OpenTelemetry.Exporter" Version="1.9.0" />
