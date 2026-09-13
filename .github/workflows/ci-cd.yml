@@ -44,7 +44,12 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
+ dependabot/github_actions/actions/checkout-7
+
+      - uses: actions/setup-dotnet@v4
+
       - uses: actions/setup-dotnet@v6
+main
         with:
           dotnet-version: 10.0.x
       - run: dotnet restore
@@ -60,7 +65,12 @@ jobs:
         working-directory: src/Web
     steps:
       - uses: actions/checkout@v7
+dependabot/github_actions/actions/checkout-7
+
+      - uses: actions/setup-node@v4
+
       - uses: actions/setup-node@v7
+main
         with:
           node-version: 22
           cache: npm
@@ -106,6 +116,12 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
+dependabot/github_actions/actions/checkout-7
+      - uses: azure/setup-kubectl@v4
+        with:
+          version: latest
+      - run: kubectl kustomize k8s/ > /dev/null
+
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
@@ -132,12 +148,17 @@ main
         run: python -m pip install --disable-pip-version-check pyyaml
       - name: Validate workload security policy
         run: python scripts/validate_manifests.py
+main
 
   azure-iac:
     name: Azure IaC validation
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
+dependabot/github_actions/actions/checkout-7
+
+
+main
       - name: Validate Bicep
         uses: azure/cli@v2
         with:
@@ -166,6 +187,10 @@ main
     needs: [backend, frontend]
     steps:
       - uses: actions/checkout@v7
+ependabot/github_actions/actions/checkout-7
+
+
+main
       - name: Build main API
         run: docker build -t azure-kubernetes-showcase-api:${{ github.sha }} ./src/Showcase.Api
       - name: Build frontend
@@ -186,7 +211,12 @@ main
       contents: read
     steps:
       - uses: actions/checkout@v7
+dependabot/github_actions/actions/checkout-7
+
+      - uses: github/codeql-action/init@v3
+
       - uses: github/codeql-action/init@v4
+main
         with:
           languages: csharp,javascript-typescript
           queries: security-extended

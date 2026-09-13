@@ -1,5 +1,18 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
+dependabot/github_actions/actions/checkout-7
+resources:
+  - api.yaml
+  - web.yaml
+  - networkpolicy.yaml
+  - workload-identity.yaml
+  - apps/care-portal-deployment.yaml
+  - apps/community-hub-deployment.yaml
+patches:
+  - path: namespace.yaml
+    target:
+      kind: Namespace
+      name: showcase
 
 namespace: showcase
 
@@ -31,3 +44,4 @@ images:
     newName: acrshowcasedev.azurecr.io/community-hub-api
   - name: acrshowcasedev.azurecr.io/security-radar
     newName: acrshowcasedev.azurecr.io/security-radar
+main
