@@ -254,3 +254,7 @@ main
 ## Automated repository metadata
 
 See [generated repository snapshot](docs/generated/repository-snapshot.md) for the current repository head and tracked engineering areas.
+
+## Automated repository metadata
+
+See [generated repository snapshot](docs/generated/repository-snapshot.md) for the current repository head and tracked engineering areas.
