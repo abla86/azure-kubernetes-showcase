@@ -36,7 +36,7 @@ permissions:
 
 concurrency:
   group: ci-cd-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress:true
 
 jobs:
   backend:
@@ -44,7 +44,12 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
+
+dependabot/github_actions/actions/setup-dotnet-6
+
+      - uses: actions/setup-dotnet@v6
+main
+      - uses: actions/setup-dotnet@v4 main
         with:
           dotnet-version: 10.0.x
       - run: dotnet restore
@@ -148,7 +153,11 @@ main
         with:
           languages: csharp,javascript-typescript
           queries: security-extended
+dependabot/github_actions/actions/setup-dotnet-6
+
+      - uses: actions/setup-dotnet@v6=======
       - uses: actions/setup-dotnet@v4
+main
         with:
           dotnet-version: 10.0.x
       - run: dotnet build --configuration Release
