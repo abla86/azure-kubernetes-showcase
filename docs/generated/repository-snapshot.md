@@ -4,9 +4,9 @@ Generated automatically from `main`.
 
 ## Head
 
-- Commit: `c72697e7758e1d83708627f5c3ce91731994a8a7`
-- Commit date: `2026-09-12T07:42:59+02:00`
-- Subject: docs: remove generated citation markup and duplicate metadata section
+- Commit: `898f3d4d2005e33fb98644f1c2454dd2dec74b66`
+- Commit date: `2026-09-13T23:17:20+02:00`
+- Subject: docs: add RCA and continuous-improvement workflow
 
 ## Engineering areas
 
