@@ -358,3 +358,7 @@
 - Commit: Bump Microsoft.AspNetCore.OpenApi from 10.0.11 to 10.0.12 (#40)
 - Branch: main
 
+### 2026-09-13T03:22:47Z — e9ee69d
+- Commit: Bump Azure.Core from 1.60.0 to 1.62.0 (#37)
+- Branch: main
+
