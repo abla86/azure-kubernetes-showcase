@@ -1,0 +1,9 @@
+resource_group_name              = "rg-azure-kubernetes-showcase"
+location                          = "norwayeast"
+environment                       = "dev"
+kubernetes_version                = null
+node_count                        = 2
+node_vm_size                      = "Standard_D2s_v5"
+github_actions_principal_object_id = null
+monthly_budget_eur                = 50
+budget_alert_emails               = ["alerts@example.invalid"]

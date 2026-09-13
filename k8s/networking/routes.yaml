@@ -1,0 +1,39 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: care-portal
+  namespace: showcase
+spec:
+  parentRefs:
+    - name: showcase-gateway
+      sectionName: https
+  hostnames:
+    - showcase.example.com
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /api/care
+      backendRefs:
+        - name: care-portal-service
+          port: 80
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: community-hub
+  namespace: showcase
+spec:
+  parentRefs:
+    - name: showcase-gateway
+      sectionName: https
+  hostnames:
+    - showcase.example.com
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /api/community
+      backendRefs:
+        - name: community-hub-service
+          port: 80

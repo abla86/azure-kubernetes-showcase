@@ -1,0 +1,66 @@
+name: Repository Hygiene
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: "23 4 * * 1"
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  hygiene:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check for accidental secret-like files
+        shell: bash
+        run: |
+          set -euo pipefail
+          bad=0
+          while IFS= read -r file; do
+            case "$file" in
+              *.env|*.env.*|*id_rsa|*id_dsa|*.pfx|*.p12|*.key|*.pem)
+                echo "Potential sensitive file tracked: $file"
+                bad=1
+                ;;
+            esac
+          done < <(git ls-files)
+          exit "$bad"
+
+      - name: Check repository for TODO/FIXME markers
+        shell: bash
+        run: |
+          echo "Informational maintenance scan"
+          git grep -n -E 'TODO|FIXME' -- ':!README.md' || true
+
+      - name: Dependency review
+        if: github.event_name == 'pull_request'
+        uses: actions/dependency-review-action@v4
+
+      - name: Create maintenance issue on failure
+        if: failure() && github.event_name == 'schedule'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = 'Automated repository hygiene check failed';
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              per_page: 100
+            });
+            if (!issues.some(i => i.title === title)) {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title,
+                body: 'A scheduled repository hygiene check failed. Review the workflow run and address the reported finding.'
+              });
+            }

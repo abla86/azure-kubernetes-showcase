@@ -1,0 +1,33 @@
+name: Bug report
+description: Report a reproducible problem in the showcase
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened?
+      description: Describe the observed behaviour and expected behaviour.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: How can it be reproduced?
+      description: Include the smallest reproducible sequence and relevant environment details.
+    validations:
+      required: true
+  - type: textarea
+    id: validation
+    attributes:
+      label: Validation performed
+      description: Include commands, CI results, screenshots or logs that help verify the issue.
+    validations:
+      required: true
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety and privacy
+      options:
+        - label: I have removed credentials, secrets and personal or patient-identifiable information.
+          required: true

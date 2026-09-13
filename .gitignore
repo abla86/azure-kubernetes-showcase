@@ -2,6 +2,7 @@ bin/
 obj/
 node_modules/
 dist/
+k8s/generated-workload-identity.yaml
 .env
 .env.*
 !.env.example
