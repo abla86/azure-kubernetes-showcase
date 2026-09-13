@@ -43,8 +43,8 @@ jobs:
     name: Backend build and test
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: 10.0.x
       - run: dotnet restore
@@ -59,8 +59,8 @@ jobs:
       run:
         working-directory: src/Web
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm
@@ -76,8 +76,8 @@ jobs:
       run:
         working-directory: src/Web
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm
@@ -90,8 +90,8 @@ jobs:
     name: Kubernetes manifest render
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
-      - uses: azure/setup-kubectl@v4
+      - uses: actions/checkout@v7
+      - uses: azure/setup-kubectl@v5
         with:
           version: latest
       - name: Render manifests without a cluster
@@ -105,7 +105,7 @@ jobs:
     name: Kubernetes manifest validation
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-python@v5
         with:
           python-version: "3.14"
@@ -118,7 +118,7 @@ jobs:
     name: Azure IaC validation
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Validate Bicep
         uses: azure/cli@v2
         with:
@@ -146,7 +146,7 @@ jobs:
     runs-on: ubuntu-24.04
     needs: [backend, frontend]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Build main API
         run: docker build -t azure-kubernetes-showcase-api:${{ github.sha }} ./src/Showcase.Api
       - name: Build frontend
@@ -166,23 +166,23 @@ jobs:
       actions: read
       contents: read
     steps:
-      - uses: actions/checkout@v4
-      - uses: github/codeql-action/init@v3
+      - uses: actions/checkout@v7
+      - uses: github/codeql-action/init@v4
         with:
           languages: csharp,javascript-typescript
           queries: security-extended
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: 10.0.x
       - run: dotnet build --configuration Release
-      - uses: github/codeql-action/analyze@v3
+      - uses: github/codeql-action/analyze@v4
 
   resilience-self-test:
     name: Non-destructive local resilience and security self-test
     runs-on: ubuntu-24.04
     needs: [docker]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-python@v5
         with:
           python-version: "3.14"
