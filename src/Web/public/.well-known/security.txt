@@ -1,0 +1,3 @@
+Contact: mailto:REPLACE_WITH_SECURITY_CONTACT
+Preferred-Languages: no, en
+Policy: https://github.com/abla86/azure-kubernetes-showcase/blob/main/SECURITY.md

@@ -3,124 +3,256 @@ name: CI-CD
 on:
   push:
     branches: [main]
+    paths:
+      - "src/**"
+      - "apps/**"
+      - "tests/**"
+      - "k8s/**"
+      - "security/**"
+      - "scripts/**"
+      - "docker-compose.yml"
+      - "Makefile"
+      - "infra/**"
+      - ".github/workflows/**"
   pull_request:
     branches: [main]
+    paths:
+      - "src/**"
+      - "apps/**"
+      - "tests/**"
+      - "k8s/**"
+      - "security/**"
+      - "scripts/**"
+      - "docker-compose.yml"
+      - "Makefile"
+      - "infra/**"
+      - ".github/workflows/**"
+  workflow_dispatch:
 
 permissions:
   contents: read
   security-events: write
   actions: read
 
+concurrency:
+  group: ci-cd-${{ github.ref }}
+  cancel-in-progress: true 
+
 jobs:
   backend:
     name: Backend build and test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
+ dependabot/github_actions/actions/checkout-7
 
       - uses: actions/setup-dotnet@v4
+
+      - uses: actions/setup-dotnet@v6
+main
         with:
           dotnet-version: 10.0.x
-
       - run: dotnet restore
       - run: dotnet build --configuration Release --no-restore
-      - run: dotnet test --configuration Release --verbosity normal --collect:"XPlat Code Coverage"
+      - name: Test without rebuilding
+        run: dotnet test --configuration Release --no-build --verbosity normal --collect:"XPlat Code Coverage"
 
   frontend:
     name: Frontend lint and build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: src/Web
     steps:
       - uses: actions/checkout@v7
+dependabot/github_actions/actions/checkout-7
 
       - uses: actions/setup-node@v4
+
+      - uses: actions/setup-node@v7
+main
         with:
           node-version: 22
           cache: npm
           cache-dependency-path: src/Web/package-lock.json
-
       - run: npm ci
       - run: npm run lint
       - run: npm run build
 
-  kubernetes:
-    name: Kubernetes manifest validation
-    runs-on: ubuntu-latest
+  frontend-e2e:
+    name: Frontend E2E
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: src/Web
     steps:
       - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: src/Web/package-lock.json
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+
+  kubernetes-dry-run:
+    name: Kubernetes manifest render
+   feat/complete-production-verification
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: azure/setup-kubectl@v5
+        with:
+          version: latest
+      - name: Render manifests without a cluster
+        run: |
+          set -euo pipefail
+          kubectl kustomize k8s/ > /tmp/rendered-manifests.yaml
+          test -s /tmp/rendered-manifests.yaml
+          grep -q '^apiVersion:' /tmp/rendered-manifests.yaml
+  kubernetes:
+    name: Kubernetes manifest validation
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+dependabot/github_actions/actions/checkout-7
       - uses: azure/setup-kubectl@v4
         with:
           version: latest
       - run: kubectl kustomize k8s/ > /dev/null
 
-  azure-iac:
-    name: Azure IaC validation
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
+      - uses: azure/setup-kubectl@v5
+        with:
+          version: 1.37.0
+      - name: Render manifests without a cluster
+        run: |
+          set -euo pipefail
+          kubectl kustomize k8s/ > rendered-k8s.yaml
+          test -s rendered-k8s.yaml
+          grep -q '^apiVersion:' rendered-k8s.yaml
 
+  kubernetes:
+    name: Kubernetes manifest validation
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+      - name: Install YAML parser
+        run: python -m pip install --disable-pip-version-check pyyaml
+      - name: Validate workload security policy
+        run: python scripts/validate_manifests.py
+main
+
+  azure-iac:
+    name: Azure IaC validation
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+dependabot/github_actions/actions/checkout-7
+
+
+main
       - name: Validate Bicep
         uses: azure/cli@v2
         with:
-          inlineScript: az bicep build --file infra/bicep/main.bicep
-
+          inlineScript: |
+            set -euo pipefail
+            while IFS= read -r -d '' file; do
+              az bicep build --file "$file" --stdout >/dev/null
+            done < <(find infra/bicep -name '*.bicep' -print0)
       - name: Validate Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: 1.6.6
-
+          terraform_version: 1.7.5
       - name: Terraform format check
         working-directory: infra/terraform
         run: terraform fmt -check -recursive
-
       - name: Terraform init
         working-directory: infra/terraform
-        run: terraform init -backend=false
-
+        run: terraform init -backend=false -input=false
       - name: Terraform validate
         working-directory: infra/terraform
         run: terraform validate
 
   docker:
     name: Container build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [backend, frontend]
     steps:
       - uses: actions/checkout@v7
+ependabot/github_actions/actions/checkout-7
 
+
+main
       - name: Build main API
         run: docker build -t azure-kubernetes-showcase-api:${{ github.sha }} ./src/Showcase.Api
-
       - name: Build frontend
         run: docker build -t azure-kubernetes-showcase-web:${{ github.sha }} ./src/Web
-
       - name: Build care portal
         run: docker build -t care-portal-api:${{ github.sha }} ./apps/care-portal/CarePortal.Api
-
       - name: Build community hub
         run: docker build -t community-hub-api:${{ github.sha }} ./apps/community-hub/CommunityHub.Api
+      - name: Build security radar
+        run: docker build -t security-radar:${{ github.sha }} ./apps/security-radar
 
   security:
     name: CodeQL security analysis
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       security-events: write
       actions: read
       contents: read
     steps:
       - uses: actions/checkout@v7
+dependabot/github_actions/actions/checkout-7
 
       - uses: github/codeql-action/init@v3
+
+      - uses: github/codeql-action/init@v4
+main
         with:
           languages: csharp,javascript-typescript
           queries: security-extended
-
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: 10.0.x
-
       - run: dotnet build --configuration Release
+      - uses: github/codeql-action/analyze@v4
 
-      - uses: github/codeql-action/analyze@v3
+  resilience-self-test:
+    name: Non-destructive local resilience and security self-test
+    runs-on: ubuntu-24.04
+    needs: [docker]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+      - name: Run frontend end-to-end test suite
+        working-directory: src/Web
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+          npm run test:e2e:ci
+      - name: Set local telemetry mode
+        run: echo "OTEL_ENABLED=false" >> "$GITHUB_ENV"
+      - name: Run canonical local smoke test
+        run: python scripts/local_smoke_test.py
+feat/complete-production-verification
+
+
+main
+      - name: Verify smoke-test dry-run path
+        run: python scripts/local_smoke_test.py --dry-run
+      - name: Collect Docker diagnostics on failure
+        if: failure()
+        run: |
+          docker compose ps
+          docker compose logs --no-color

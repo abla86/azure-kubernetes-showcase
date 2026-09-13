@@ -1,6 +1,9 @@
-﻿using OpenTelemetry.Metrics;
-using OpenTelemetry.Trace;
+using System.Diagnostics;
+using Azure.Identity;
+using Azure.Monitor.OpenTelemetry.Exporter;
+using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,18 +15,14 @@ builder.Host.UseSerilog((context, configuration) =>
         .WriteTo.Console();
 });
 
-builder.Services.AddOpenTelemetry()
-    .ConfigureResource(resource =>
-        resource.AddService("azure-kubernetes-showcase"))
-    .WithTracing(tracing =>
+var credential = new DefaultAzureCredential();
+
+builder.Services
+    .AddOpenTelemetry()
+    .ConfigureResource(resource => resource.AddService("azure-kubernetes-showcase"))
+    .UseAzureMonitorExporter(options =>
     {
-        tracing
-            .AddAspNetCoreInstrumentation()
-            .AddHttpClientInstrumentation();
-    })
-    .WithMetrics(metrics =>
-    {
-        metrics.AddAspNetCoreInstrumentation();
+        options.Credential = credential;
     });
 
 builder.Services.AddHealthChecks();
@@ -41,10 +40,22 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+app.Use(async (context, next) =>
+{
+    context.Response.Headers["X-Clacks-Overhead"] = "GNU Terry Pratchett";
+    context.Response.Headers["X-Defense-Depth"] = "Zero-Trust-Active";
+    await next();
+});
+
 app.UseSerilogRequestLogging();
 app.UseCors("frontend");
 
-app.MapHealthChecks("/health");
+app.MapGet("/.well-known/security.txt", () => Results.Text(
+    "Contact: https://github.com/abla86/azure-kubernetes-showcase/security/policy\n" +
+    "Expires: 2027-08-27T00:00:00Z\n" +
+    "Preferred-Languages: no, en\n" +
+    "Policy: https://github.com/abla86/azure-kubernetes-showcase/blob/main/SECURITY.md\n",
+    "text/plain"));
 
 app.MapGet("/api/health", () =>
     Results.Ok(new
@@ -90,5 +101,3 @@ app.MapGet("/api/events", () =>
 app.Run();
 
 public partial class Program;
-
-

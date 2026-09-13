@@ -4,5 +4,4 @@ metadata:
   name: api-workload-identity-sa
   namespace: showcase
   annotations:
-    # Replace at deployment time with the Terraform output client ID.
-    azure.workload.identity/client-id: "${AZURE_WORKLOAD_IDENTITY_CLIENT_ID}"
+    azure.workload.identity/client-id: "__AZURE_WORKLOAD_IDENTITY_CLIENT_ID__"

@@ -1,0 +1,43 @@
+name: Weekly Security Review
+
+on:
+  schedule:
+    - cron: "23 4 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  review:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check for accidentally committed private-key material
+        shell: bash
+        run: |
+          if grep -RIn --exclude-dir=.git --exclude='*.lock.json' \
+             -E '-----BEGIN (RSA |EC |OPENSSH |DSA )?PRIVATE KEY-----' .; then
+            echo "Private-key material detected in repository contents."
+            exit 1
+          fi
+
+      - name: Check Kubernetes manifests for privileged settings
+        shell: bash
+        run: |
+          if grep -RIn --include='*.yaml' --include='*.yml' \
+             -E 'privileged:[[:space:]]*true|allowPrivilegeEscalation:[[:space:]]*true' k8s; then
+            echo "Potentially privileged Kubernetes configuration detected."
+            exit 1
+          fi
+
+      - name: Check for wildcard Kubernetes egress
+        shell: bash
+        run: |
+          if grep -RIn --include='*.yaml' --include='*.yml' \
+             -E 'egress:[[:space:]]*$' k8s >/tmp/egress.txt; then
+            cat /tmp/egress.txt
+          fi
+          echo "Review Kubernetes egress policies above when present."

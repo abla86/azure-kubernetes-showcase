@@ -1,0 +1,122 @@
+name: Security Compliance
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+    paths:
+      - "infra/terraform/**"
+      - "infra/bicep/**"
+      - "k8s/**"
+      - "scripts/validate_manifests.py"
+      - "docs/iac-parity-matrix.md"
+      - ".github/workflows/security-compliance.yml"
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  terraform:
+    name: Terraform fmt and validate
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.7.5
+feat/complete-production-verification
+      - name: Terraform fmt diagnostic
+
+      - name: Show Terraform formatter diff
+ main
+        working-directory: infra/terraform
+        run: terraform fmt -diff -recursive
+      - name: Terraform fmt check
+        working-directory: infra/terraform
+        run: terraform fmt -check -recursive
+      - name: Terraform init
+        working-directory: infra/terraform
+        run: terraform init -backend=false -input=false
+      - name: Terraform validate
+        working-directory: infra/terraform
+        run: terraform validate
+
+  bicep:
+    name: Bicep build validation
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Azure CLI
+        uses: azure/cli@v2
+        with:
+          inlineScript: az bicep install
+      - name: Bicep build
+        shell: bash
+        run: |
+          set -euo pipefail
+          find infra/bicep -name '*.bicep' -print0 | while IFS= read -r -d '' file; do
+            az bicep build --file "$file" --stdout >/dev/null
+          done
+
+  manifest-policy:
+    name: Kubernetes workload security policy
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install YAML parser
+        run: python -m pip install --disable-pip-version-check pyyaml
+      - name: Validate Kubernetes manifests
+        run: python scripts/validate_manifests.py
+
+  checkov:
+    name: Check Terraform and Kubernetes security
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkov
+        uses: bridgecrewio/checkov-action@v12
+        with:
+          directory: .
+          framework: terraform,kubernetes
+          quiet: false
+          soft_fail: false
+          output_format: cli,sarif
+          output_file_path: console,checkov.sarif
+      - name: Upload Checkov SARIF
+        if: always()
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: checkov.sarif
+
+  kubeconform:
+    name: Validate Kubernetes schemas
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker://ghcr.io/yannh/kubeconform@sha256:faffaf43f95aa6425306e1ab8d6fcad72acb9049158f38e574c085ea1ec0f64e
+        with:
+          args: -strict -ignore-missing-schemas -summary k8s
+
+  parity:
+    name: Check IaC parity contract
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify parity document and anchors
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f docs/iac-parity-matrix.md
+          test -d infra/terraform
+          test -d infra/bicep
+          grep -R 'oidc_issuer_enabled\|workload_identity_enabled' infra/terraform >/dev/null
+          grep -R -i 'oidc\|workload identity' infra/bicep >/dev/null
+          grep -R 'network_policy.*azure' infra/terraform >/dev/null
+          grep -R -i 'network.*policy' infra/bicep >/dev/null
+          grep -R 'admin_enabled.*false' infra/terraform >/dev/null
+          echo 'IaC parity anchors present.'

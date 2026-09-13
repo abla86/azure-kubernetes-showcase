@@ -2,141 +2,255 @@
 
 [![CI/CD](https://github.com/abla86/azure-kubernetes-showcase/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/abla86/azure-kubernetes-showcase/actions/workflows/ci-cd.yml)
 
-A cloud-engineering portfolio project demonstrating .NET 10, React/TypeScript, Docker, Kubernetes, Azure IaC and DevSecOps.
+A public cloud-engineering portfolio project demonstrating **.NET 10, React/TypeScript, Docker, Kubernetes, Azure, Infrastructure as Code, CI/CD, DevSecOps and observability**.
 
-## What it demonstrates
+> **Portfolio status:** Public repository and deployment-ready infrastructure showcase. Azure deployment is intentionally opt-in because it creates billable cloud resources. Runtime deployment claims are not made until an actual Azure/AKS environment has been provisioned and verified.
+
+## What this project demonstrates
 
 - ASP.NET Core / .NET 10 APIs
 - React + TypeScript + Vite
-- Core Showcase API, Care Portal and Community Hub modules
-- Multi-stage non-root Docker containers
+- Modular service boundaries
+- Multi-stage, non-root Docker images
 - Kubernetes Deployments, Services, probes, HPA and NetworkPolicy
 - Restricted Pod Security
+- Azure Kubernetes Service (AKS)
+- Azure Container Registry (ACR)
 - Azure Bicep and modular Terraform
 - AKS OIDC / Workload Identity
-- ACR pull permissions
-- GitHub Actions CI
-- CodeQL and Dependabot
-- Health endpoints, Serilog and OpenTelemetry in the core API
+- GitHub Actions CI/CD
+- CodeQL, Dependabot, Trivy and SBOM generation
+- OpenTelemetry and Azure Monitor integration points
+- Automated API security self-tests
+- Controlled Kubernetes resilience testing
+- IaC validation and parity checks
+- Day-2 diagnostic documentation
+
+## Architecture
+
+```text
+Developer / Pull Request
+          |
+          v
+    GitHub Actions
+   /  |  |  |  \
+  v   v  v  v   v
+Build Test CodeQL Trivy SBOM
+          |
+          v
+       Azure ACR
+          |
+          v
+        Argo CD
+          |
+          v
+         AKS
+          |
+     +----+----+----+
+     |    |    |    |
+    Core Care Community Security
+     API Portal   Hub    Radar
+          |
+          v
+ NetworkPolicy / Pod Security
+          |
+          v
+ OpenTelemetry -> Azure Monitor
+```
 
 ## Application modules
 
 ### Core Showcase API
 `src/Showcase.Api/`
 
-The original portfolio API with health, information, metrics and example event endpoints.
+The main .NET API containing health, information, metrics and example event endpoints.
 
 ### Care Portal
 `apps/care-portal/CarePortal.Api/`
 
-A small demonstration service for care-coordination concepts. It contains no patient data and uses in-memory example data only.
+A deliberately small demonstration service for service-boundary and API design. It contains no patient data and uses demonstration data only.
 
 ### Community Hub
 `apps/community-hub/CommunityHub.Api/`
 
-A small demonstration service for shared resources. It contains no real personal data and uses in-memory example data only.
+A small demonstration service for shared-resource scenarios. It contains no real personal data.
 
-## Architecture
+### Security Radar
+`apps/security-radar/`
 
-```text
-React/TypeScript frontend
-        |
-        v
-Kubernetes / Nginx
-        |
-        +--> Core Showcase API
-        +--> Care Portal
-        +--> Community Hub
-        |
-        +--> NetworkPolicy + Restricted Pod Security
-        |
-        +--> OIDC / Workload Identity
-        |
-        v
-Azure Container Registry
-        |
-        v
-Terraform / Bicep
-```
+A controlled security/operations demonstration with a local event feed, bounded-delay simulation, rate limiting and an application-level test route. It is **not** presented as a production SIEM or intrusion-detection platform.
 
-## Local development
+## Local verification
 
-Prerequisites: .NET 10 SDK, Node.js 22+, Docker Desktop, kubectl and optionally Azure CLI/Terraform.
+### Prerequisites
+
+- .NET 10 SDK
+- Node.js 22+
+- Docker Desktop
+- Python 3.12+
+- kubectl
+- Azure CLI and Terraform for infrastructure work
+
+### Build and test
 
 ```powershell
 dotnet restore
 dotnet build --configuration Release
 dotnet test --configuration Release
+
+cd src/Web
+npm ci
+npm run lint
+npm run build
+cd ../..
+
+python scripts/local_smoke_test.py
+```
+
+### Run the local stack
+
+```powershell
 docker compose up --build
 ```
 
-The solution file includes the core API, Care Portal and Community Hub.
-
-Compose ports:
-
-| Service | Port |
-|---|---:|
-| Main API | 5080 |
-| Frontend | 5173 |
-| Care Portal | 5081 |
-| Community Hub | 5082 |
+Then the local services are available on the ports documented by the Compose configuration. The canonical smoke test starts the stack, verifies health and security behavior, and tears the stack down afterwards.
 
 ## Kubernetes
 
-The `k8s/` directory contains the namespace, application deployments, services, HPA, NetworkPolicies, probes and Workload Identity ServiceAccount configuration.
+The `k8s/` directory contains the Kubernetes deployment model, including:
 
-CI uses client-side parsing without requiring a live cluster:
+- Namespace and workloads
+- startup/readiness/liveness probes
+- HPA
+- Gateway API routes
+- Workload Identity ServiceAccount configuration
+- default-deny NetworkPolicies with required DNS egress
+- restricted workload security settings
 
-```powershell
-kubectl apply --dry-run=client --validate=false -f k8s/
-```
+`scripts/validate_manifests.py` checks the declared workload security controls, including non-root execution, privilege-escalation prevention, read-only filesystems, dropped capabilities and seccomp configuration.
 
-A successful manifest parse is not treated as proof of a production deployment.
+## Azure Infrastructure as Code
 
-## Azure IaC
+Terraform is organized into networking, ACR, AKS and IAM/Workload Identity modules. The AKS configuration uses OIDC and Workload Identity and is designed around Azure CNI Overlay with Azure Network Policy.
 
-Terraform is modularized into networking, ACR, AKS and IAM/Workload Identity. The AKS configuration enables OIDC and Workload Identity, uses Azure networking/policy settings and grants the kubelet identity ACR pull access.
+Bicep is retained as a second IaC representation. CI compiles Bicep and validates Terraform without requiring an Azure deployment.
 
-Bicep remains available as a second IaC representation.
+### Important deployment boundary
 
-The repository does not claim that Azure resources are deployed merely because the configuration exists. Deployment may create billable resources.
+The repository does **not** claim that Azure resources exist merely because Terraform or Bicep files exist. An actual deployment requires an Azure subscription and correctly configured GitHub OIDC trust, state storage and repository variables/secrets.
 
-## CI / DevSecOps
+The deployment workflow is manual and supports `plan` and `apply`. `apply` must remain an explicit operator action because it can create billable Azure resources.
 
-GitHub Actions checks:
+## GitHub Actions / DevSecOps
+
+The repository contains workflows for:
 
 1. .NET restore, build and tests
-2. Frontend install, lint and build
-3. Kubernetes manifest parsing
+2. Frontend lint and build
+3. Kubernetes manifest/security validation
 4. Bicep compilation
-5. Terraform format, initialization and validation
-6. Docker builds for all four application containers
-7. CodeQL analysis
+5. Terraform formatting and validation
+6. Container builds
+7. Trivy vulnerability scanning
+8. CycloneDX SBOM generation
+9. CodeQL analysis
+10. Checkov IaC checks
+11. Kubeconform schema validation
+12. IaC parity-contract checks
+13. Local API security self-testing
+14. Canonical local smoke testing
+15. Repository maintenance and documentation checks
+16. Explicitly triggered AKS resilience testing
 
-## Security
+The Azure deployment workflow uses OIDC rather than long-lived Azure credentials stored in the repository.
 
-- Non-root runtime containers
-- Explicit UID 1654 for .NET containers
-- `runAsNonRoot`
-- `seccompProfile: RuntimeDefault`
-- `allowPrivilegeEscalation: false`
-- Capabilities dropped with `ALL`
-- Restricted Pod Security labels
-- NetworkPolicy isolation
-- OIDC / Workload Identity configuration
-- ACR pull through managed identity
-- CodeQL and Dependabot
+## Security architecture
+
+| Layer | Control | Purpose |
+|---|---|---|
+| Source | CodeQL, Dependabot | Static analysis and dependency monitoring |
+| Build | Trivy, SBOM, Checkov | Supply-chain and IaC checks |
+| Container | Non-root, read-only filesystem, dropped capabilities | Runtime hardening |
+| Kubernetes | Restricted Pod Security, seccomp, probes | Workload hardening |
+| Network | Default-deny NetworkPolicies | Explicit communication boundaries |
+| Identity | OIDC / Workload Identity | Avoid stored cloud credentials |
+| Configuration | Kubeconform and policy validation | Prevent invalid manifests/configuration |
+| Runtime | OpenTelemetry and runbooks | Observability and diagnosis |
+| Resilience | Controlled pod deletion/reconciliation test | Verifiable recovery behavior |
 
 No credentials, production data or patient information are included.
 
-## Verification status
+## Resilience testing
 
-Automated CI checks are the authoritative verification for committed source. A failed check is not described as successful functionality. A real Azure/AKS deployment requires a separate deployment and runtime verification.
+`.github/workflows/chaos.yml` provides an explicitly triggered, bounded resilience test. It is designed to authenticate to AKS using OIDC, delete a selected workload pod and verify Kubernetes reconciliation.
 
-## Scope
+This workflow should only be run against an intentionally provisioned showcase environment.
 
-This is a portfolio showcase, not a production healthcare or community-management system. The modules are intentionally small demonstrations of service boundaries, containers, Kubernetes and Azure infrastructure.
+## Day-2 operations
+
+See `docs/observability-runbook.md` for the diagnostic path from routing and NetworkPolicy through pod health, application logs and telemetry.
+
+The repository also contains `k8s-pod-doctor` for first-line diagnosis of common pod failures such as `CrashLoopBackOff` and `OOMKilled`.
+
+## Cost controls
+
+Terraform contains a configurable resource-group budget guardrail. Budget thresholds and notification recipients are variables rather than hardcoded secrets.
+
+**Important:** a budget configuration is a guardrail, not a guarantee of zero Azure cost.
+
+## Verification discipline
+
+The project deliberately separates:
+
+- **configuration** — what the repository declares;
+- **static verification** — what CI can validate without Azure;
+- **local runtime verification** — what Docker Compose and local tests demonstrate;
+- **cloud runtime verification** — what can only be demonstrated after deployment to Azure/AKS.
+
+A configuration file is never treated as proof that a cloud resource or runtime behavior exists.
+
+## Portfolio scope
+
+This is a **cloud-engineering portfolio showcase**, not a production healthcare or community-management platform. The application modules are intentionally small so that the engineering concerns around containers, Kubernetes, Azure, IaC, CI/CD, security and observability remain visible.
+
+## Repository quality
+
+The repository includes:
+
+- `SECURITY.md`
+- `CONTRIBUTING.md`
+- `CODE_OF_CONDUCT.md`
+- `CHANGELOG.md`
+- architecture and operational documentation
+- automated maintenance checks
+- reproducible local verification commands
 
 ## Repository
 
 https://github.com/abla86/azure-kubernetes-showcase
+
+feat/complete-production-verification
+## Change-control audit
+
+See [docs/REPOSITORY-CHANGE-AUDIT-2026-08-28.md](docs/REPOSITORY-CHANGE-AUDIT-2026-08-28.md) for the repository change-control and traceability record.
+
+## Automated repository metadata
+
+See [generated repository snapshot](docs/generated/repository-snapshot.md) for the current repository head and tracked engineering areas.
+
+## Automated repository metadata
+
+See [generated repository snapshot](docs/generated/repository-snapshot.md) for the current repository head and tracked engineering areas.
+
+## Automated repository metadata
+
+See [generated repository snapshot](docs/generated/repository-snapshot.md) for the current repository head and tracked engineering areas.
+
+## Automated repository metadata
+
+See [generated repository snapshot](docs/generated/repository-snapshot.md) for the current repository head and tracked engineering areas.
+main
+
+## Automated repository metadata
+
+See [generated repository snapshot](docs/generated/repository-snapshot.md) for the current repository head and tracked engineering areas.

@@ -34,3 +34,28 @@ variable "node_vm_size" {
   type        = string
   default     = "Standard_D2s_v5"
 }
+
+variable "github_actions_principal_object_id" {
+  description = "Object ID of the Microsoft Entra principal used by GitHub Actions OIDC."
+  type        = string
+  default     = null
+  nullable    = true
+}
+
+variable "monthly_budget_eur" {
+  description = "Monthly resource-group budget used as a cost guardrail."
+  type        = number
+  default     = 50
+}
+
+variable "budget_alert_emails" {
+  description = "Email recipients for Azure budget notifications."
+  type        = list(string)
+  default     = []
+}
+
+variable "budget_start_date" {
+  description = "First day of the month used as the Azure budget period start. Use RFC3339 UTC format."
+  type        = string
+  default     = "2026-08-01T00:00:00Z"
+}

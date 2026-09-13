@@ -2,6 +2,7 @@
   <Folder Name="/apps/">
     <Project Path="apps/care-portal/CarePortal.Api/CarePortal.Api.csproj" />
     <Project Path="apps/community-hub/CommunityHub.Api/CommunityHub.Api.csproj" />
+    <Project Path="apps/security-radar/SecurityRadar.Web/SecurityRadar.Web.csproj" />
   </Folder>
   <Folder Name="/src/">
     <Project Path="src/Showcase.Api/Showcase.Api.csproj" />

@@ -11,6 +11,21 @@ updates:
     schedule:
       interval: weekly
 
+  - package-ecosystem: nuget
+    directory: "/apps/care-portal/CarePortal.Api"
+    schedule:
+      interval: weekly
+
+  - package-ecosystem: nuget
+    directory: "/apps/community-hub/CommunityHub.Api"
+    schedule:
+      interval: weekly
+
+  - package-ecosystem: nuget
+    directory: "/apps/security-radar/SecurityRadar.Web"
+    schedule:
+      interval: weekly
+
   - package-ecosystem: npm
     directory: "/src/Web"
     schedule:
@@ -23,6 +38,21 @@ updates:
 
   - package-ecosystem: docker
     directory: "/src/Web"
+    schedule:
+      interval: weekly
+
+  - package-ecosystem: docker
+    directory: "/apps/care-portal/CarePortal.Api"
+    schedule:
+      interval: weekly
+
+  - package-ecosystem: docker
+    directory: "/apps/community-hub/CommunityHub.Api"
+    schedule:
+      interval: weekly
+
+  - package-ecosystem: docker
+    directory: "/apps/security-radar"
     schedule:
       interval: weekly
 
