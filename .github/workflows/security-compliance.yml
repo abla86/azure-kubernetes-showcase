@@ -23,9 +23,16 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
-      - uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.13.3
+      - name: Install Terraform
+        shell: bash
+        run: |
+          set -euo pipefail
+          version=1.13.3
+          curl -fsSL "https://releases.hashicorp.com/terraform/${version}/terraform_${version}_linux_amd64.zip" -o /tmp/terraform.zip
+          curl -fsSL "https://releases.hashicorp.com/terraform/${version}/terraform_${version}_SHA256SUMS" -o /tmp/terraform.SHA256SUMS
+          grep "terraform_${version}_linux_amd64.zip" /tmp/terraform.SHA256SUMS | sed "s#  terraform_${version}_linux_amd64.zip#  /tmp/terraform.zip#" | sha256sum -c -
+          sudo unzip -o /tmp/terraform.zip -d /usr/local/bin
+          terraform version
       - name: Terraform fmt check
         working-directory: infra/terraform
         run: terraform fmt -check -recursive
@@ -41,10 +48,9 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
-      - name: Install Azure CLI and Bicep
-        uses: azure/cli@v2
-        with:
-          inlineScript: az bicep install
+      - name: Install Bicep
+        shell: bash
+        run: az bicep install
       - name: Bicep build
         shell: bash
         run: |
@@ -91,9 +97,11 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
-      - uses: docker://ghcr.io/yannh/kubeconform@sha256:faffaf43f95aa6425306e1ab8d6fcad72acb9049158f38e574c085ea1ec0f64e
+      - uses: azure/setup-kubectl@v5
         with:
-          args: -strict -ignore-missing-schemas -summary k8s
+          version: latest
+      - name: Validate Kubernetes schemas
+        run: docker run --rm -v "$PWD:/work" -w /work ghcr.io/yannh/kubeconform:latest -strict -ignore-missing-schemas -summary k8s
 
   parity:
     name: Check IaC parity contract
