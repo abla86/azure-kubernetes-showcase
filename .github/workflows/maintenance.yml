@@ -37,12 +37,16 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          todo="TODO"
+          fixme="FIXME"
+          change_me="CHANGE_ME"
+          replace_me="REPLACE_ME"
           matches=$(git grep -nIE \
-            -e 'TODO[[:space:]]*:' \
-            -e 'FIXME[[:space:]]*:' \
-            -e 'CHANGE_ME' \
-            -e 'REPLACE_ME' \
-            -- . ':(exclude)*.lock' || true)
+            -e "${todo}[[:space:]]*:" \
+            -e "${fixme}[[:space:]]*:" \
+            -e "${change_me}" \
+            -e "${replace_me}" \
+            -- . ':(exclude)*.lock' ':(exclude).github/workflows/maintenance.yml' || true)
 
           if [ -n "$matches" ]; then
             echo "Unresolved repository placeholders found:"
