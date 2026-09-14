@@ -49,6 +49,20 @@ def validate() -> int:
             container_name = container.get("name", "unknown")
             prefix = f"{path}: Deployment/{name} container/{container_name}"
             security = container.get("securityContext", {}) or {}
+            image = str(container.get("image", ""))
+            resources = container.get("resources", {}) or {}
+            requests = resources.get("requests", {}) or {}
+            limits = resources.get("limits", {}) or {}
+
+            if not image:
+                errors.append(f"{prefix} missing container image")
+            elif image.endswith(":latest") or ":latest@" in image:
+                errors.append(f"{prefix} must not use mutable :latest image tag")
+
+            if not requests:
+                errors.append(f"{prefix} missing resource requests")
+            if not limits:
+                errors.append(f"{prefix} missing resource limits")
 
             if security.get("runAsNonRoot") is not True:
                 errors.append(f"{prefix} missing runAsNonRoot: true")
