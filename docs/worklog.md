@@ -498,3 +498,7 @@
 - Commit: fix: harden release manifest placeholder validation
 - Branch: main
 
+### 2026-09-14T01:27:45Z — 8db96c6
+- Commit: fix: remove duplicate service account token setting
+- Branch: main
+
