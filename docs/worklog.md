@@ -582,3 +582,7 @@
 - Commit: fix: use Azure Core credential types
 - Branch: main
 
+### 2026-09-14T01:41:54Z — ba80638
+- Commit: fix: use current AKS context action
+- Branch: main
+
