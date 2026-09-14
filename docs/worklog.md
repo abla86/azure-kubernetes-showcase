@@ -550,3 +550,7 @@
 - Commit: fix: remove duplicate Azure Core reference
 - Branch: main
 
+### 2026-09-14T01:39:31Z — 4181b17
+- Commit: fix: align TypeScript with typescript-eslint
+- Branch: main
+
