@@ -4,9 +4,9 @@ Generated automatically from `main`.
 
 ## Head
 
-- Commit: `afafe45f077c742861b93ff7104bfa3a39d58aa9`
-- Commit date: `2026-09-14T01:25:35Z`
-- Subject: docs: sync generated repository metadata
+- Commit: `2febc1f01d1e469e91c1eee454f0ad01bced1b5f`
+- Commit date: `2026-09-14T03:25:40+02:00`
+- Subject: fix: resolve corrupted Community Hub project dependencies
 
 ## Engineering areas
 
