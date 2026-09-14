@@ -466,3 +466,7 @@
 - Commit: ci: enforce non-empty source and no placeholder implementations
 - Branch: main
 
+### 2026-09-14T01:23:43Z — d0cdfd0
+- Commit: fix: enable CodeQL SARIF upload and automatic scanning
+- Branch: main
+
