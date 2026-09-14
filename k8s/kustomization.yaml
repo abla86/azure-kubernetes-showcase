@@ -7,6 +7,7 @@ resources:
   - workload-identity.yaml
   - api.yaml
   - web.yaml
+  - apps/showcase-web-service-account.yaml
   - apps/care-portal-deployment.yaml
   - apps/community-hub-deployment.yaml
   - apps/security-radar-service-account.yaml
