@@ -4,9 +4,9 @@ Generated automatically from `main`.
 
 ## Head
 
-- Commit: `5fd98045ae96498425ce577dc91466e67bef8751`
-- Commit date: `2026-09-14T03:33:18+02:00`
-- Subject: ci: update checkout action to Node 24 runtime
+- Commit: `3fb3a3419913184cf8e9397f07c70bc012b293a3`
+- Commit date: `2026-09-14T01:39:48Z`
+- Subject: docs: sync generated repository metadata
 
 ## Engineering areas
 
