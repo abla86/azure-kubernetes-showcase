@@ -22,7 +22,6 @@ module "acr" {
 }
 
 module "aks" {
-feat/complete-production-verification
   source              = "./modules/aks"
   resource_group_name = azurerm_resource_group.rg.name
   location            = var.location
@@ -31,16 +30,6 @@ feat/complete-production-verification
   kubernetes_version  = var.kubernetes_version
   node_count          = var.node_count
   node_vm_size        = var.node_vm_size
-
-  source                             = "./modules/aks"
-  resource_group_name                = azurerm_resource_group.rg.name
-  location                           = var.location
-  environment                        = var.environment
-  subnet_id                          = module.networking.subnet_id
-  kubernetes_version                 = var.kubernetes_version
-  node_count                         = var.node_count
-  node_vm_size                       = var.node_vm_size
- main
 }
 
 resource "azurerm_application_insights" "app" {
