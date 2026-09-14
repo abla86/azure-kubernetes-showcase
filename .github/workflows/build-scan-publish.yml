@@ -7,23 +7,18 @@ on:
   pull_request:
     branches: [main]
     paths: ["apps/**", "src/**", "docker-compose.yml", "k8s/**", "scripts/**", ".github/workflows/build-scan-publish.yml"]
+  workflow_dispatch:
 
 permissions:
   contents: read
   security-events: write
-  id-token: write
-
-env:
-  ACR_NAME: ${{ vars.ACR_NAME }}
-  ACR_LOGIN_SERVER: ${{ vars.ACR_LOGIN_SERVER }}
 
 jobs:
-  build-scan-publish:
-    name: Build, scan and publish verified image
+  build-scan:
+    name: Build and scan verified image
     runs-on: ubuntu-24.04
-    environment: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && 'production' || '' }}
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         include:
           - name: care-portal-api
@@ -39,19 +34,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3
-
-      - name: Azure login using OIDC
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
-      - name: Login to ACR
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: az acr login --name "$ACR_NAME"
-
       - name: Build image
         uses: docker/build-push-action@v6
         with:
@@ -61,7 +43,6 @@ jobs:
           tags: ${{ matrix.name }}:${{ github.sha }}
           cache-from: type=gha,scope=${{ matrix.name }}
           cache-to: type=gha,mode=max,scope=${{ matrix.name }}
-
       - name: Trivy vulnerability scan
         uses: aquasecurity/trivy-action@v0.36.0
         with:
@@ -71,14 +52,12 @@ jobs:
           severity: CRITICAL,HIGH
           ignore-unfixed: true
           exit-code: "1"
-
       - name: Upload Trivy SARIF
         if: always()
         uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: trivy-${{ matrix.name }}.sarif
           category: trivy-${{ matrix.name }}
-
       - name: Generate SBOM
         if: always()
         uses: aquasecurity/trivy-action@v0.36.0
@@ -87,7 +66,6 @@ jobs:
           format: cyclonedx
           output: sbom-${{ matrix.name }}.cdx.json
           scan-type: image
-
       - name: Upload SBOM
         if: always()
         uses: actions/upload-artifact@v4
@@ -96,19 +74,45 @@ jobs:
           path: sbom-${{ matrix.name }}.cdx.json
           retention-days: 30
 
+  publish:
+    name: Publish verified images to Azure Container Registry
+    runs-on: ubuntu-24.04
+    needs: [build-scan]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.ENABLE_AZURE_PUBLISH == 'true'
+    environment: production
+    strategy:
+      fail-fast: false
+      matrix:
+        name: [care-portal-api, community-hub-api, showcase-api, showcase-web, security-radar]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Login to ACR
+        run: az acr login --name "${{ vars.ACR_NAME }}"
+      - name: Rebuild verified image
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.name == 'care-portal-api' && './apps/care-portal/CarePortal.Api' || matrix.name == 'community-hub-api' && './apps/community-hub/CommunityHub.Api' || matrix.name == 'showcase-api' && './src/Showcase.Api' || matrix.name == 'showcase-web' && './src/Web' || './apps/security-radar' }}
+          push: false
+          load: true
+          tags: ${{ matrix.name }}:${{ github.sha }}
       - name: Push verified image
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
           set -euo pipefail
-          docker tag "${{ matrix.name }}:${{ github.sha }}" "$ACR_LOGIN_SERVER/${{ matrix.name }}:${{ github.sha }}"
-          docker tag "${{ matrix.name }}:${{ github.sha }}" "$ACR_LOGIN_SERVER/${{ matrix.name }}:main"
-          docker push "$ACR_LOGIN_SERVER/${{ matrix.name }}:${{ github.sha }}"
-          docker push "$ACR_LOGIN_SERVER/${{ matrix.name }}:main"
+          docker tag "${{ matrix.name }}:${{ github.sha }}" "${{ vars.ACR_LOGIN_SERVER }}/${{ matrix.name }}:${{ github.sha }}"
+          docker tag "${{ matrix.name }}:${{ github.sha }}" "${{ vars.ACR_LOGIN_SERVER }}/${{ matrix.name }}:main"
+          docker push "${{ vars.ACR_LOGIN_SERVER }}/${{ matrix.name }}:${{ github.sha }}"
+          docker push "${{ vars.ACR_LOGIN_SERVER }}/${{ matrix.name }}:main"
 
   kubernetes-render-check:
     name: Render and validate Kubernetes release manifests
     runs-on: ubuntu-24.04
-    needs: [build-scan-publish]
+    needs: [build-scan]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -128,8 +132,8 @@ jobs:
   kubernetes-deploy:
     name: Deploy release to AKS
     runs-on: ubuntu-24.04
-    needs: [build-scan-publish, kubernetes-render-check]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [build-scan, kubernetes-render-check]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.ENABLE_AZURE_DEPLOY == 'true'
     environment: production
     steps:
       - uses: actions/checkout@v4
