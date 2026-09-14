@@ -486,3 +486,7 @@
 - Commit: fix: reconstruct corrupted CI workflow and restore valid security pipeline
 - Branch: main
 
+### 2026-09-14T01:26:40Z — 18c725d
+- Commit: fix: remove corrupted Checkov configuration and consolidate intentional exceptions
+- Branch: main
+
