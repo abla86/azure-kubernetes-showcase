@@ -17,6 +17,7 @@ spec:
         app: showcase-web
     spec:
       automountServiceAccountToken: false
+      serviceAccountName: showcase-web-sa
       securityContext:
         runAsNonRoot: true
         seccompProfile:
