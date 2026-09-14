@@ -12,16 +12,23 @@ permissions:
 
 jobs:
   source-integrity:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v7
-      - name: Reject empty source files and implementation placeholders
+      - uses: actions/checkout@v4
+      - name: Reject empty source files, conflict markers and implementation placeholders
         shell: bash
         run: |
           set -euo pipefail
           failed=0
           while IFS= read -r -d '' file; do
             [ -s "$file" ] || { echo "EMPTY SOURCE: $file"; failed=1; }
-            if grep -EIn '^[[:space:]]*(//|#|/\*|<!--)[[:space:]]*(TODO|FIXME|XXX|HACK|NOT IMPLEMENTED|COMING SOON|PLACEHOLDER)\b' "$file" >/dev/null 2>&1; then echo "PLACEHOLDER SOURCE: $file"; failed=1; fi
-          done < <(find . -type f \( -name '*.cs' -o -name '*.js' -o -name '*.jsx' -o -name '*.ts' -o -name '*.tsx' -o -name '*.py' -o -name '*.java' -o -name '*.go' -o -name '*.rs' -o -name '*.html' -o -name '*.css' -o -name '*.scss' -o -name '*.sql' -o -name '*.sh' -o -name '*.ps1' \) -not -path './.git/*' -print0)
+            if grep -EIn '^[[:space:]]*(//|#|/\*|<!--)[[:space:]]*(TODO|FIXME|XXX|HACK|NOT IMPLEMENTED|COMING SOON|PLACEHOLDER)\b' "$file" >/dev/null 2>&1; then
+              echo "PLACEHOLDER SOURCE: $file"
+              failed=1
+            fi
+            if grep -EIn '^(<<<<<<<|=======|>>>>>>>)[[:space:]]*|^[[:space:]]*(feat|fix|dependabot|main)/[^[:space:]]+$' "$file" >/dev/null 2>&1; then
+              echo "MERGE ARTIFACT: $file"
+              failed=1
+            fi
+          done < <(find . -type f \( -name '*.cs' -o -name '*.csproj' -o -name '*.js' -o -name '*.jsx' -o -name '*.ts' -o -name '*.tsx' -o -name '*.py' -o -name '*.java' -o -name '*.go' -o -name '*.rs' -o -name '*.html' -o -name '*.css' -o -name '*.scss' -o -name '*.sql' -o -name '*.sh' -o -name '*.ps1' -o -name '*.yml' -o -name '*.yaml' -o -name '*.tf' \) -not -path './.git/*' -not -path './docs/*' -print0)
           exit "$failed"
