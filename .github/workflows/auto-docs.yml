@@ -25,7 +25,7 @@ jobs:
     name: Sync repository metadata
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
@@ -113,7 +113,7 @@ jobs:
               echo
               echo "## Engineering areas"
               echo
-              for path in \                "apps" "src" "k8s" "infra" "security" "scripts" ".github/workflows"; do
+              for path in "apps" "src" "k8s" "infra" "security" "scripts" ".github/workflows"; do
                 if [ -d "$path" ]; then
                   echo "- \`$path/\` present"
                 fi
