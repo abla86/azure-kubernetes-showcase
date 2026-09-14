@@ -1,73 +1,146 @@
+using System.Collections.Concurrent;
 using System.Diagnostics;
-using System.Text.Json;
-using System.Threading.RateLimiting;
+using System.Diagnostics.Metrics;
 using Microsoft.AspNetCore.RateLimiting;
 using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using System.Threading.RateLimiting;
+
+const string serviceName = "security-radar";
+var otelEnabled = string.Equals(
+    Environment.GetEnvironmentVariable("OTEL_ENABLED"),
+    "true",
+    StringComparison.OrdinalIgnoreCase);
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddHealthChecks();
 
 builder.Services.AddRateLimiter(options =>
 {
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
-    options.AddFixedWindowLimiter("DeceptionWall", limiterOptions =>
+    options.AddFixedWindowLimiter("DeceptionWall", limiter =>
     {
-        limiterOptions.PermitLimit = 10;
-        limiterOptions.Window = TimeSpan.FromSeconds(10);
-        limiterOptions.QueueLimit = 0;
+        limiter.PermitLimit = 2;
+        limiter.Window = TimeSpan.FromMinutes(1);
+        limiter.QueueLimit = 0;
     });
 });
-
-var otelEnabled = string.Equals(
-    builder.Configuration["OTEL_ENABLED"],
-    "true",
-    StringComparison.OrdinalIgnoreCase);
 
 if (otelEnabled)
 {
     builder.Services.AddOpenTelemetry()
-        .WithTracing(tracing => tracing.AddAspNetCoreInstrumentation())
-        .WithMetrics(metrics => metrics.AddAspNetCoreInstrumentation());
+        .ConfigureResource(resource => resource.AddService(serviceName))
+        .WithTracing(tracing => tracing
+            .AddAspNetCoreInstrumentation()
+            .AddOtlpExporter(options =>
+            {
+                var endpoint = Environment.GetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT");
+                if (Uri.TryCreate(endpoint, UriKind.Absolute, out var uri))
+                {
+                    options.Endpoint = uri;
+                }
+            }))
+        .WithMetrics(metrics => metrics
+            .AddAspNetCoreInstrumentation()
+            .AddMeter("AzureKubernetesShowcase.SecurityRadar")
+            .AddOtlpExporter(options =>
+            {
+                var endpoint = Environment.GetEnvironmentVariable("OTEL_EXPORTER_OTLP_ENDPOINT");
+                if (Uri.TryCreate(endpoint, UriKind.Absolute, out var uri))
+                {
+                    options.Endpoint = uri;
+                }
+            }));
 }
 
-builder.Services.AddSingleton<SecurityEventStore>();
-
 var app = builder.Build();
+
+app.UseDefaultFiles();
+app.UseStaticFiles();
 app.UseRateLimiter();
 
-var deceptionCounter = app.Services.GetRequiredService<SecurityEventStore>().Counter;
-
-app.MapGet("/health", () => Results.Ok(new { status = "healthy" }));
-
-app.MapGet("/api/status", () => Results.Ok(new
+app.Use(async (context, next) =>
 {
-    status = "operational",
-    rateLimiting = true,
-    structuredSecurityEvents = true,
-    ghostRoute = true,
-    telemetryEnabled = otelEnabled
-}));
+    context.Response.Headers["X-Clacks-Overhead"] = "GNU Terry Pratchett";
+    context.Response.Headers["X-Defense-Depth"] = "Active";
+    await next();
+});
 
-app.MapMethods("/ghost/{**path}",
-    new[] { "GET", "POST", "PUT", "PATCH", "DELETE" },
-    async (HttpContext context, ILogger<Program> logger, SecurityEventStore store) =>
+var events = new ConcurrentQueue<object>();
+using var meter = new Meter("AzureKubernetesShowcase.SecurityRadar");
+var deceptionCounter = meter.CreateCounter<long>(
+    "security.deception.events",
+    description: "Controlled deception events");
+
+void Record(string route, string action, long delayMs = 0)
+{
+    events.Enqueue(new
+    {
+        timestamp = DateTimeOffset.UtcNow,
+        route,
+        action,
+        delayMs
+    });
+
+    while (events.Count > 100 && events.TryDequeue(out _)) { }
+}
+
+static string SanitizeForLog(string value) =>
+    value.Replace("\r", "", StringComparison.Ordinal)
+         .Replace("\n", "", StringComparison.Ordinal)
+         .Replace("\t", " ", StringComparison.Ordinal);
+
+app.MapHealthChecks("/health");
+
+app.MapPost("/api/simulate-attack", async (
+    HttpContext context,
+    ILogger<Program> logger) =>
 {
     var started = Stopwatch.GetTimestamp();
-    var route = NormalizeRoute(context.Request.Path);
-    var safeRoute = SanitizeForLog(route);
+    await Task.Delay(TimeSpan.FromSeconds(2), context.RequestAborted);
+    var elapsed = (long)Stopwatch.GetElapsedTime(started).TotalMilliseconds;
 
     logger.LogWarning(
         "SecurityDeceptionEvent Route={Route} Classification={Classification} Action={Action}",
-        safeRoute,
+        "/api/simulate-attack",
+        "controlled-simulation",
+        "logged-and-rejected");
+
+    deceptionCounter.Add(1, new KeyValuePair<string, object?>(
+        "route", "/api/simulate-attack"));
+
+    Record("/api/simulate-attack", "controlled-simulation-rejected", elapsed);
+
+    return Results.BadRequest(new
+    {
+        detected = true,
+        simulation = true,
+        action = "Request rejected after controlled delay",
+        delayMs = elapsed,
+        timestamp = DateTimeOffset.UtcNow
+    });
+}).RequireRateLimiting("DeceptionWall");
+
+app.MapMethods("/ghost/{**path}",
+    new[] { "GET", "POST", "PUT", "PATCH", "DELETE" },
+    async (HttpContext context, ILogger<Program> logger) =>
+{
+    var started = Stopwatch.GetTimestamp();
+    var route = SanitizeForLog(context.Request.Path.ToString());
+
+    logger.LogWarning(
+        "SecurityDeceptionEvent Route={Route} Classification={Classification} Action={Action}",
+        route,
         "controlled-decoy",
         "logged-and-rejected");
 
-    deceptionCounter.Add(route);
+    deceptionCounter.Add(1, new KeyValuePair<string, object?>("route", route));
 
     await Task.Delay(TimeSpan.FromSeconds(1.5), context.RequestAborted);
     var elapsed = (long)Stopwatch.GetElapsedTime(started).TotalMilliseconds;
 
-    store.Record(route, "ghost-route-rejected", elapsed);
+    Record(route, "ghost-route-rejected", elapsed);
 
     return Results.NotFound(new
     {
@@ -79,71 +152,20 @@ app.MapMethods("/ghost/{**path}",
     });
 }).RequireRateLimiting("DeceptionWall");
 
-app.MapGet("/api/events", (SecurityEventStore store) =>
-    Results.Ok(store.Events));
+app.MapGet("/api/events", () =>
+    Results.Ok(events.Reverse().Take(50)));
 
-app.Run();
-
-static string NormalizeRoute(PathString path)
+app.MapGet("/api/status", () => Results.Ok(new
 {
-    var value = path.ToString();
-    return value.Length > 512 ? value[..512] : value;
-}
+    service = serviceName,
+    status = "operational",
+    controlledSimulation = true,
+    ghostRoute = true,
+    rateLimiting = true,
+    structuredSecurityEvents = true,
+    localEventFeed = true,
+    telemetryEnabled = otelEnabled,
+    timestamp = DateTimeOffset.UtcNow
+}));
 
-static string SanitizeForLog(string value) =>
-    value.Replace("\r", "", StringComparison.Ordinal)
-         .Replace("\n", "", StringComparison.Ordinal)
-         .Replace("\t", " ", StringComparison.Ordinal);
-
-public sealed class SecurityEventStore
-{
-    private readonly object _gate = new();
-    private readonly List<SecurityEvent> _events = new();
-    public SecurityEventCounter Counter { get; } = new();
-
-    public IReadOnlyList<SecurityEvent> Events
-    {
-        get
-        {
-            lock (_gate)
-            {
-                return _events.ToArray();
-            }
-        }
-    }
-
-    public void Record(string route, string classification, long elapsedMs)
-    {
-        lock (_gate)
-        {
-            _events.Add(new SecurityEvent(
-                SanitizeForLog(route),
-                classification,
-                elapsedMs,
-                DateTimeOffset.UtcNow));
-
-            if (_events.Count > 100)
-                _events.RemoveAt(0);
-        }
-    }
-
-    private static string SanitizeForLog(string value) =>
-        value.Replace("\r", "", StringComparison.Ordinal)
-             .Replace("\n", "", StringComparison.Ordinal)
-             .Replace("\t", " ", StringComparison.Ordinal);
-}
-
-public sealed class SecurityEventCounter
-{
-    private long _count;
-    public long Count => Interlocked.Read(ref _count);
-    public void Add(string _) => Interlocked.Increment(ref _count);
-}
-
-public sealed record SecurityEvent(
-    string Route,
-    string Classification,
-    long DelayMs,
-    DateTimeOffset Timestamp);
-
-public partial class Program { }
+app.Run("http://0.0.0.0:8080");
