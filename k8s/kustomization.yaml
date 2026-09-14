@@ -9,6 +9,7 @@ resources:
   - web.yaml
   - apps/care-portal-deployment.yaml
   - apps/community-hub-deployment.yaml
+  - apps/security-radar-service-account.yaml
   - apps/security-radar-deployment.yaml
   - autoscaling.yaml
   - disruption-budgets.yaml
