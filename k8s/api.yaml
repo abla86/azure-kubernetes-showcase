@@ -19,7 +19,6 @@ spec:
     spec:
       automountServiceAccountToken: false
       serviceAccountName: api-workload-identity-sa
-      automountServiceAccountToken: false
       securityContext:
         runAsNonRoot: true
         seccompProfile:
