@@ -586,3 +586,7 @@
 - Commit: fix: use current AKS context action
 - Branch: main
 
+### 2026-09-14T01:42:23Z — 0d98d3b
+- Commit: fix: pin kubeconform validation image
+- Branch: main
+
