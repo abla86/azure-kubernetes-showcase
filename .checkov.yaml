@@ -1,33 +1,3 @@
-feat/complete-production-verification
-# Checkov exceptions for controls that require deployment-time or paid Azure capabilities.
-# Every exception is intentional and documented here so CI remains deterministic.
-skip-check:
-  - CKV_AZURE_237
-  - CKV_AZURE_167
-  - CKV_AZURE_166
-  - CKV_AZURE_233
-  - CKV_AZURE_164
-  - CKV_AZURE_139
-  - CKV_AZURE_165
-  - CKV_AZURE_172
-  - CKV_AZURE_227
-  - CKV_AZURE_6
-  - CKV_AZURE_117
-  - CKV_AZURE_116
-  - CKV_AZURE_115
-  - CKV_AZURE_170
-  - CKV_AZURE_226
-  - CKV_AZURE_141
-  - CKV_AZURE_171
-  - CKV_AZURE_168
-  - CKV_AZURE_232
-  - CKV2_AZURE_31
-  # Azure Workload Identity requires the projected service-account token.
-  - CKV_K8S_38
-  # Release CI replaces the source-manifest rendering token with the immutable release SHA.
-  - CKV_K8S_43
-  # Gateway API manages ingress separately from pod-local NetworkPolicy selectors.
-  - CKV2_K8S_6
 # Checkov exceptions are limited to controls that require environment-specific
 # production infrastructure or release-time values that this public showcase does
 # not hard-code. Security controls that are implementable in source remain enforced.
@@ -40,5 +10,6 @@ skip-check:
   - CKV_AZURE_115 # AKS private cluster requires private DNS/network access infrastructure and conflicts with the public demo ingress model.
   - CKV_AZURE_171 # The selected azurerm provider schema does not expose the required automatic upgrade-channel property.
   - CKV_AZURE_232 # System-node-only critical-pod placement is an operational scheduling policy for the target cluster.
+  - CKV_K8S_38 # Azure Workload Identity requires the projected service-account token.
   - CKV_K8S_43 # Immutable ACR digests are resolved after images are built and published by the release pipeline.
-main
+  - CKV2_K8S_6 # Gateway API manages ingress separately from pod-local NetworkPolicy selectors.
