@@ -122,7 +122,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          grep -R "${IMAGE_TAG}\|__APP_HOSTNAME__\|__CERT_MANAGER_EMAIL__" k8s >/dev/null
+          grep -R -E '\$\{IMAGE_TAG\}|__APP_HOSTNAME__|__CERT_MANAGER_EMAIL__' k8s >/dev/null
           test -f k8s/kustomization.yaml
 
   kubernetes-deploy:
