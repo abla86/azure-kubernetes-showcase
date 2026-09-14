@@ -73,20 +73,37 @@ jobs:
           name: sbom-${{ matrix.name }}
           path: sbom-${{ matrix.name }}.cdx.json
           retention-days: 30
+      - name: Export scanned image
+        if: ${{ success() && vars.ENABLE_AZURE_PUBLISH == 'true' }}
+        run: docker save "${{ matrix.name }}:${{ github.sha }}" -o "image-${{ matrix.name }}.tar"
+      - name: Upload scanned image
+        if: ${{ success() && vars.ENABLE_AZURE_PUBLISH == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: image-${{ matrix.name }}
+          path: image-${{ matrix.name }}.tar
+          retention-days: 1
 
   publish:
-    name: Publish verified images to Azure Container Registry
+    name: Publish scanned images to Azure Container Registry
     runs-on: ubuntu-24.04
     needs: [build-scan]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.ENABLE_AZURE_PUBLISH == 'true'
     environment: production
+    permissions:
+      contents: read
+      id-token: write
     strategy:
       fail-fast: false
       matrix:
         name: [care-portal-api, community-hub-api, showcase-api, showcase-web, security-radar]
     steps:
-      - uses: actions/checkout@v4
-      - uses: docker/setup-buildx-action@v3
+      - uses: actions/download-artifact@v4
+        with:
+          name: image-${{ matrix.name }}
+          path: image
+      - name: Load scanned image
+        run: docker load -i "image/image-${{ matrix.name }}.tar"
       - uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
@@ -94,14 +111,7 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
       - name: Login to ACR
         run: az acr login --name "${{ vars.ACR_NAME }}"
-      - name: Rebuild verified image
-        uses: docker/build-push-action@v6
-        with:
-          context: ${{ matrix.name == 'care-portal-api' && './apps/care-portal/CarePortal.Api' || matrix.name == 'community-hub-api' && './apps/community-hub/CommunityHub.Api' || matrix.name == 'showcase-api' && './src/Showcase.Api' || matrix.name == 'showcase-web' && './src/Web' || './apps/security-radar' }}
-          push: false
-          load: true
-          tags: ${{ matrix.name }}:${{ github.sha }}
-      - name: Push verified image
+      - name: Push scanned image
         run: |
           set -euo pipefail
           docker tag "${{ matrix.name }}:${{ github.sha }}" "${{ vars.ACR_LOGIN_SERVER }}/${{ matrix.name }}:${{ github.sha }}"
@@ -132,9 +142,12 @@ jobs:
   kubernetes-deploy:
     name: Deploy release to AKS
     runs-on: ubuntu-24.04
-    needs: [build-scan, kubernetes-render-check]
+    needs: [build-scan, kubernetes-render-check, publish]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.ENABLE_AZURE_DEPLOY == 'true'
     environment: production
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@v4
       - uses: azure/login@v2
