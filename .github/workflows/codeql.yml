@@ -24,6 +24,8 @@ jobs:
         uses: actions/setup-dotnet@v5
         with:
           dotnet-version: '10.0.x'
+      - name: Restore solution
+        run: dotnet restore AzureKubernetesShowcase.slnx
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v4
         with:
