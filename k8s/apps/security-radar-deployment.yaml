@@ -30,11 +30,6 @@ spec:
               containerPort: 8080
           securityContext:
             allowPrivilegeEscalation: false
-feat/complete-production-verification
-            runAsNonRoot: true
-            runAsUser: 10001
-            runAsGroup: 10001
-main
             readOnlyRootFilesystem: true
             runAsNonRoot: true
             runAsUser: 10001
