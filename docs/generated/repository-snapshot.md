@@ -4,9 +4,9 @@ Generated automatically from `main`.
 
 ## Head
 
-- Commit: `9a6e2e7b5f443cf200dfb10bb6632b75068ce24a`
-- Commit date: `2026-09-14T03:26:01+02:00`
-- Subject: fix: remove corrupted merge marker from community hub manifest
+- Commit: `63058686a18082d277e88198bc4e4fd27366dfa4`
+- Commit date: `2026-09-14T01:26:18Z`
+- Subject: docs: sync generated repository metadata
 
 ## Engineering areas
 
