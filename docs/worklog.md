@@ -506,3 +506,7 @@
 - Commit: fix: decouple security scanning from optional Azure credentials
 - Branch: main
 
+### 2026-09-14T01:28:26Z — be0acf8
+- Commit: security: publish only the exact images that passed Trivy
+- Branch: main
+
