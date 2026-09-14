@@ -478,3 +478,7 @@
 - Commit: docs: sync generated repository metadata
 - Branch: main
 
+### 2026-09-14T01:25:57Z — 174c455
+- Commit: fix: remove corrupted merge marker from care portal manifest
+- Branch: main
+
