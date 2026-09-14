@@ -502,3 +502,7 @@
 - Commit: fix: remove duplicate service account token setting
 - Branch: main
 
+### 2026-09-14T01:28:09Z — 9865595
+- Commit: fix: decouple security scanning from optional Azure credentials
+- Branch: main
+
