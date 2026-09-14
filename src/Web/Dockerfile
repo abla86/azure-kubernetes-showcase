@@ -4,8 +4,11 @@ WORKDIR /app
 
 COPY package*.json ./
 
-# Require the OpenSSL package level that fixes CVE-2026-14456.
-RUN apk add --no-cache 'libssl3>=3.5.8-r0' && apk upgrade --no-cache
+# Upgrade the Alpine base packages before enforcing the OpenSSL security floor.
+# This fixes CVE-2026-14456 (libssl3 < 3.5.8-r0) without relying on a stale
+# package index from the base image.
+RUN apk upgrade --no-cache \
+    && apk add --no-cache 'libssl3>=3.5.8-r0'
 RUN npm ci
 
 COPY . .
@@ -14,8 +17,9 @@ RUN npm run build
 
 FROM nginxinc/nginx-unprivileged:alpine
 
-# Require the OpenSSL package level that fixes CVE-2026-14456 in the runtime image.
-RUN apk add --no-cache 'libssl3>=3.5.8-r0' && apk upgrade --no-cache
+# Keep the runtime image patched and enforce the same OpenSSL security floor.
+RUN apk upgrade --no-cache \
+    && apk add --no-cache 'libssl3>=3.5.8-r0'
 
 COPY --from=build /app/dist /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
