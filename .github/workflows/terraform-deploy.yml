@@ -38,21 +38,17 @@ jobs:
         working-directory: infra/terraform
     steps:
       - uses: actions/checkout@v5
-
-      - uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: "1.13.3"
-
-      - name: Terraform init for pull request validation
-        if: github.event_name == 'pull_request'
-        run: terraform init -backend=false -input=false
-
-      - name: Terraform validate for pull request
-        if: github.event_name == 'pull_request'
-        run: terraform validate
-
+      - name: Install Terraform
+        shell: bash
+        run: |
+          set -euo pipefail
+          version=1.13.3
+          curl -fsSL "https://releases.hashicorp.com/terraform/${version}/terraform_${version}_linux_amd64.zip" -o /tmp/terraform.zip
+          curl -fsSL "https://releases.hashicorp.com/terraform/${version}/terraform_${version}_SHA256SUMS" -o /tmp/terraform.SHA256SUMS
+          grep "terraform_${version}_linux_amd64.zip" /tmp/terraform.SHA256SUMS | sed "s#  terraform_${version}_linux_amd64.zip#  /tmp/terraform.zip#" | sha256sum -c -
+          sudo unzip -o /tmp/terraform.zip -d /usr/local/bin
+          terraform version
       - name: Terraform init with Azure AD/OIDC backend
-        if: github.event_name != 'pull_request'
         run: |
           set -euo pipefail
           terraform init -input=false \
@@ -62,30 +58,23 @@ jobs:
             -backend-config="key=azure-kubernetes-showcase.tfstate" \
             -backend-config="use_oidc=true" \
             -backend-config="use_azuread_auth=true"
-
-      - name: Show Terraform formatter diff
+      - name: Terraform formatter diff
         if: always()
         run: terraform fmt -diff -recursive
-
       - name: Terraform format check
         run: terraform fmt -check -recursive
-
       - name: Terraform validate
-        if: github.event_name != 'pull_request'
         run: terraform validate
-
       - name: Terraform plan
-        if: github.event_name != 'pull_request'
+        if: inputs.action == 'plan' || inputs.action == 'apply'
         run: terraform plan -input=false -out=tfplan
-
       - name: Upload Terraform plan
-        if: github.event_name != 'pull_request'
+        if: inputs.action == 'plan' || inputs.action == 'apply'
         uses: actions/upload-artifact@v4
         with:
           name: terraform-plan-${{ github.sha }}
           path: infra/terraform/tfplan
           retention-days: 7
-
       - name: Terraform apply
         if: inputs.action == 'apply'
         run: terraform apply -input=false -auto-approve tfplan
