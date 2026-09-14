@@ -42,7 +42,18 @@ jobs:
 
       - name: Dependency review
         if: github.event_name == 'pull_request' && github.base_ref == 'main'
-        uses: actions/dependency-review-action@v4
+        uses: actions/dependency-review-action@v5
+        with:
+          fail-on-severity: high
+
+      - name: Check for merge artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git grep -n -E '^(<<<<<<<|=======|>>>>>>>)[[:space:]]*' -- ':!docs/*'; then
+            echo "Merge conflict markers detected in tracked files."
+            exit 1
+          fi
 
       - name: Create maintenance issue on failure
         if: failure() && github.event_name == 'schedule'
