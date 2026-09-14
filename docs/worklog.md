@@ -494,3 +494,7 @@
 - Commit: fix: reconstruct valid Kubernetes kustomization
 - Branch: main
 
+### 2026-09-14T01:27:22Z — d11eda2
+- Commit: fix: harden release manifest placeholder validation
+- Branch: main
+
