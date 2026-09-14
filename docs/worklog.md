@@ -578,3 +578,7 @@
 - Commit: docs: update automated worklog
 - Branch: main
 
+### 2026-09-14T01:41:34Z — b1644c0
+- Commit: fix: use Azure Core credential types
+- Branch: main
+
