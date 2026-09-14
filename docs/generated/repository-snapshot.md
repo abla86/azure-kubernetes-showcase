@@ -4,9 +4,9 @@ Generated automatically from `main`.
 
 ## Head
 
-- Commit: `2febc1f01d1e469e91c1eee454f0ad01bced1b5f`
-- Commit date: `2026-09-14T03:25:40+02:00`
-- Subject: fix: resolve corrupted Community Hub project dependencies
+- Commit: `174c455d3e6a967cb7464f4bcb741b715819dfc6`
+- Commit date: `2026-09-14T03:25:54+02:00`
+- Subject: fix: remove corrupted merge marker from care portal manifest
 
 ## Engineering areas
 
