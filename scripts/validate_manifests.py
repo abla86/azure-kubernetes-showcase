@@ -11,6 +11,7 @@ K8S_DIR = ROOT / "k8s"
 
 REQUIRED_PROBES = ("startupProbe", "readinessProbe", "livenessProbe")
 REQUIRED_DROP_CAP = "ALL"
+FORBIDDEN_HOST_FLAGS = ("hostNetwork", "hostPID", "hostIPC")
 
 
 def iter_documents() -> list[tuple[Path, dict[str, Any]]]:
@@ -44,6 +45,10 @@ def validate() -> int:
 
         if not service_account or service_account == "default":
             errors.append(f"{path}: Deployment/{name} must use a dedicated service account")
+
+        for flag in FORBIDDEN_HOST_FLAGS:
+            if pod_spec.get(flag) is True:
+                errors.append(f"{path}: Deployment/{name} must not enable {flag}")
 
         seccomp = pod_security.get("seccompProfile", {}) or {}
         if seccomp.get("type") != "RuntimeDefault":
