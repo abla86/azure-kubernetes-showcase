@@ -40,6 +40,10 @@ def validate() -> int:
         name = document.get("metadata", {}).get("name", "unknown")
         pod_spec = document.get("spec", {}).get("template", {}).get("spec", {})
         pod_security = pod_spec.get("securityContext", {}) or {}
+        service_account = pod_spec.get("serviceAccountName")
+
+        if not service_account or service_account == "default":
+            errors.append(f"{path}: Deployment/{name} must use a dedicated service account")
 
         seccomp = pod_security.get("seccompProfile", {}) or {}
         if seccomp.get("type") != "RuntimeDefault":
