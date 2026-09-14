@@ -530,3 +530,7 @@
 - Commit: security: upgrade Alpine before enforcing OpenSSL floor
 - Branch: main
 
+### 2026-09-14T01:32:29Z — 3245df3
+- Commit: fix: build web image as root then run nginx non-root
+- Branch: main
+
