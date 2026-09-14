@@ -97,11 +97,8 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
-      - uses: azure/setup-kubectl@v5
-        with:
-          version: latest
       - name: Validate Kubernetes schemas
-        run: docker run --rm -v "$PWD:/work" -w /work ghcr.io/yannh/kubeconform:latest -strict -ignore-missing-schemas -summary k8s
+        run: docker run --rm -v "$PWD:/work" -w /work ghcr.io/yannh/kubeconform@sha256:faffaf43f95aa6425306e1ab8d6fcad72acb9049158f38e574c085ea1ec0f64e -strict -ignore-missing-schemas -summary k8s
 
   parity:
     name: Check IaC parity contract
