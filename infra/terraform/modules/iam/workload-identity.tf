@@ -17,18 +17,11 @@ resource "azurerm_user_assigned_identity" "workload" {
 }
 
 resource "azurerm_federated_identity_credential" "api" {
- feat/complete-production-verification
   name                      = "fic-api-workload"
   user_assigned_identity_id = azurerm_user_assigned_identity.workload.id
   issuer                    = var.oidc_issuer_url
   audience                  = ["api://AzureADTokenExchange"]
   subject                   = var.workload_identity_subject
-  name                       = "fic-api-workload"
-  user_assigned_identity_id  = azurerm_user_assigned_identity.workload.id
-  issuer                     = var.oidc_issuer_url
-  audience                   = ["api://AzureADTokenExchange"]
-  subject                    = var.workload_identity_subject
-main
 }
 
 output "workload_identity_client_id" {
