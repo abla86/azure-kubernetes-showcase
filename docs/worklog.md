@@ -590,3 +590,7 @@
 - Commit: fix: pin kubeconform validation image
 - Branch: main
 
+### 2026-09-14T01:43:15Z — 20bf2e7
+- Commit: fix: prevent automated worklog commit loop
+- Branch: main
+
