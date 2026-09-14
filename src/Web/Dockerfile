@@ -17,7 +17,8 @@ RUN npm run build
 
 FROM nginxinc/nginx-unprivileged:alpine
 
-# Keep the runtime image patched and enforce the same OpenSSL security floor.
+# apk requires root; return to the image's non-root nginx user afterwards.
+USER root
 RUN apk upgrade --no-cache \
     && apk add --no-cache 'libssl3>=3.5.8-r0'
 
@@ -26,4 +27,5 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 8080
 
+USER 101
 CMD ["nginx", "-g", "daemon off;"]
