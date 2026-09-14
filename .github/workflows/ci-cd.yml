@@ -41,7 +41,7 @@ jobs:
     name: Backend build and test
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 10.0.x
@@ -57,7 +57,7 @@ jobs:
       run:
         working-directory: src/Web
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -74,7 +74,7 @@ jobs:
       run:
         working-directory: src/Web
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -88,11 +88,11 @@ jobs:
     name: Kubernetes manifest validation
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: azure/setup-kubectl@v4
         with:
           version: latest
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
       - name: Render Kubernetes manifests
@@ -108,7 +108,7 @@ jobs:
     name: Azure IaC validation
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Validate Bicep
         uses: azure/cli@v2
         with:
@@ -135,7 +135,7 @@ jobs:
     runs-on: ubuntu-24.04
     needs: [backend, frontend]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Build main API
         run: docker build -t azure-kubernetes-showcase-api:${{ github.sha }} ./src/Showcase.Api
       - name: Build frontend
@@ -155,7 +155,7 @@ jobs:
       security-events: write
       actions: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: github/codeql-action/init@v4
         with:
           languages: csharp,javascript-typescript
@@ -171,8 +171,8 @@ jobs:
     runs-on: ubuntu-24.04
     needs: [docker]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
       - name: Install Python test dependencies
