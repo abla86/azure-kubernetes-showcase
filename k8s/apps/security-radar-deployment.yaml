@@ -17,6 +17,7 @@ spec:
         app: security-radar
     spec:
       automountServiceAccountToken: false
+      serviceAccountName: security-radar-sa
       securityContext:
         runAsNonRoot: true
         seccompProfile:
