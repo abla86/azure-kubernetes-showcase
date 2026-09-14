@@ -482,3 +482,7 @@
 - Commit: fix: remove corrupted merge marker from care portal manifest
 - Branch: main
 
+### 2026-09-14T01:26:16Z — 2e8930b
+- Commit: fix: reconstruct corrupted CI workflow and restore valid security pipeline
+- Branch: main
+
