@@ -594,3 +594,7 @@
 - Commit: fix: prevent automated worklog commit loop
 - Branch: main
 
+### 2026-09-14T08:56:08Z — cc17115
+- Commit: fix: preserve security radar behavior while preventing log forging
+- Branch: main
+
