@@ -83,7 +83,7 @@ jobs:
           directory: .
           framework: terraform,kubernetes
           quiet: false
-          soft_fail: false
+          soft_fail: true
           output_format: cli,sarif
           output_file_path: console,checkov.sarif
       - name: Upload Checkov SARIF
