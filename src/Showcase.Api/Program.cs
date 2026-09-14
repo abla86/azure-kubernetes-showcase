@@ -15,15 +15,20 @@ builder.Host.UseSerilog((context, configuration) =>
         .WriteTo.Console();
 });
 
-var credential = new DefaultAzureCredential();
-
-builder.Services
+var openTelemetry = builder.Services
     .AddOpenTelemetry()
-    .ConfigureResource(resource => resource.AddService("azure-kubernetes-showcase"))
-    .UseAzureMonitorExporter(options =>
+    .ConfigureResource(resource => resource.AddService("azure-kubernetes-showcase"));
+
+var azureMonitorConnectionString = builder.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"];
+if (!string.IsNullOrWhiteSpace(azureMonitorConnectionString))
+{
+    var credential = new DefaultAzureCredential();
+    openTelemetry.UseAzureMonitorExporter(options =>
     {
+        options.ConnectionString = azureMonitorConnectionString;
         options.Credential = credential;
     });
+}
 
 builder.Services.AddHealthChecks();
 
@@ -49,6 +54,8 @@ app.Use(async (context, next) =>
 
 app.UseSerilogRequestLogging();
 app.UseCors("frontend");
+
+app.MapHealthChecks("/health");
 
 app.MapGet("/.well-known/security.txt", () => Results.Text(
     "Contact: https://github.com/abla86/azure-kubernetes-showcase/security/policy\n" +
