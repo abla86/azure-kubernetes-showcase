@@ -3,6 +3,10 @@ import subprocess
 import sys
 
 
+def _finding(namespace, name, container, reason):
+    return {"namespace": namespace, "name": name, "container": container, "reason": reason}
+
+
 def diagnose_pod(pod):
     """Return structured findings for one Kubernetes pod."""
     namespace = pod.get("metadata", {}).get("namespace", "unknown")
@@ -14,20 +18,21 @@ def diagnose_pod(pod):
         last_state = status.get("lastState", {}) or {}
         container = status.get("name", "unknown")
 
-        waiting = state.get("waiting")
-        if waiting and waiting.get("reason") == "CrashLoopBackOff":
-            findings.append({"namespace": namespace, "name": name, "container": container, "reason": "CrashLoopBackOff"})
+        waiting = state.get("waiting") or {}
+        waiting_reason = waiting.get("reason")
+        if waiting_reason:
+            findings.append(_finding(namespace, name, container, waiting_reason))
 
-        terminated = state.get("terminated")
-        if terminated and terminated.get("reason") == "OOMKilled":
-            findings.append({"namespace": namespace, "name": name, "container": container, "reason": "OOMKilled"})
+        terminated = state.get("terminated") or {}
+        if terminated.get("reason") == "OOMKilled":
+            findings.append(_finding(namespace, name, container, "OOMKilled"))
 
-        previous = last_state.get("terminated")
-        if previous and previous.get("reason") == "OOMKilled":
-            findings.append({"namespace": namespace, "name": name, "container": container, "reason": "Previous OOMKilled"})
+        previous = last_state.get("terminated") or {}
+        if previous.get("reason") == "OOMKilled":
+            findings.append(_finding(namespace, name, container, "Previous OOMKilled"))
 
         if status.get("ready") is False and not waiting and not terminated:
-            findings.append({"namespace": namespace, "name": name, "container": container, "reason": "NotReady"})
+            findings.append(_finding(namespace, name, container, "NotReady"))
 
     return findings
 
