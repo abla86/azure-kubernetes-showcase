@@ -7,6 +7,7 @@ on:
       - "src/**"
       - "apps/**"
       - "tests/**"
+      - "tools/**"
       - "k8s/**"
       - "security/**"
       - "scripts/**"
@@ -20,6 +21,7 @@ on:
       - "src/**"
       - "apps/**"
       - "tests/**"
+      - "tools/**"
       - "k8s/**"
       - "security/**"
       - "scripts/**"
@@ -36,7 +38,17 @@ concurrency:
   group: ci-cd-${{ github.ref }}
   cancel-in-progress: true
 
-jobs:
+  python-tools:
+    name: Python operations tools
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Run Python regression tests
+        run: python -m unittest discover -s tests/python-tools -p 'test_*.py' -v
+
   backend:
     name: Backend build and test
     runs-on: ubuntu-24.04
@@ -162,10 +174,6 @@ jobs:
   security:
     name: CodeQL security analysis
     runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-      security-events: write
-      actions: read
     steps:
       - uses: actions/checkout@v5
       - uses: github/codeql-action/init@v4
