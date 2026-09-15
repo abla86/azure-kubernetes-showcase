@@ -38,6 +38,7 @@ concurrency:
   group: ci-cd-${{ github.ref }}
   cancel-in-progress: true
 
+jobs:
   python-tools:
     name: Python operations tools
     runs-on: ubuntu-24.04
@@ -174,6 +175,10 @@ concurrency:
   security:
     name: CodeQL security analysis
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
     steps:
       - uses: actions/checkout@v5
       - uses: github/codeql-action/init@v4
