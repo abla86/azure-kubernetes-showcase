@@ -190,7 +190,7 @@ This workflow should only be run against an intentionally provisioned showcase e
 
 See `docs/observability-runbook.md` for the diagnostic path from routing and NetworkPolicy through pod health, application logs and telemetry.
 
-The repository also contains `k8s-pod-doctor` for first-line diagnosis of common pod failures such as `CrashLoopBackOff` and `OOMKilled`.
+The repository also contains `k8s-pod-doctor` (under `archive/k8s-pod-doctor/`) for first-line diagnosis of common pod failures such as `CrashLoopBackOff` and `OOMKilled`.
 
 ## Cost controls
 
