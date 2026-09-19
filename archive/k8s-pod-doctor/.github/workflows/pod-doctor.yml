@@ -1,0 +1,33 @@
+name: Pod Doctor
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+  schedule:
+    - cron: "41 3 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Test
+        run: python -m unittest discover -s tests -v
+
+      - name: Compile
+        run: python -m py_compile doctor.py
+
+      - name: CLI self-test
+        run: |
+          python -c "import doctor; healthy={'metadata':{'namespace':'ci','name':'healthy'},'status':{'containerStatuses':[{'name':'api','ready':True,'state':{'running':{}}}]}}; crash={'metadata':{'namespace':'ci','name':'crash'},'status':{'containerStatuses':[{'name':'api','state':{'waiting':{'reason':'CrashLoopBackOff'}}}]}}; assert doctor.diagnose_pod(healthy)==[]; f=doctor.diagnose_pod(crash); assert len(f)==1 and f[0]['reason']=='CrashLoopBackOff'; print('Pod Doctor self-test passed.')"
