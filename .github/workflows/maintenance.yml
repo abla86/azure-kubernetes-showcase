@@ -99,15 +99,15 @@ jobs:
           fi
 
           body=$(cat <<EOF
-$marker
+          $marker
 
-The scheduled repository maintenance checks found one or more documentation or hygiene problems.
+          The scheduled repository maintenance checks found one or more documentation or hygiene problems.
 
-Review the failed workflow run and correct the repository state.
+          Review the failed workflow run and correct the repository state.
 
-This issue is created automatically and intentionally does not modify repository files.
-EOF
-)
+          This issue is created automatically and intentionally does not modify repository files.
+          EOF
+          )
 
           gh issue create \
             --repo "$REPO" \
