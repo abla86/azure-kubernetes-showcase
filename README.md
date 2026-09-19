@@ -209,6 +209,12 @@ The project deliberately separates:
 
 A configuration file is never treated as proof that a cloud resource or runtime behavior exists.
 
+## Known Limitations and Production Considerations
+
+- **Cloud deployment is not verified in this repository.** Terraform/Bicep files declare intent; only a real Azure/AKS deployment proves the resources exist (see *Important deployment boundary* and *Verification discipline*).
+- **Demonstration services only.** Care Portal, Community Hub and Security Radar use demonstration data and are not production healthcare, community-management or SIEM/intrusion-detection systems (see *Portfolio scope*).
+- **Production use would additionally require:** an Azure subscription with GitHub OIDC trust, remote state storage, secret management, real identity/authorization, and an operator-approved `apply` step.
+
 ## Portfolio scope
 
 This is a **cloud-engineering portfolio showcase**, not a production healthcare or community-management platform. The application modules are intentionally small so that the engineering concerns around containers, Kubernetes, Azure, IaC, CI/CD, security and observability remain visible.
