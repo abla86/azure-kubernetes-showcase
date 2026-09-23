@@ -598,3 +598,7 @@
 - Commit: fix: preserve security radar behavior while preventing log forging
 - Branch: main
 
+### 2026-09-21T08:57:37Z — dce5e9b
+- Commit: docs: correct references to merged/removed repositories
+- Branch: main
+
