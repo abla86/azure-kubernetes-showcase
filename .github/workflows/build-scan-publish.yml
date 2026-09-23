@@ -33,7 +33,7 @@ jobs:
             context: ./apps/security-radar
     steps:
       - uses: actions/checkout@v5
-      - uses: docker/setup-buildx-action@v3
+      - uses: docker/setup-buildx-action@v4
       - name: Build image
         uses: docker/build-push-action@v6
         with:
@@ -98,7 +98,7 @@ jobs:
       matrix:
         name: [care-portal-api, community-hub-api, showcase-api, showcase-web, security-radar]
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: image-${{ matrix.name }}
           path: image
