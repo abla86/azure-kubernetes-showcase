@@ -22,7 +22,7 @@ jobs:
     name: Terraform fmt and validate
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - name: Install Terraform
         shell: bash
         run: |
@@ -47,7 +47,7 @@ jobs:
     name: Bicep build validation
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - name: Install Bicep
         shell: bash
         run: az bicep install
@@ -63,7 +63,7 @@ jobs:
     name: Kubernetes workload security policy
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
@@ -76,7 +76,7 @@ jobs:
     name: Check Terraform and Kubernetes security
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - name: Checkov
         uses: bridgecrewio/checkov-action@v12
         with:
@@ -96,7 +96,7 @@ jobs:
     name: Validate Kubernetes schemas
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - name: Validate Kubernetes schemas
         run: docker run --rm -v "$PWD:/work" -w /work ghcr.io/yannh/kubeconform@sha256:faffaf43f95aa6425306e1ab8d6fcad72acb9049158f38e574c085ea1ec0f64e -strict -ignore-missing-schemas -summary k8s
 
@@ -104,7 +104,7 @@ jobs:
     name: Check IaC parity contract
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - name: Verify parity document and anchors
         shell: bash
         run: |
