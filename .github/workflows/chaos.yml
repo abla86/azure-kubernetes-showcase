@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-24.04
     environment: chaos-test
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - name: Azure login using OIDC
         uses: azure/login@v2
         with:

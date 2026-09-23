@@ -17,7 +17,7 @@ jobs:
     name: Sync repository metadata
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Synchronize with current main
