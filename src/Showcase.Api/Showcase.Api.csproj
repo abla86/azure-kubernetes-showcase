@@ -11,6 +11,8 @@
     <PackageReference Include="OpenTelemetry" Version="1.19.0" />
     <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.19.0" />
     <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.18.0" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.19.0" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.18.0" />
     <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.18.0" />
  dependabot/nuget/src/Showcase.Api/OpenTelemetry.Instrumentation.Http-1.19.0
     <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.19.0" />
