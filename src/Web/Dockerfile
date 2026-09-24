@@ -8,7 +8,7 @@ COPY package*.json ./
 # This fixes CVE-2026-14456 (libssl3 < 3.5.8-r0) without relying on a stale
 # package index from the base image.
 RUN apk upgrade --no-cache \
-    && apk add --no-cache 'libssl3>=3.5.8-r0'
+    && apk add --no-cache 'libssl3>=3.5.8-r0' 'libexpat>=2.8.5-r0'
 
 # Reconcile the committed dependency manifest before the clean install. The
 # repository intentionally keeps package-lock.json under review, while this
@@ -25,7 +25,7 @@ FROM nginxinc/nginx-unprivileged:alpine
 # apk requires root; return to the image's non-root nginx user afterwards.
 USER root
 RUN apk upgrade --no-cache \
-    && apk add --no-cache 'libssl3>=3.5.8-r0'
+    && apk add --no-cache 'libssl3>=3.5.8-r0' 'libexpat>=2.8.5-r0'
 
 COPY --from=build /app/dist /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
