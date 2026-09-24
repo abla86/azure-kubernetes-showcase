@@ -15,5 +15,6 @@ COPY --from=build /app/publish .
 ENV ASPNETCORE_URLS=http://+:8080
 EXPOSE 8080
 
+ENV DOTNET_EnableDiagnostics=0
 USER 1654
 ENTRYPOINT ["dotnet", "CarePortal.Api.dll"]
