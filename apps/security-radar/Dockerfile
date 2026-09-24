@@ -8,6 +8,7 @@ RUN dotnet publish SecurityRadar.Web/SecurityRadar.Web.csproj -c Release -o /app
 FROM mcr.microsoft.com/dotnet/aspnet:10.0
 WORKDIR /app
 RUN useradd --create-home --uid 10001 appuser
+ENV DOTNET_EnableDiagnostics=0
 USER 10001
 COPY --from=build /app/publish .
 EXPOSE 8080
