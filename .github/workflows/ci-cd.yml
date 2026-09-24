@@ -41,9 +41,12 @@ concurrency:
 jobs:
   python-tools:
     name: Python operations tools
+    timeout-minutes: 30
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
       - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
@@ -55,6 +58,8 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
       - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: 10.0.x
@@ -71,6 +76,8 @@ jobs:
         working-directory: src/Web
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@v7
         with:
           node-version: 22
@@ -90,6 +97,8 @@ jobs:
         working-directory: src/Web
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@v7
         with:
           node-version: 22
@@ -106,6 +115,8 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
       - uses: azure/setup-kubectl@v5
         with:
           version: latest
@@ -128,6 +139,8 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
       - name: Validate Bicep
         shell: bash
         run: |
@@ -161,6 +174,8 @@ jobs:
     needs: [backend, frontend]
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
       - name: Build main API
         run: docker build -t azure-kubernetes-showcase-api:${{ github.sha }} ./src/Showcase.Api
       - name: Build frontend
@@ -181,6 +196,8 @@ jobs:
       actions: read
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
       - uses: github/codeql-action/init@v4
         with:
           languages: csharp,javascript-typescript
@@ -197,6 +214,8 @@ jobs:
     needs: [docker]
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
       - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
