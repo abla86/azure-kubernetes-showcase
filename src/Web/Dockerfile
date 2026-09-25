@@ -7,8 +7,7 @@ COPY package*.json ./
 # Upgrade the Alpine base packages before enforcing the OpenSSL security floor.
 # This fixes CVE-2026-14456 (libssl3 < 3.5.8-r0) without relying on a stale
 # package index from the base image.
-RUN apk upgrade --no-cache \
-    && apk add --no-cache 'libssl3>=3.5.8-r0' 'libexpat>=2.8.5-r0'
+RUN apk upgrade --no-cache
 
 # Reconcile the committed dependency manifest before the clean install. The
 # repository intentionally keeps package-lock.json under review, while this
