@@ -18,7 +18,6 @@ resource "azurerm_container_registry" "acr" {
   admin_enabled             = false
   anonymous_pull_enabled    = false
   data_endpoint_enabled     = true
-  trust_policy_enabled      = true
   quarantine_policy_enabled = true
   retention_policy_in_days  = 7
   zone_redundancy_enabled   = true
