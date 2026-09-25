@@ -20,13 +20,9 @@ COPY . .
 
 RUN npm run build
 
-FROM nginxinc/nginx-unprivileged:alpine
+FROM nginxinc/nginx-unprivileged:stable-trixie
 
 # apk requires root; return to the image's non-root nginx user afterwards.
-USER root
-RUN apk upgrade --no-cache \
-    && apk add --no-cache 'libssl3>=3.5.8-r0'
-
 COPY --from=build /app/dist /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
