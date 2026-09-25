@@ -20,7 +20,7 @@ COPY . .
 
 RUN npm run build
 
-FROM nginxinc/nginx-unprivileged:alpine
+FROM nginxinc/nginx-unprivileged:stable-trixie
 
 # apk requires root; return to the image's non-root nginx user afterwards.
 USER root
