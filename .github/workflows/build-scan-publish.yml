@@ -68,7 +68,7 @@ jobs:
           scan-type: image
       - name: Upload SBOM
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: sbom-${{ matrix.name }}
           path: sbom-${{ matrix.name }}.cdx.json
@@ -78,7 +78,7 @@ jobs:
         run: docker save "${{ matrix.name }}:${{ github.sha }}" -o "image-${{ matrix.name }}.tar"
       - name: Upload scanned image
         if: ${{ success() && vars.ENABLE_AZURE_PUBLISH == 'true' }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: image-${{ matrix.name }}
           path: image-${{ matrix.name }}.tar
