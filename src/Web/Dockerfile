@@ -19,7 +19,7 @@ COPY . .
 
 RUN npm run build
 
-FROM nginxinc/nginx-unprivileged:stable-trixie
+FROM nginxinc/nginx-unprivileged:stable-alpine-slim
 
 
 COPY --from=build /app/dist /usr/share/nginx/html
