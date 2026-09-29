@@ -602,3 +602,7 @@
 - Commit: docs: correct references to merged/removed repositories
 - Branch: main
 
+### 2026-09-28T09:47:24Z — af52d31
+- Commit: fix: keep Debian nginx runtime free of Alpine package commands
+- Branch: main
+
