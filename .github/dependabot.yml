@@ -1,62 +1,12 @@
 version: 2
-
 updates:
-  - package-ecosystem: nuget
-    directory: "/src/Showcase.Api"
-    schedule:
-      interval: weekly
-
-  - package-ecosystem: nuget
-    directory: "/tests/Showcase.Api.Tests"
-    schedule:
-      interval: weekly
-
-  - package-ecosystem: nuget
-    directory: "/apps/care-portal/CarePortal.Api"
-    schedule:
-      interval: weekly
-
-  - package-ecosystem: nuget
-    directory: "/apps/community-hub/CommunityHub.Api"
-    schedule:
-      interval: weekly
-
-  - package-ecosystem: nuget
-    directory: "/apps/security-radar/SecurityRadar.Web"
-    schedule:
-      interval: weekly
-
-  - package-ecosystem: npm
-    directory: "/src/Web"
-    schedule:
-      interval: weekly
-
-  - package-ecosystem: docker
-    directory: "/src/Showcase.Api"
-    schedule:
-      interval: weekly
-
-  - package-ecosystem: docker
-    directory: "/src/Web"
-    schedule:
-      interval: weekly
-
-  - package-ecosystem: docker
-    directory: "/apps/care-portal/CarePortal.Api"
-    schedule:
-      interval: weekly
-
-  - package-ecosystem: docker
-    directory: "/apps/community-hub/CommunityHub.Api"
-    schedule:
-      interval: weekly
-
-  - package-ecosystem: docker
-    directory: "/apps/security-radar"
-    schedule:
-      interval: weekly
-
-  - package-ecosystem: github-actions
+  - package-ecosystem: "github-actions"
     directory: "/"
-    schedule:
-      interval: weekly
+    schedule: { interval: "weekly" }
+    open-pull-requests-limit: 10
+    labels: ["security","github-actions"]
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule: { interval: "weekly" }
+    open-pull-requests-limit: 10
+    labels: ["security","dependencies"]
