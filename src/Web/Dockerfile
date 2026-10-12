@@ -21,6 +21,10 @@ RUN npm run build
 
 FROM nginxinc/nginx-unprivileged:stable-alpine-slim
 
+# The base image defaults to an unprivileged user. Temporarily switch to root
+# to patch the runtime OS, then restore the unprivileged user below.
+USER root
+RUN apk upgrade --no-cache
 
 COPY --from=build /app/dist /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
