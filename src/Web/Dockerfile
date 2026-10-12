@@ -21,8 +21,9 @@ RUN npm run build
 
 FROM nginxinc/nginx-unprivileged:stable-alpine-slim
 
-# The final runtime image has its own Alpine packages; patch them separately
-# because upgrading the build stage does not update this stage.
+# The base image defaults to an unprivileged user. Temporarily switch to root
+# to patch the runtime OS, then restore the unprivileged user below.
+USER root
 RUN apk upgrade --no-cache
 
 COPY --from=build /app/dist /usr/share/nginx/html
